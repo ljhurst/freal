@@ -3,6 +3,11 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 from espn_api.football import League as EspnLeague
+from espn_api.requests.espn_requests import (
+    ESPNAccessDenied,
+    ESPNInvalidLeague,
+    ESPNUnknownError,
+)
 from pydantic import BaseModel, SecretStr
 
 from freal.leagues.models import Matchup, MatchupKind, Season, Side, Slot, Team
@@ -21,15 +26,34 @@ class EspnCredentials(BaseModel):
     swid: SecretStr
 
 
+class EspnAuthError(Exception):
+    """ESPN refused the league's cookies, or the league needs cookies and has none."""
+
+
+class SeasonNotFound(Exception):
+    """The league has no such season on ESPN."""
+
+
+class EspnUnavailable(Exception):
+    """ESPN answered with an error."""
+
+
 def load_season(league_id: int, year: int, credentials: EspnCredentials | None = None) -> Season:
     """Fetch one season of a league from ESPN: teams plus every completed matchup."""
-    espn = EspnLeague(
-        league_id=league_id,
-        year=year,
-        espn_s2=credentials.espn_s2.get_secret_value() if credentials else None,
-        swid=credentials.swid.get_secret_value() if credentials else None,
-    )
-    return build_season(espn, league_id, year, espn.box_scores)
+    try:
+        espn = EspnLeague(
+            league_id=league_id,
+            year=year,
+            espn_s2=credentials.espn_s2.get_secret_value() if credentials else None,
+            swid=credentials.swid.get_secret_value() if credentials else None,
+        )
+        return build_season(espn, league_id, year, espn.box_scores)
+    except ESPNAccessDenied as error:
+        raise EspnAuthError(str(error)) from error
+    except ESPNInvalidLeague as error:
+        raise SeasonNotFound(str(error)) from error
+    except ESPNUnknownError as error:
+        raise EspnUnavailable(str(error)) from error
 
 
 def build_season(

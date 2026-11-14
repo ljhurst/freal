@@ -2,8 +2,20 @@ from types import SimpleNamespace
 from typing import Any
 
 import pytest
+from espn_api.requests.espn_requests import (
+    ESPNAccessDenied,
+    ESPNInvalidLeague,
+    ESPNUnknownError,
+)
 
-from freal.integrations.espn.client import build_season
+from freal.integrations.espn import client as espn_client
+from freal.integrations.espn.client import (
+    EspnAuthError,
+    EspnUnavailable,
+    SeasonNotFound,
+    build_season,
+    load_season,
+)
 from freal.leagues.models import MatchupKind
 
 
@@ -76,6 +88,26 @@ def test_bye_weeks_are_skipped(missing_opponent: int | None) -> None:
     season = build_season(espn, 7, 2024, lambda period: [bye])
 
     assert season.matchups == ()
+
+
+@pytest.mark.parametrize(
+    ("raised", "translated"),
+    [
+        (ESPNAccessDenied, EspnAuthError),
+        (ESPNInvalidLeague, SeasonNotFound),
+        (ESPNUnknownError, EspnUnavailable),
+    ],
+)
+def test_espn_errors_are_translated_so_callers_never_see_the_library(
+    monkeypatch: pytest.MonkeyPatch, raised: type[Exception], translated: type[Exception]
+) -> None:
+    def fail(**_: Any) -> None:
+        raise raised("boom")
+
+    monkeypatch.setattr(espn_client, "EspnLeague", fail)
+
+    with pytest.raises(translated):
+        load_season(1, 2025)
 
 
 def _league(
