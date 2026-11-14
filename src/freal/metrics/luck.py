@@ -1,8 +1,6 @@
 from collections import defaultdict
 from statistics import fmean
 
-from pydantic import computed_field
-
 from freal.leagues.models import FrozenModel, Season
 from freal.metrics.results import games_by_team
 from freal.metrics.standings import standings
@@ -10,18 +8,11 @@ from freal.metrics.standings import standings
 
 class Luck(FrozenModel):
     team_id: int
-    wins: int
-    ties: int
     expected_wins: float
+    luck: float
     all_play_wins: int
     all_play_ties: int
     all_play_losses: int
-
-    # mypy rejects any decorator stacked on a property; pydantic's docs prescribe this ignore.
-    @computed_field  # type: ignore[prop-decorator]
-    @property
-    def luck(self) -> float:
-        return self.wins + self.ties / 2 - self.expected_wins
 
 
 class ScheduleStrength(FrozenModel):
@@ -53,9 +44,8 @@ def luck_table(season: Season) -> tuple[Luck, ...]:
         table.append(
             Luck(
                 team_id=team_id,
-                wins=standing_of[team_id].wins,
-                ties=standing_of[team_id].ties,
                 expected_wins=expected_wins,
+                luck=standing_of[team_id].wins + standing_of[team_id].ties / 2 - expected_wins,
                 all_play_wins=all_play_wins,
                 all_play_ties=all_play_ties,
                 all_play_losses=all_play_losses,

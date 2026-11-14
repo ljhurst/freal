@@ -9,7 +9,6 @@ from freal.metrics.standings import Standing, standings
 class TeamReport(FrozenModel):
     team_id: int
     name: str
-    owner: str
     standing: Standing
     luck: Luck
     schedule: ScheduleStrength
@@ -26,7 +25,7 @@ class SeasonReport(FrozenModel):
 
 
 def build_season_report(season: Season) -> SeasonReport:
-    """Everything the dashboard shows for one season, safe to publish: no owner ids."""
+    """Everything the dashboard shows for one season, safe to publish: team names only, no owners."""
     standing_of = {row.team_id: row for row in standings(season)}
     luck_of = {row.team_id: row for row in luck_table(season)}
     schedule_of = {row.team_id: row for row in strength_of_schedule(season)}
@@ -40,7 +39,6 @@ def build_season_report(season: Season) -> SeasonReport:
             TeamReport(
                 team_id=team.team_id,
                 name=team.name,
-                owner=team.owner,
                 standing=standing_of[team.team_id],
                 luck=luck_of[team.team_id],
                 schedule=schedule_of[team.team_id],

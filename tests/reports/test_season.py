@@ -23,7 +23,7 @@ def test_every_team_appears_once_with_all_of_its_metrics(season_2025: Season) ->
         )
 
 
-def test_the_report_json_has_derived_values_and_no_owner_ids(season_2025: Season) -> None:
+def test_the_report_json_has_derived_values_and_no_owner_information(season_2025: Season) -> None:
     report = build_season_report(season_2025)
 
     payload = json.loads(report.model_dump_json())
@@ -31,7 +31,7 @@ def test_the_report_json_has_derived_values_and_no_owner_ids(season_2025: Season
 
     assert first["luck"]["luck"] == pytest.approx(report.teams[0].luck.luck)
     assert "efficiency" in first["efficiency"]
-    assert "owner_id" not in report.model_dump_json()
+    assert "owner" not in report.model_dump_json().lower()
     assert SeasonReport.model_validate_json(report.model_dump_json()) == report
 
 
