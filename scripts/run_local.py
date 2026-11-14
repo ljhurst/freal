@@ -13,9 +13,9 @@ import uvicorn
 from pydantic import SecretStr
 
 from freal.integrations.espn.client import EspnCredentials
+from freal.integrations.lasso.tokens import LassoTokenValidator
 from freal.leagues.config import LEAGUES_PARAMETER
 from freal.operations.api import create_app
-from freal.operations.auth import LassoTokenValidator
 from freal.storage.credentials import CredentialStore
 from freal.storage.parameters import MemoryParameterStore
 

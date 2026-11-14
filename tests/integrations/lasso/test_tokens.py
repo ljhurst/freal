@@ -6,7 +6,7 @@ import jwt
 import pytest
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-from freal.operations.auth import LassoTokenValidator
+from freal.integrations.lasso.tokens import LassoTokenValidator
 
 ISSUER = "https://lasso.example/"
 AUDIENCE = "https://freal-api.example/"

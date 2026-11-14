@@ -17,10 +17,10 @@ from freal.integrations.espn.client import (
     SeasonNotFound,
     load_season,
 )
+from freal.integrations.lasso.tokens import VerifiedToken
 from freal.leagues.config import LEAGUES_PARAMETER, LeagueConfig, latest_season, parse_leagues
 from freal.leagues.models import Season
 from freal.models import FrozenModel
-from freal.operations.auth import VerifiedToken
 from freal.reports.season import SeasonReport, build_season_report
 from freal.storage.credentials import CredentialStore
 from freal.storage.parameters import ParameterStore

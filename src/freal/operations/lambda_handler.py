@@ -3,8 +3,8 @@ import os
 
 from mangum import Mangum
 
+from freal.integrations.lasso.tokens import LassoTokenValidator
 from freal.operations.api import create_app
-from freal.operations.auth import LassoTokenValidator
 from freal.storage.parameters import SsmParameterStore
 
 logging.getLogger("freal").setLevel(logging.INFO)
