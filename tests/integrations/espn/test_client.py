@@ -1,6 +1,8 @@
 from types import SimpleNamespace
 from typing import Any
 
+import pytest
+
 from freal.integrations.espn.client import build_season
 from freal.leagues.models import MatchupKind
 
@@ -23,6 +25,7 @@ def test_regular_and_playoff_matchups_are_converted() -> None:
     assert first.home.lineup[0].is_starter
     assert not first.home.lineup[1].is_starter
     assert [t.owner for t in season.teams] == ["owner-1", "owner-2"]
+    assert [t.owner_id for t in season.teams] == ["{GUID-1}", "{GUID-2}"]
 
 
 def test_consolation_brackets_are_not_playoffs() -> None:
@@ -64,10 +67,11 @@ def test_playoff_round_fetches_the_first_scoring_period_of_the_round() -> None:
     assert sorted(fetched) == [1, 2, 3, 5]
 
 
-def test_bye_weeks_are_skipped() -> None:
+@pytest.mark.parametrize("missing_opponent", [None, 0])
+def test_bye_weeks_are_skipped(missing_opponent: int | None) -> None:
     espn = _league(outcomes={1: ["W"], 2: ["L"]})
     bye = _box("NONE", 100.0, 0.0)
-    bye.away_team = 0
+    bye.away_team = missing_opponent
 
     season = build_season(espn, 7, 2024, lambda period: [bye])
 
@@ -88,7 +92,7 @@ def _league(
             SimpleNamespace(
                 team_id=team_id,
                 team_name=f"team-{team_id}",
-                owners=[{"displayName": f"owner-{team_id}"}],
+                owners=[{"displayName": f"owner-{team_id}", "id": f"{{GUID-{team_id}}}"}],
                 outcomes=team_outcomes,
             )
             for team_id, team_outcomes in outcomes.items()

@@ -15,6 +15,7 @@ def test_fixture_season_has_a_full_regular_season_and_two_playoff_rounds(
 def test_fixture_is_anonymized(season_2025: Season) -> None:
     assert {t.name for t in season_2025.teams} == {f"Team {i}" for i in range(1, 9)}
     assert all(t.owner.startswith("Owner ") for t in season_2025.teams)
+    assert {t.owner_id for t in season_2025.teams} == {f"owner-{i}" for i in range(1, 9)}
 
 
 def test_every_lineup_has_starters_and_a_bench(season_2025: Season) -> None:

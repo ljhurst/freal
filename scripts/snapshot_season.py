@@ -23,7 +23,12 @@ def anonymize(season: Season) -> Season:
         update={
             "name": "Test League",
             "teams": tuple(
-                Team(team_id=t.team_id, name=f"Team {t.team_id}", owner=f"Owner {t.team_id}")
+                Team(
+                    team_id=t.team_id,
+                    name=f"Team {t.team_id}",
+                    owner=f"Owner {t.team_id}",
+                    owner_id=f"owner-{t.team_id}",
+                )
                 for t in season.teams
             ),
         }

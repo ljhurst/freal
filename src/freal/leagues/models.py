@@ -47,6 +47,7 @@ class Team(FrozenModel):
     team_id: int
     name: str
     owner: str
+    owner_id: str
 
 
 class Season(FrozenModel):

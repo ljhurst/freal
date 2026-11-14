@@ -81,13 +81,17 @@ def _scoring_period(matchup_period: int, regular_season_weeks: int, playoff_leng
 
 
 def _to_team(team: Any) -> Team:
-    owners = team.owners or []
-    owner = owners[0]["displayName"] if owners else ""
-    return Team(team_id=team.team_id, name=team.team_name, owner=owner)
+    owner = (team.owners or [{}])[0]
+    return Team(
+        team_id=team.team_id,
+        name=team.team_name,
+        owner=owner.get("displayName", ""),
+        owner_id=owner.get("id", ""),
+    )
 
 
 def _to_matchup(period: int, box: Any) -> Matchup | None:
-    if isinstance(box.home_team, int) or isinstance(box.away_team, int):
+    if not (_is_team(box.home_team) and _is_team(box.away_team)):
         return None
     return Matchup(
         week=period,
@@ -105,6 +109,10 @@ def _to_matchup(period: int, box: Any) -> Matchup | None:
             lineup=tuple(_to_slot(player) for player in box.away_lineup),
         ),
     )
+
+
+def _is_team(side: Any) -> bool:
+    return getattr(side, "team_id", None) is not None
 
 
 def _to_slot(player: Any) -> Slot:
