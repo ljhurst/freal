@@ -5,6 +5,7 @@ from pydantic import computed_field
 
 from freal.leagues.models import FrozenModel, Season
 from freal.metrics.results import games_by_team
+from freal.metrics.standings import standings
 
 
 class Luck(FrozenModel):
@@ -36,10 +37,9 @@ def luck_table(season: Season) -> tuple[Luck, ...]:
         for game in games:
             points_by_week[game.week][team_id] = game.points
 
+    standing_of = {standing.team_id: standing for standing in standings(season)}
     table = []
     for team_id, games in games_of.items():
-        wins = sum(game.points > game.opponent_points for game in games)
-        ties = sum(game.points == game.opponent_points for game in games)
         all_play_wins = all_play_ties = all_play_losses = 0
         expected_wins = 0.0
         for game in games:
@@ -53,8 +53,8 @@ def luck_table(season: Season) -> tuple[Luck, ...]:
         table.append(
             Luck(
                 team_id=team_id,
-                wins=wins,
-                ties=ties,
+                wins=standing_of[team_id].wins,
+                ties=standing_of[team_id].ties,
                 expected_wins=expected_wins,
                 all_play_wins=all_play_wins,
                 all_play_ties=all_play_ties,
