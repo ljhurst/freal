@@ -9,10 +9,10 @@ from fastapi.testclient import TestClient
 from freal.integrations.espn.client import EspnAuthError, EspnUnavailable, SeasonNotFound
 from freal.integrations.espn.credentials import EspnCredentials
 from freal.integrations.lasso.tokens import VerifiedToken
-from freal.leagues.config import LEAGUES_PARAMETER
 from freal.leagues.models import Season
 from freal.operations.api import create_app
 from freal.storage.credentials import CredentialStore
+from freal.storage.leagues import LEAGUES_PARAMETER
 from freal.storage.parameters import MemoryParameterStore
 
 LEAGUE_ID = 7

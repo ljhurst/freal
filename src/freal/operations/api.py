@@ -18,11 +18,13 @@ from freal.integrations.espn.client import (
 )
 from freal.integrations.espn.credentials import EspnCredentials
 from freal.integrations.lasso.tokens import VerifiedToken
-from freal.leagues.config import LEAGUES_PARAMETER, LeagueConfig, latest_season, parse_leagues
+from freal.leagues.config import LeagueConfig
 from freal.leagues.models import Season
+from freal.leagues.seasons import latest_season
 from freal.models import FrozenModel
 from freal.reports.season import SeasonReport, build_season_report
 from freal.storage.credentials import CredentialStore
+from freal.storage.leagues import LeaguesNotConfigured, LeagueStore
 from freal.storage.parameters import ParameterStore
 
 logger = logging.getLogger(__name__)
@@ -123,7 +125,7 @@ class _Service:
         today: Callable[[], date],
         clock: Callable[[], float],
     ) -> None:
-        self._parameters = parameters
+        self._league_store = LeagueStore(parameters)
         self._credentials = CredentialStore(parameters)
         self._fetch_season = fetch_season
         self._today = today
@@ -162,10 +164,10 @@ class _Service:
         return self._configured.get_or_compute("leagues", self._read_leagues)
 
     def _read_leagues(self) -> tuple[LeagueConfig, ...]:
-        raw = self._parameters.get(LEAGUES_PARAMETER)
-        if raw is None:
-            raise ApiError(503, "not_configured")
-        return parse_leagues(raw)
+        try:
+            return self._league_store.load()
+        except LeaguesNotConfigured as error:
+            raise ApiError(503, "not_configured") from error
 
     def _league(self, league_id: int) -> LeagueConfig:
         for league in self._configured_leagues():
