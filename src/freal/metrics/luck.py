@@ -1,9 +1,10 @@
 from collections import defaultdict
 from statistics import fmean
 
-from freal.leagues.models import FrozenModel, Season
+from freal.leagues.models import Season
 from freal.metrics.results import games_by_team
 from freal.metrics.standings import standings
+from freal.models import FrozenModel
 
 
 class Luck(FrozenModel):

@@ -3,7 +3,7 @@ from typing import Any, Protocol
 
 import jwt
 
-from freal.leagues.models import FrozenModel
+from freal.models import FrozenModel
 
 logger = logging.getLogger(__name__)
 

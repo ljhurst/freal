@@ -1,9 +1,10 @@
-from freal.leagues.models import FrozenModel, Season
+from freal.leagues.models import Season
 from freal.metrics.consistency import Consistency, consistency
 from freal.metrics.efficiency import LineupEfficiency, lineup_efficiency
 from freal.metrics.luck import Luck, ScheduleStrength, luck_table, strength_of_schedule
 from freal.metrics.results import TeamWeek, team_weeks
 from freal.metrics.standings import Standing, standings
+from freal.models import FrozenModel
 
 
 class TeamReport(FrozenModel):

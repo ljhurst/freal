@@ -2,7 +2,7 @@ from datetime import date
 
 from pydantic import Field, TypeAdapter
 
-from freal.leagues.models import FrozenModel
+from freal.models import FrozenModel
 
 LEAGUES_PARAMETER = "/freal/leagues"
 SEASON_ROLLOVER_MONTH = 8

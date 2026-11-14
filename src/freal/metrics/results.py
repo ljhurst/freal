@@ -1,6 +1,7 @@
 from collections import defaultdict
 
-from freal.leagues.models import FrozenModel, Matchup, MatchupKind, Season
+from freal.leagues.models import Matchup, MatchupKind, Season
+from freal.models import FrozenModel
 
 
 class TeamWeek(FrozenModel):

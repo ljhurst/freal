@@ -1,14 +1,10 @@
 from enum import StrEnum
 
-from pydantic import BaseModel, ConfigDict
+from freal.models import FrozenModel
 
 BENCH_SLOT = "BE"
 IR_SLOT = "IR"
 INACTIVE_SLOTS = frozenset({BENCH_SLOT, IR_SLOT})
-
-
-class FrozenModel(BaseModel):
-    model_config = ConfigDict(frozen=True)
 
 
 class MatchupKind(StrEnum):

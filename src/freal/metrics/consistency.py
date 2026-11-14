@@ -1,7 +1,8 @@
 from statistics import fmean, pstdev
 
-from freal.leagues.models import FrozenModel, Season
+from freal.leagues.models import Season
 from freal.metrics.results import games_by_team
+from freal.models import FrozenModel
 
 
 class Consistency(FrozenModel):
