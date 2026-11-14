@@ -24,7 +24,7 @@ def test_expected_wins_are_the_share_of_the_league_outscored() -> None:
     assert (table[2].all_play_wins, table[2].all_play_losses) == (2, 1)
 
 
-def test_tied_scores_count_half_a_win_in_all_play_and_in_the_matchup() -> None:
+def test_equal_scores_elsewhere_in_the_league_count_half_a_win() -> None:
     games = season(
         [
             matchup(1, side(1, 100), side(3, 80)),
@@ -36,6 +36,9 @@ def test_tied_scores_count_half_a_win_in_all_play_and_in_the_matchup() -> None:
 
     assert table[1].expected_wins == pytest.approx(2.5 / 3)
     assert table[1].all_play_ties == 1
+
+
+def test_a_drawn_matchup_is_a_tie_and_not_luck() -> None:
     drawn = season([matchup(1, side(1, 90), side(2, 90))], team_ids=(1, 2))
     assert [row.ties for row in luck_table(drawn)] == [1, 1]
     assert [row.luck for row in luck_table(drawn)] == [0.0, 0.0]
@@ -51,6 +54,12 @@ def test_a_bye_week_only_compares_teams_that_played() -> None:
 
     assert [row.team_id for row in table] == [1, 2]
     assert table[0].expected_wins == pytest.approx(1.0)
+
+
+def test_luck_is_included_when_the_table_is_serialized() -> None:
+    games = season([matchup(1, side(1, 100), side(2, 90))], team_ids=(1, 2))
+
+    assert luck_table(games)[0].model_dump()["luck"] == pytest.approx(0.0)
 
 
 def test_luck_across_the_league_sums_to_zero(season_2025: Season) -> None:

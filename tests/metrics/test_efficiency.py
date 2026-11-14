@@ -56,6 +56,19 @@ def test_players_on_injured_reserve_are_never_started() -> None:
     assert optimal_points(side(1, 10, lineup)) == pytest.approx(10)
 
 
+def test_efficiency_values_are_included_when_serialized() -> None:
+    lineup = (
+        slot("QB", 10, player_id=1),
+        slot("BE", 25, eligible=("QB", "BE", "IR"), player_id=2),
+    )
+    games = season([matchup(1, side(1, 10, lineup), side(2, 0))], team_ids=(1, 2))
+
+    dumped = lineup_efficiency(games)[0].model_dump()
+
+    assert dumped["left_on_bench"] == pytest.approx(15)
+    assert dumped["efficiency"] == pytest.approx(0.4)
+
+
 def test_playoff_matchups_are_ignored() -> None:
     lineup = (slot("QB", 10, player_id=1),)
     games = season(

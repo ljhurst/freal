@@ -1,8 +1,10 @@
 from collections import defaultdict
 from statistics import fmean
 
+from pydantic import computed_field
+
 from freal.leagues.models import FrozenModel, Season
-from freal.metrics.results import TeamWeek, team_weeks
+from freal.metrics.results import games_by_team
 
 
 class Luck(FrozenModel):
@@ -14,6 +16,8 @@ class Luck(FrozenModel):
     all_play_ties: int
     all_play_losses: int
 
+    # mypy rejects any decorator stacked on a property; pydantic's docs prescribe this ignore.
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def luck(self) -> float:
         return self.wins + self.ties / 2 - self.expected_wins
@@ -26,14 +30,14 @@ class ScheduleStrength(FrozenModel):
 
 def luck_table(season: Season) -> tuple[Luck, ...]:
     """Actual wins against the wins a team would expect playing every other team each week."""
-    rows = team_weeks(season)
+    games_of = games_by_team(season)
     points_by_week: dict[int, dict[int, float]] = defaultdict(dict)
-    for row in rows:
-        points_by_week[row.week][row.team_id] = row.points
+    for team_id, games in games_of.items():
+        for game in games:
+            points_by_week[game.week][team_id] = game.points
 
-    games_by_team = _group_by_team(rows)
     table = []
-    for team_id, games in sorted(games_by_team.items()):
+    for team_id, games in games_of.items():
         wins = sum(game.points > game.opponent_points for game in games)
         ties = sum(game.points == game.opponent_points for game in games)
         all_play_wins = all_play_ties = all_play_losses = 0
@@ -62,21 +66,14 @@ def luck_table(season: Season) -> tuple[Luck, ...]:
 
 def strength_of_schedule(season: Season) -> tuple[ScheduleStrength, ...]:
     """The average of each opponent's average weekly points, over a team's games."""
-    games_by_team = _group_by_team(team_weeks(season))
+    games_of = games_by_team(season)
     average_points = {
-        team_id: fmean(game.points for game in games) for team_id, games in games_by_team.items()
+        team_id: fmean(game.points for game in games) for team_id, games in games_of.items()
     }
     return tuple(
         ScheduleStrength(
             team_id=team_id,
             average_opponent_points=fmean(average_points[game.opponent_id] for game in games),
         )
-        for team_id, games in sorted(games_by_team.items())
+        for team_id, games in games_of.items()
     )
-
-
-def _group_by_team(rows: tuple[TeamWeek, ...]) -> dict[int, list[TeamWeek]]:
-    grouped: dict[int, list[TeamWeek]] = defaultdict(list)
-    for row in rows:
-        grouped[row.team_id].append(row)
-    return grouped

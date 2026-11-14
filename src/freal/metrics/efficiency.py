@@ -1,6 +1,9 @@
 from collections import defaultdict
 
-from freal.leagues.models import FrozenModel, MatchupKind, Season, Side, Slot
+from pydantic import computed_field
+
+from freal.leagues.models import FrozenModel, Season, Side, Slot
+from freal.metrics.results import regular_matchups
 
 IR_SLOT = "IR"
 
@@ -10,10 +13,13 @@ class LineupEfficiency(FrozenModel):
     points: float
     optimal_points: float
 
+    # mypy rejects any decorator stacked on a property; pydantic's docs prescribe this ignore.
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def left_on_bench(self) -> float:
         return self.optimal_points - self.points
 
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def efficiency(self) -> float:
         return self.points / self.optimal_points if self.optimal_points else 1.0
@@ -23,9 +29,7 @@ def lineup_efficiency(season: Season) -> tuple[LineupEfficiency, ...]:
     """Season totals of actual points against the best lineup each week allowed."""
     actual: dict[int, float] = defaultdict(float)
     optimal: dict[int, float] = defaultdict(float)
-    for matchup in season.matchups:
-        if matchup.kind is not MatchupKind.REGULAR:
-            continue
+    for matchup in regular_matchups(season):
         for side in (matchup.home, matchup.away):
             actual[side.team_id] += side.points
             optimal[side.team_id] += optimal_points(side)
