@@ -35,9 +35,10 @@ done
 
 find build -exec touch -t 202001010000.00 {} +
 
-# App code goes into a fresh archive first: zip's -x excludes only apply on creation.
-(cd build/app && zip -Xrq "../../${zip_path}" freal)
-(cd build/package && zip -Xrq "../../${zip_path}" .)
+# Files are added in sorted order because zip otherwise records them in the order the
+# filesystem lists them, which differs between machines and changes the hash.
+(cd build/app && find freal -type f | LC_ALL=C sort | zip -Xq "../../${zip_path}" -@)
+(cd build/package && find . -type f | LC_ALL=C sort | zip -Xq "../../${zip_path}" -@)
 
 rm -rf build
 
