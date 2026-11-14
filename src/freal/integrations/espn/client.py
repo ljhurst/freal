@@ -7,15 +7,12 @@ from espn_api.requests.espn_requests import (
 
 from freal.integrations.espn.credentials import EspnCredentials
 from freal.integrations.espn.mapping import build_season
+from freal.leagues.errors import SeasonNotFound
 from freal.leagues.models import Season
 
 
 class EspnAuthError(Exception):
     """ESPN refused the league's cookies, or the league needs cookies and has none."""
-
-
-class SeasonNotFound(Exception):
-    """The league has no such season on ESPN."""
 
 
 class EspnUnavailable(Exception):

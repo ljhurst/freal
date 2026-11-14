@@ -15,6 +15,7 @@ from pydantic import SecretStr
 from freal.integrations.espn.credentials import EspnCredentials
 from freal.integrations.lasso.tokens import LassoTokenValidator
 from freal.operations.api import create_app
+from freal.operations.service import LeagueService
 from freal.storage.credentials import CredentialStore
 from freal.storage.leagues import LEAGUES_PARAMETER
 from freal.storage.parameters import MemoryParameterStore
@@ -41,7 +42,8 @@ def main(league_id: int, first_year: int, cookies_file: Path, port: int) -> None
     )
     CredentialStore(store).save(ACCOUNT, _read_credentials(cookies_file))
     validator = LassoTokenValidator(issuer_url=LASSO_ISSUER_URL, audience=FREAL_RESOURCE_URL)
-    uvicorn.run(create_app(store, validator.validate), host="127.0.0.1", port=port)
+    app = create_app(LeagueService(store), validator.validate)
+    uvicorn.run(app, host="127.0.0.1", port=port)
 
 
 def _read_credentials(path: Path) -> EspnCredentials:

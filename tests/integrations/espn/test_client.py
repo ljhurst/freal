@@ -11,9 +11,9 @@ from freal.integrations.espn import client as espn_client
 from freal.integrations.espn.client import (
     EspnAuthError,
     EspnUnavailable,
-    SeasonNotFound,
     load_season,
 )
+from freal.leagues.errors import SeasonNotFound
 
 
 @pytest.mark.parametrize(

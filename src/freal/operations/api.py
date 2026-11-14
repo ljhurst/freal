@@ -1,7 +1,4 @@
-import logging
-import time
 from collections.abc import Callable
-from datetime import date
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Header, Request, Response
@@ -9,27 +6,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, SecretStr
 
-from freal.cache import TtlCache
-from freal.integrations.espn.client import (
-    EspnAuthError,
-    EspnUnavailable,
-    SeasonNotFound,
-    load_season,
-)
+from freal.integrations.espn.client import EspnAuthError, EspnUnavailable
 from freal.integrations.espn.credentials import EspnCredentials
 from freal.integrations.lasso.tokens import VerifiedToken
-from freal.leagues.config import LeagueConfig
-from freal.leagues.models import Season
-from freal.leagues.seasons import latest_season
-from freal.models import FrozenModel
-from freal.reports.season import SeasonReport, build_season_report
-from freal.storage.credentials import CredentialStore
-from freal.storage.leagues import LeaguesNotConfigured, LeagueStore
-from freal.storage.parameters import ParameterStore
+from freal.leagues.errors import AccountNotFound, LeagueNotFound, SeasonNotFound
+from freal.operations.service import LeagueService, LeagueSummary
+from freal.reports.season import SeasonReport
+from freal.storage.leagues import LeaguesNotConfigured
 
-logger = logging.getLogger(__name__)
-
-SeasonFetcher = Callable[[int, int, EspnCredentials | None], Season]
 TokenValidator = Callable[[str], VerifiedToken | None]
 
 READ_SCOPE = "freal:read"
@@ -38,14 +22,15 @@ CONNECT_SCOPE = "freal:connect"
 ALLOWED_ORIGINS = (
     r"^(https://(freal|freal-pr-\d+\.preview)\.bylukehurst\.com|http://localhost(:\d+)?)$"
 )
-REPORT_CACHE_SECONDS = 300
-CONFIG_CACHE_SECONDS = 60
 
-
-class LeagueSummary(FrozenModel):
-    league_id: int
-    name: str
-    years: tuple[int, ...]
+ERROR_RESPONSES: dict[type[Exception], tuple[int, str]] = {
+    LeagueNotFound: (404, "league_not_found"),
+    SeasonNotFound: (404, "season_not_found"),
+    AccountNotFound: (404, "account_not_found"),
+    LeaguesNotConfigured: (503, "not_configured"),
+    EspnAuthError: (502, "espn_auth_expired"),
+    EspnUnavailable: (502, "espn_unavailable"),
+}
 
 
 class ConnectRequest(BaseModel):
@@ -62,14 +47,7 @@ class ApiError(Exception):
         self.headers = headers
 
 
-def create_app(
-    parameters: ParameterStore,
-    validate_token: TokenValidator,
-    fetch_season: SeasonFetcher = load_season,
-    today: Callable[[], date] = date.today,
-    clock: Callable[[], float] = time.monotonic,
-) -> FastAPI:
-    service = _Service(parameters, fetch_season, today, clock)
+def create_app(service: LeagueService, validate_token: TokenValidator) -> FastAPI:
     app = FastAPI(title="freal", docs_url=None, redoc_url=None, openapi_url=None)
     app.add_middleware(
         CORSMiddleware,
@@ -83,6 +61,9 @@ def create_app(
         return JSONResponse(
             {"error": error.code}, status_code=error.status_code, headers=error.headers
         )
+
+    for error_type, (status_code, code) in ERROR_RESPONSES.items():
+        app.add_exception_handler(error_type, _error_response(status_code, code))
 
     def require_scope(scope: str) -> Callable[[str | None], VerifiedToken]:
         def check(authorization: Annotated[str | None, Header()] = None) -> VerifiedToken:
@@ -111,81 +92,18 @@ def create_app(
         request: ConnectRequest,
         token: Annotated[VerifiedToken, Depends(require_scope(CONNECT_SCOPE))],
     ) -> Response:
-        service.connect(request, token)
+        credentials = EspnCredentials(espn_s2=request.espn_s2, swid=request.swid)
+        service.connect(request.account, credentials, token.subject)
         return Response(status_code=204)
 
     return app
 
 
-class _Service:
-    def __init__(
-        self,
-        parameters: ParameterStore,
-        fetch_season: SeasonFetcher,
-        today: Callable[[], date],
-        clock: Callable[[], float],
-    ) -> None:
-        self._league_store = LeagueStore(parameters)
-        self._credentials = CredentialStore(parameters)
-        self._fetch_season = fetch_season
-        self._today = today
-        self._configured = TtlCache[tuple[LeagueConfig, ...]](CONFIG_CACHE_SECONDS, clock)
-        self._reports = TtlCache[SeasonReport](REPORT_CACHE_SECONDS, clock)
+def _error_response(status_code: int, code: str) -> Callable[[Request, Exception], JSONResponse]:
+    def respond(_: Request, __: Exception) -> JSONResponse:
+        return JSONResponse({"error": code}, status_code=status_code)
 
-    def leagues(self) -> list[LeagueSummary]:
-        latest = latest_season(self._today())
-        return [
-            LeagueSummary(
-                league_id=league.league_id,
-                name=league.name,
-                years=league.years(latest),
-            )
-            for league in self._configured_leagues()
-        ]
-
-    def season_report(self, league_id: int, year: int) -> SeasonReport:
-        league = self._league(league_id)
-        if not league.first_year <= year <= latest_season(self._today()):
-            raise ApiError(404, "season_not_found")
-        return self._reports.get_or_compute(
-            (league_id, year), lambda: self._build_report(league, year)
-        )
-
-    def connect(self, request: ConnectRequest, token: VerifiedToken) -> None:
-        if request.account not in {league.account for league in self._configured_leagues()}:
-            raise ApiError(404, "account_not_found")
-        self._credentials.save(
-            request.account,
-            EspnCredentials(espn_s2=request.espn_s2, swid=request.swid),
-        )
-        logger.info("espn cookies updated for %s by %s", request.account, token.subject)
-
-    def _configured_leagues(self) -> tuple[LeagueConfig, ...]:
-        return self._configured.get_or_compute("leagues", self._read_leagues)
-
-    def _read_leagues(self) -> tuple[LeagueConfig, ...]:
-        try:
-            return self._league_store.load()
-        except LeaguesNotConfigured as error:
-            raise ApiError(503, "not_configured") from error
-
-    def _league(self, league_id: int) -> LeagueConfig:
-        for league in self._configured_leagues():
-            if league.league_id == league_id:
-                return league
-        raise ApiError(404, "league_not_found")
-
-    def _build_report(self, league: LeagueConfig, year: int) -> SeasonReport:
-        credentials = self._credentials.load(league.account)
-        try:
-            season = self._fetch_season(league.league_id, year, credentials)
-        except EspnAuthError as error:
-            raise ApiError(502, "espn_auth_expired") from error
-        except SeasonNotFound as error:
-            raise ApiError(404, "season_not_found") from error
-        except EspnUnavailable as error:
-            raise ApiError(502, "espn_unavailable") from error
-        return build_season_report(season)
+    return respond
 
 
 def _bearer_token(authorization: str | None) -> str | None:
