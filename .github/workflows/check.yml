@@ -16,6 +16,7 @@ jobs:
     with:
       setup-uv: true
       setup-command: uv sync --locked
+      terraform-version: "1.17.0"
 
   test:
     uses: ljhurst/stych/.github/workflows/test.yml@v1
