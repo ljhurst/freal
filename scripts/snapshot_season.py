@@ -8,7 +8,8 @@ from pathlib import Path
 
 from pydantic import SecretStr
 
-from freal.integrations.espn.client import EspnCredentials, load_season
+from freal.integrations.espn.client import load_season
+from freal.integrations.espn.credentials import EspnCredentials
 from freal.leagues.models import Season, Team
 
 

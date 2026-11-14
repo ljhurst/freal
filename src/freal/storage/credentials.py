@@ -1,6 +1,6 @@
 import json
 
-from freal.integrations.espn.client import EspnCredentials
+from freal.integrations.espn.credentials import EspnCredentials
 from freal.storage.parameters import ParameterStore
 
 

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 import boto3
 from botocore.stub import Stubber
 
-from freal.integrations.espn.client import EspnCredentials
+from freal.integrations.espn.credentials import EspnCredentials
 from freal.storage.credentials import CredentialStore
 from freal.storage.parameters import MemoryParameterStore, SsmParameterStore
 

@@ -12,11 +12,11 @@ from pydantic import BaseModel, SecretStr
 from freal.cache import TtlCache
 from freal.integrations.espn.client import (
     EspnAuthError,
-    EspnCredentials,
     EspnUnavailable,
     SeasonNotFound,
     load_season,
 )
+from freal.integrations.espn.credentials import EspnCredentials
 from freal.integrations.lasso.tokens import VerifiedToken
 from freal.leagues.config import LEAGUES_PARAMETER, LeagueConfig, latest_season, parse_leagues
 from freal.leagues.models import Season

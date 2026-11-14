@@ -6,12 +6,8 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from freal.integrations.espn.client import (
-    EspnAuthError,
-    EspnCredentials,
-    EspnUnavailable,
-    SeasonNotFound,
-)
+from freal.integrations.espn.client import EspnAuthError, EspnUnavailable, SeasonNotFound
+from freal.integrations.espn.credentials import EspnCredentials
 from freal.integrations.lasso.tokens import VerifiedToken
 from freal.leagues.config import LEAGUES_PARAMETER
 from freal.leagues.models import Season
