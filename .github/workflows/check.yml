@@ -1,0 +1,31 @@
+---
+name: Check
+
+# yamllint disable-line rule:truthy
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  pre-commit:
+    uses: ljhurst/stych/.github/workflows/pre-commit.yml@v1
+    with:
+      setup-uv: true
+      setup-command: uv sync --locked
+
+  test:
+    uses: ljhurst/stych/.github/workflows/test.yml@v1
+    with:
+      command: uv run pytest -q
+      setup-command: uv sync --locked
+      setup-uv: true
+      paths: |
+        src/**
+        tests/**
+        pyproject.toml
+        uv.lock
+        .github/workflows/check.yml

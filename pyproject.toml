@@ -30,3 +30,7 @@ files = ["src", "tests"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[[tool.mypy.overrides]]
+module = "espn_api.*"
+ignore_missing_imports = true
