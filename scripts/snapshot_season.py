@@ -21,6 +21,7 @@ def main(league_id: int, year: int, cookies_file: Path, out: Path) -> None:
 def anonymize(season: Season) -> Season:
     return season.model_copy(
         update={
+            "league_id": 1,
             "name": "Test League",
             "teams": tuple(
                 Team(
