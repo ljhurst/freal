@@ -5,8 +5,6 @@ from pydantic import computed_field
 from freal.leagues.models import FrozenModel, Season, Side, Slot
 from freal.metrics.results import regular_matchups
 
-IR_SLOT = "IR"
-
 
 class LineupEfficiency(FrozenModel):
     team_id: int
@@ -43,7 +41,7 @@ def optimal_points(side: Side) -> float:
     """The most a side's roster could have scored in the starting slots it had."""
     slots = [player.slot for player in side.lineup if player.is_starter]
     candidates = sorted(
-        (player for player in side.lineup if player.slot != IR_SLOT),
+        (player for player in side.lineup if not player.is_injured_reserve),
         key=lambda player: player.points,
         reverse=True,
     )

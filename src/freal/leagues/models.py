@@ -2,7 +2,9 @@ from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict
 
-INACTIVE_SLOTS = frozenset({"BE", "IR"})
+BENCH_SLOT = "BE"
+IR_SLOT = "IR"
+INACTIVE_SLOTS = frozenset({BENCH_SLOT, IR_SLOT})
 
 
 class FrozenModel(BaseModel):
@@ -27,6 +29,10 @@ class Slot(FrozenModel):
     @property
     def is_starter(self) -> bool:
         return self.slot not in INACTIVE_SLOTS
+
+    @property
+    def is_injured_reserve(self) -> bool:
+        return self.slot == IR_SLOT
 
 
 class Side(FrozenModel):
