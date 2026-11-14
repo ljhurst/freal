@@ -8,11 +8,14 @@ serves the result to people who log in through [Lasso](https://lasso.bylukehurst
 
 ## How it works
 
-- `src/freal/integrations/espn/` fetches a season from ESPN into typed models.
+- `src/freal/integrations/` talks to outside services: `espn/` fetches a season and
+  maps it into typed models, `lasso/` verifies login tokens.
 - `src/freal/metrics/` and `src/freal/reports/` turn a season into the report.
-- `src/freal/operations/` is the HTTP API (FastAPI on a Lambda Function URL).
-  Every route needs a Lasso access token: `freal:read` to see data,
-  `freal:connect` to store fresh ESPN cookies.
+- `src/freal/storage/` reads and writes the SSM parameters: league config and cookies.
+- `src/freal/operations/` holds the entry points: `service.py` is the application
+  logic with no HTTP in it, `api.py` is the HTTP layer (FastAPI on a Lambda Function
+  URL), and `lambda_handler.py` wires them together. Every route needs a Lasso access
+  token: `freal:read` to see data, `freal:connect` to store fresh ESPN cookies.
 - League config and cookies live in SSM under `/freal/`, never in the repo or
   Terraform state.
 
