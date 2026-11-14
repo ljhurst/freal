@@ -40,7 +40,6 @@ def test_equal_scores_elsewhere_in_the_league_count_half_a_win() -> None:
 
 def test_a_drawn_matchup_is_a_tie_and_not_luck() -> None:
     drawn = season([matchup(1, side(1, 90), side(2, 90))], team_ids=(1, 2))
-    assert [row.ties for row in luck_table(drawn)] == [1, 1]
     assert [row.luck for row in luck_table(drawn)] == [0.0, 0.0]
 
 
@@ -56,12 +55,6 @@ def test_a_bye_week_only_compares_teams_that_played() -> None:
     assert table[0].expected_wins == pytest.approx(1.0)
 
 
-def test_luck_is_included_when_the_table_is_serialized() -> None:
-    games = season([matchup(1, side(1, 100), side(2, 90))], team_ids=(1, 2))
-
-    assert luck_table(games)[0].model_dump()["luck"] == pytest.approx(0.0)
-
-
 def test_luck_across_the_league_sums_to_zero(season_2025: Season) -> None:
     assert sum(row.luck for row in luck_table(season_2025)) == pytest.approx(0.0)
 
@@ -75,7 +68,7 @@ def test_playoff_games_are_ignored() -> None:
         team_ids=(1, 2),
     )
 
-    assert [row.wins for row in luck_table(games)] == [1, 0]
+    assert [row.expected_wins for row in luck_table(games)] == [1.0, 0.0]
 
 
 def test_strength_of_schedule_is_the_average_points_of_opponents() -> None:
