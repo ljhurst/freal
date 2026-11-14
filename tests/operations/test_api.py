@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import date
 
 import pytest
@@ -243,6 +244,16 @@ def test_connecting_stores_cookies_that_later_fetches_use(
     used = fetcher.calls[0][2]
     assert used is not None
     assert used.swid.get_secret_value() == "{SWID}"
+
+
+def test_who_stored_the_cookies_is_logged(
+    client: TestClient, caplog: pytest.LogCaptureFixture
+) -> None:
+    with caplog.at_level(logging.INFO, logger="freal.operations.api"):
+        client.post("/connect", json=_connect_body(), headers=CONNECTOR)
+
+    assert "espn cookies updated for luke by owner" in caplog.text
+    assert "s2-value" not in caplog.text
 
 
 def test_connecting_needs_the_connect_scope(

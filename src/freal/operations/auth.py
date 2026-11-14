@@ -8,6 +8,7 @@ from freal.leagues.models import FrozenModel
 logger = logging.getLogger(__name__)
 
 TOKEN_LEEWAY_SECONDS = 60
+JWKS_TIMEOUT_SECONDS = 5
 
 
 class VerifiedToken(FrozenModel):
@@ -34,7 +35,7 @@ class LassoTokenValidator:
         self._issuer_url = issuer_url
         self._audience = audience
         self._signing_keys: SigningKeySource = signing_keys or jwt.PyJWKClient(
-            f"{issuer_url.rstrip('/')}/jwks"
+            f"{issuer_url.rstrip('/')}/jwks", timeout=JWKS_TIMEOUT_SECONDS
         )
 
     def validate(self, token: str) -> VerifiedToken | None:

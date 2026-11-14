@@ -1,3 +1,4 @@
+import logging
 import os
 
 from mangum import Mangum
@@ -5,6 +6,8 @@ from mangum import Mangum
 from freal.operations.api import create_app
 from freal.operations.auth import LassoTokenValidator
 from freal.storage.parameters import SsmParameterStore
+
+logging.getLogger("freal").setLevel(logging.INFO)
 
 validator = LassoTokenValidator(
     issuer_url=os.environ["LASSO_ISSUER_URL"],

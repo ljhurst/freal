@@ -1,3 +1,4 @@
+import logging
 import time
 from collections.abc import Callable
 from datetime import date
@@ -22,6 +23,8 @@ from freal.operations.cache import TtlCache
 from freal.reports.season import SeasonReport, build_season_report
 from freal.storage.credentials import CredentialStore
 from freal.storage.parameters import ParameterStore
+
+logger = logging.getLogger(__name__)
 
 SeasonFetcher = Callable[[int, int, EspnCredentials | None], Season]
 TokenValidator = Callable[[str], VerifiedToken | None]
@@ -100,9 +103,12 @@ def create_app(
     def season(league_id: int, year: int) -> SeasonReport:
         return service.season_report(league_id, year)
 
-    @app.post("/connect", status_code=204, dependencies=[Depends(require_scope(CONNECT_SCOPE))])
-    def connect(request: ConnectRequest) -> Response:
-        service.connect(request)
+    @app.post("/connect", status_code=204)
+    def connect(
+        request: ConnectRequest,
+        token: Annotated[VerifiedToken, Depends(require_scope(CONNECT_SCOPE))],
+    ) -> Response:
+        service.connect(request, token)
         return Response(status_code=204)
 
     return app
@@ -142,13 +148,14 @@ class _Service:
             (league_id, year), lambda: self._build_report(league, year)
         )
 
-    def connect(self, request: ConnectRequest) -> None:
+    def connect(self, request: ConnectRequest, token: VerifiedToken) -> None:
         if request.account not in {league.account for league in self._configured_leagues()}:
             raise ApiError(404, "account_not_found")
         self._credentials.save(
             request.account,
             EspnCredentials(espn_s2=request.espn_s2, swid=request.swid),
         )
+        logger.info("espn cookies updated for %s by %s", request.account, token.subject)
 
     def _configured_leagues(self) -> tuple[LeagueConfig, ...]:
         return self._configured.get_or_compute("leagues", self._read_leagues)
