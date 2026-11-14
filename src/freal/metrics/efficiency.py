@@ -2,8 +2,9 @@ from collections import defaultdict
 
 from pydantic import computed_field
 
-from freal.leagues.models import FrozenModel, Season, Side, Slot
+from freal.leagues.models import Season, Side, Slot
 from freal.metrics.results import regular_matchups
+from freal.models import FrozenModel
 
 
 class LineupEfficiency(FrozenModel):
