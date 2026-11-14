@@ -1,4 +1,5 @@
 from freal.leagues.models import MatchupKind, Season
+from tests.factories import slot
 
 
 def test_fixture_season_has_a_full_regular_season_and_two_playoff_rounds(
@@ -23,3 +24,10 @@ def test_every_lineup_has_starters_and_a_bench(season_2025: Season) -> None:
 
     assert any(slot.is_starter for slot in lineup)
     assert any(not slot.is_starter for slot in lineup)
+
+
+def test_only_the_injured_reserve_slot_is_injured_reserve() -> None:
+    assert slot("IR", 0).is_injured_reserve
+    assert not slot("BE", 0).is_injured_reserve
+    assert not slot("QB", 0).is_injured_reserve
+    assert not slot("IR", 0).is_starter
