@@ -96,6 +96,14 @@ describe('the season page', () => {
     }
   });
 
+  it('says what each standout number measures', async () => {
+    renderSeason('/leagues/1/2025');
+
+    expect(await screen.findByText('92.5% of optimal points')).toBeInTheDocument();
+    expect(screen.getByText('187.9 points in week 12')).toBeInTheDocument();
+    expect(screen.getByText('±13.1 points a week')).toBeInTheDocument();
+  });
+
   it('draws one trend point per game played in every standings row', async () => {
     renderSeason('/leagues/1/2025');
 

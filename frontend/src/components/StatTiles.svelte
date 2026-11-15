@@ -22,17 +22,17 @@
       highlights.mostEfficient && {
         label: 'Best manager',
         name: highlights.mostEfficient.team.name,
-        figure: `${formatPercent(highlights.mostEfficient.value)} of the best lineup`,
+        figure: `${formatPercent(highlights.mostEfficient.value)} of optimal points`,
       },
       highlights.topWeek && {
         label: 'Top week',
         name: highlights.topWeek.team.name,
-        figure: `${formatPoints(highlights.topWeek.value)} in week ${highlights.topWeek.week}`,
+        figure: `${formatPoints(highlights.topWeek.value)} points in week ${highlights.topWeek.week}`,
       },
       highlights.steadiest && {
         label: 'Steadiest',
         name: highlights.steadiest.team.name,
-        figure: `±${highlights.steadiest.value.toFixed(1)} a week`,
+        figure: `±${highlights.steadiest.value.toFixed(1)} points a week`,
       },
     ].filter((tile) => tile !== null),
   );
