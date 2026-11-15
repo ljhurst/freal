@@ -282,6 +282,9 @@
           "team_id": {
             "title": "Team Id",
             "type": "integer"
+          },
+          "verdict": {
+            "$ref": "#/components/schemas/Verdict"
           }
         },
         "required": [
@@ -289,6 +292,7 @@
           "name",
           "standing",
           "luck",
+          "verdict",
           "schedule",
           "efficiency",
           "consistency"
@@ -368,6 +372,15 @@
         ],
         "title": "ValidationError",
         "type": "object"
+      },
+      "Verdict": {
+        "enum": [
+          "lucky",
+          "unlucky",
+          "as_expected"
+        ],
+        "title": "Verdict",
+        "type": "string"
       }
     }
   },

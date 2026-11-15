@@ -1,5 +1,11 @@
 import type { User } from 'oidc-client-ts';
-import { type Api, ApiError, type LeagueSummary, type SeasonReport } from '@/lib/api/client';
+import {
+  type Api,
+  ApiError,
+  type LeagueSummary,
+  type SeasonReport,
+  type TeamReport,
+} from '@/lib/api/client';
 import type { OidcClient, Session } from '@/lib/auth/session.svelte';
 import { Router } from '@/lib/router.svelte';
 import { SERVICES_KEY, type Services } from '@/lib/services';
@@ -69,5 +75,13 @@ export function league(overrides: Partial<LeagueSummary> = {}): LeagueSummary {
 
 /** The sample season that demo mode serves, checked against the generated API types. */
 export function seasonReport(): SeasonReport {
-  return structuredClone(demoSeason);
+  const report = structuredClone(demoSeason);
+  return {
+    ...report,
+    // JSON modules widen string literals, so only the verdict needs narrowing back.
+    teams: report.teams.map((team) => ({
+      ...team,
+      verdict: team.verdict as TeamReport['verdict'],
+    })),
+  };
 }

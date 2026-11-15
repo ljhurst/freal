@@ -4,6 +4,7 @@ from freal.metrics.efficiency import LineupEfficiency, lineup_efficiency
 from freal.metrics.luck import Luck, ScheduleStrength, luck_table, strength_of_schedule
 from freal.metrics.results import TeamWeek, team_weeks
 from freal.metrics.standings import Standing, standings
+from freal.metrics.verdict import Verdict, verdict_for
 from freal.models import FrozenModel
 
 
@@ -12,6 +13,7 @@ class TeamReport(FrozenModel):
     name: str
     standing: Standing
     luck: Luck
+    verdict: Verdict
     schedule: ScheduleStrength
     efficiency: LineupEfficiency
     consistency: Consistency
@@ -42,6 +44,7 @@ def build_season_report(season: Season) -> SeasonReport:
                 name=team.name,
                 standing=standing_of[team.team_id],
                 luck=luck_of[team.team_id],
+                verdict=verdict_for(luck_of[team.team_id]),
                 schedule=schedule_of[team.team_id],
                 efficiency=efficiency_of[team.team_id],
                 consistency=consistency_of[team.team_id],
