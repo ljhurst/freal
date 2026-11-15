@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import Footer from '@/components/Footer.svelte';
   import Header from '@/components/Header.svelte';
   import { useServices } from '@/lib/services';
   import AuthCallback from '@/views/AuthCallback.svelte';
@@ -34,9 +35,12 @@
     <NotFound />
   {/if}
 </main>
+<Footer />
 
 <style>
   main {
+    flex: 1;
+    width: 100%;
     max-width: var(--max-width);
     margin: 0 auto;
     padding: 1.5rem var(--gutter) 4rem;

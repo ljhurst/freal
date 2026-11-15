@@ -28,6 +28,10 @@ describe('createDemoApi', () => {
     expect(fetchMock).toHaveBeenCalledWith('/demo/season-2025.json');
   });
 
+  it('has no API version to report', async () => {
+    await expect(createDemoApi(vi.fn()).version()).resolves.toBeNull();
+  });
+
   it('reports a season with no sample data as not found', async () => {
     const api = createDemoApi((async () => new Response('', { status: 404 })) as typeof fetch);
 

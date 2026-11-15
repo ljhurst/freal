@@ -27,6 +27,16 @@ function setup(options: { token?: string | null; response?: Response | Error } =
 }
 
 describe('createApi', () => {
+  it('reads the API version from the version route', async () => {
+    const { api, fetchMock } = setup({ response: jsonResponse({ version: '1.2.3' }) });
+
+    await expect(api.version()).resolves.toBe('1.2.3');
+
+    expect(fetchMock).toHaveBeenCalledWith('https://api.test/version', {
+      headers: { Authorization: 'Bearer tok' },
+    });
+  });
+
   it('sends the bearer token and returns the leagues', async () => {
     const leagues = [{ league_id: 7, name: 'Family', years: [2025] }];
     const { api, fetchMock } = setup({ response: jsonResponse(leagues) });

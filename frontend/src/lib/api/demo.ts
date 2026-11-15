@@ -21,5 +21,6 @@ export function createDemoApi(fetchFn: typeof fetch = globalThis.fetch.bind(glob
   return {
     leagues: () => load<LeagueSummary[]>('/demo/leagues.json'),
     season: (_leagueId, year) => load<SeasonReport>(`/demo/season-${year}.json`),
+    version: () => Promise.resolve(null),
   };
 }
