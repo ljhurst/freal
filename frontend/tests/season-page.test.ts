@@ -44,11 +44,11 @@ describe('the season page', () => {
     });
     render(App, { context: contextFor(appServices) });
 
-    await userEvent.click(await screen.findByRole('link', { name: 'Luck' }));
+    await userEvent.click(await screen.findByRole('link', { name: 'Lineups' }));
 
-    expect(window.location.pathname).toBe('/leagues/1/2025/luck');
+    expect(window.location.pathname).toBe('/leagues/1/2025/lineups');
     expect(await screen.findByText('Coming soon')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Luck' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Lineups' })).toHaveAttribute('aria-current', 'page');
     expect(fetches).toBe(1);
   });
 

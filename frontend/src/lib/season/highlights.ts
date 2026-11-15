@@ -1,4 +1,5 @@
 import type { SeasonReport, TeamReport } from '@/lib/api/client';
+import { byStanding } from '@/lib/season/order';
 
 export interface Pick {
   team: TeamReport;
@@ -36,14 +37,6 @@ export function highlights(season: SeasonReport): Highlights {
     ),
     topWeek: topWeek(season, teams),
   };
-}
-
-export function byStanding(a: TeamReport, b: TeamReport): number {
-  return (
-    b.standing.wins - a.standing.wins ||
-    b.standing.points_for - a.standing.points_for ||
-    a.name.localeCompare(b.name)
-  );
 }
 
 function best(

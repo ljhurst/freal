@@ -8,19 +8,19 @@ describe('LuckBar', () => {
   it('grows to the right for luck and to the left for bad luck, scaled to the league', () => {
     const { container, unmount } = render(LuckBar, { luck: 1, limit: 2 });
     expect(container.querySelector('.bar.lucky')).toHaveStyle({ width: '25%' });
-    expect(screen.getByRole('img')).toHaveAccessibleName('1.0 wins luckier than scoring earned');
+    expect(screen.getByRole('img')).toHaveAccessibleName('1.0 wins luckier than expected');
     unmount();
 
     const unlucky = render(LuckBar, { luck: -2, limit: 2 });
     expect(unlucky.container.querySelector('.bar.unlucky')).toHaveStyle({ width: '50%' });
-    expect(screen.getByRole('img')).toHaveAccessibleName('2.0 wins unluckier than scoring earned');
+    expect(screen.getByRole('img')).toHaveAccessibleName('2.0 wins unluckier than expected');
   });
 
-  it('draws nothing but the track for a record that matches the scoring', () => {
+  it('draws nothing but the track for a record that matches what was expected', () => {
     const { container } = render(LuckBar, { luck: 0, limit: 2 });
 
     expect(container.querySelector('.bar.even')).toHaveStyle({ width: '0%' });
-    expect(screen.getByRole('img')).toHaveAccessibleName('Record matches what scoring earned');
+    expect(screen.getByRole('img')).toHaveAccessibleName('Record matches expected');
   });
 
   it('never grows past its half of the track', () => {
