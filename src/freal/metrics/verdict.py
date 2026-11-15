@@ -14,7 +14,7 @@ class Verdict(StrEnum):
 def verdict_for(luck: Luck) -> Verdict:
     """Whether a team's record flatters it, sells it short, or is what its scoring earned.
 
-    The line is a full win of luck over the season, one in fourteen games.
+    The line is a full win of luck over the season.
     """
     if luck.luck >= LUCK_THRESHOLD:
         return Verdict.LUCKY
