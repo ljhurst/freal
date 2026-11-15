@@ -32,7 +32,7 @@
       highlights.steadiest && {
         label: 'Steadiest',
         name: highlights.steadiest.team.name,
-        figure: `±${highlights.steadiest.value.toFixed(1)} points a week`,
+        figure: `±${highlights.steadiest.value.toFixed(1)} points per week`,
       },
     ].filter((tile) => tile !== null),
   );
