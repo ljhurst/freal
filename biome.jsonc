@@ -1,0 +1,53 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.6.7/schema.json",
+  "files": {
+    "includes": [
+      "frontend/**",
+      "!frontend/node_modules",
+      "!frontend/dist",
+      "!frontend/package-lock.json",
+      "!frontend/src/lib/api/openapi.json",
+      "!frontend/src/lib/api/schema.d.ts",
+      "!frontend/public/demo"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "lineWidth": 100
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "always",
+      "trailingCommas": "all"
+    }
+  },
+  "html": {
+    "formatter": {
+      "indentScriptAndStyle": true
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended"
+    }
+  },
+  "overrides": [
+    {
+      // Biome reads only a Svelte file's script, so it reports anything the template uses
+      // (use:link, {#await value}) as unused. svelte-check sees the template and enforces
+      // noUnusedLocals instead.
+      "includes": ["**/*.svelte"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedImports": "off",
+            "noUnusedVariables": "off"
+          }
+        }
+      }
+    }
+  ]
+}
