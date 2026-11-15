@@ -24,6 +24,11 @@ uv pip install -q \
   --target build/package \
   -r build/requirements.txt
 
+# Console scripts start with the build machine's Python path, and RECORD files list their hashes,
+# so the package would differ per machine and per Python patch release. Lambda runs neither.
+rm -rf build/package/bin
+find build/package -name RECORD -delete
+
 rsync -a --exclude='*.pyc' --exclude='__pycache__' src/freal build/app/
 
 for tree in build/package build/app; do
