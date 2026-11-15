@@ -11,6 +11,7 @@ from freal.integrations.espn.credentials import EspnCredentials
 from freal.integrations.lasso.tokens import VerifiedToken
 from freal.leagues.errors import AccountNotFound, LeagueNotFound, SeasonNotFound
 from freal.operations.service import LeagueService, LeagueSummary
+from freal.operations.version import app_version
 from freal.reports.season import SeasonReport
 from freal.storage.leagues import LeaguesNotConfigured
 
@@ -37,6 +38,10 @@ class ConnectRequest(BaseModel):
     account: str
     espn_s2: SecretStr
     swid: SecretStr
+
+
+class VersionInfo(BaseModel):
+    version: str
 
 
 class ApiError(Exception):
@@ -76,6 +81,10 @@ def create_app(service: LeagueService, validate_token: TokenValidator) -> FastAP
             return verified
 
         return check
+
+    @app.get("/version", dependencies=[Depends(require_scope(READ_SCOPE))])
+    def version() -> VersionInfo:
+        return VersionInfo(version=app_version())
 
     @app.get("/leagues", dependencies=[Depends(require_scope(READ_SCOPE))])
     def leagues() -> list[LeagueSummary]:

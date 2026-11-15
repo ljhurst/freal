@@ -19,7 +19,6 @@
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/svelte": "5.4.2",
     "@testing-library/user-event": "14.6.10",
-    "@types/node": "24.19.2",
     "jsdom": "31.0.1",
     "openapi-typescript": "7.13.0",
     "svelte": "5.57.3",
@@ -27,5 +26,6 @@
     "typescript": "5.9.3",
     "vite": "8.3.8",
     "vitest": "5.1.0"
-  }
+  },
+  "version": "0.2.0"
 }

@@ -1,21 +1,52 @@
-import { readFileSync } from 'node:fs';
-import { render, screen } from '@testing-library/svelte';
+import { render, screen, waitFor } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
 import App from '@/App.svelte';
-import { contextFor, fakeApi, league, services } from './helpers';
+import { Session } from '@/lib/auth/session.svelte';
+import { version } from '../package.json';
+import { contextFor, FakeOidcClient, fakeApi, fakeUser, services } from './helpers';
 
-const version = /^version = "(.+)"$/m.exec(readFileSync('../pyproject.toml', 'utf8'))?.[1];
+function signedIn() {
+  const client = new FakeOidcClient();
+  client.user = fakeUser();
+  return { session: new Session(client) };
+}
 
 describe('the footer', () => {
-  it('shows the app version on a page with data', async () => {
-    const appServices = services({
-      api: fakeApi({ leagues: async () => [league()] }),
+  it('shows the site and API versions once signed in', async () => {
+    const { session } = signedIn();
+    const api = fakeApi({ version: async () => '4.5.6' });
+
+    render(App, { context: contextFor(services({ api, session })) });
+
+    const footer = await screen.findByRole('contentinfo');
+    await waitFor(() => expect(footer).toHaveTextContent(`site v${version} · api v4.5.6`));
+  });
+
+  it('shows only the site version when the API cannot be asked', async () => {
+    const { session } = signedIn();
+    const api = fakeApi({ version: () => Promise.reject(new Error('offline')) });
+
+    render(App, { context: contextFor(services({ api, session })) });
+
+    expect(await screen.findByRole('contentinfo')).toHaveTextContent(
+      new RegExp(`^site v${version}$`),
+    );
+  });
+
+  it('does not ask a signed-out visitor for the API version', async () => {
+    let asked = 0;
+    const api = fakeApi({
+      version: async () => {
+        asked += 1;
+        return '1.0.0';
+      },
     });
-    render(App, { context: contextFor(appServices) });
+    const session = new Session(new FakeOidcClient());
 
-    await screen.findByText('Family League');
+    render(App, { context: contextFor(services({ api, session })) });
+    await screen.findByRole('button', { name: 'Log in' });
 
-    expect(version).toMatch(/^\d+\.\d+\.\d+$/);
-    expect(screen.getByRole('contentinfo')).toHaveTextContent(`freal v${version}`);
+    expect(screen.getByRole('contentinfo')).toHaveTextContent(new RegExp(`^site v${version}$`));
+    expect(asked).toBe(0);
   });
 });

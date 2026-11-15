@@ -1,14 +1,10 @@
-import { readFileSync } from 'node:fs';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { svelteTesting } from '@testing-library/svelte/vite';
 import { defineConfig } from 'vitest/config';
-
-const appVersion = /^version = "(.+)"$/m.exec(
-  readFileSync(new URL('../pyproject.toml', import.meta.url), 'utf8'),
-)?.[1];
+import { version } from './package.json';
 
 export default defineConfig({
-  define: { __APP_VERSION__: JSON.stringify(appVersion) },
+  define: { __APP_VERSION__: JSON.stringify(version) },
   plugins: [svelte(), svelteTesting()],
   resolve: {
     alias: { '@': new URL('./src', import.meta.url).pathname },

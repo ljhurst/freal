@@ -7,6 +7,7 @@ from freal.integrations.lasso.tokens import VerifiedToken
 from freal.leagues.errors import SeasonNotFound
 from freal.operations.api import create_app
 from freal.operations.service import LeagueService
+from freal.operations.version import app_version
 from freal.storage.credentials import CredentialStore
 from freal.storage.parameters import MemoryParameterStore
 from tests.operations.fakes import LEAGUE_ID, FakeFetcher
@@ -98,6 +99,7 @@ def test_the_api_reports_when_no_leagues_are_configured(fetcher: FakeFetcher) ->
     [
         ("GET", "/leagues"),
         ("GET", f"/leagues/{LEAGUE_ID}/seasons/2025"),
+        ("GET", "/version"),
         ("POST", "/connect"),
     ],
 )
@@ -120,6 +122,13 @@ def test_every_route_refuses_requests_without_a_valid_token(
     assert response.headers["www-authenticate"] == "Bearer"
     assert fetcher.calls == []
     assert CredentialStore(parameters).load("luke") is None
+
+
+def test_the_version_route_reports_the_deployed_api_version(client: TestClient) -> None:
+    response = client.get("/version")
+
+    assert response.status_code == 200
+    assert response.json() == {"version": app_version()}
 
 
 def test_reading_needs_the_read_scope(anonymous: TestClient, fetcher: FakeFetcher) -> None:

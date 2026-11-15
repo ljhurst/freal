@@ -21,6 +21,7 @@ export function fakeApi(overrides: Partial<Api> = {}): Api {
   return {
     leagues: () => Promise.resolve([]),
     season: () => Promise.reject(new ApiError(404, 'season_not_found')),
+    version: () => Promise.resolve('0.0.0-test'),
     ...overrides,
   };
 }

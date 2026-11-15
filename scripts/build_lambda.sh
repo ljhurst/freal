@@ -30,6 +30,7 @@ rm -rf build/package/bin
 find build/package -name RECORD -delete
 
 rsync -a --exclude='*.pyc' --exclude='__pycache__' src/freal build/app/
+printf 'VERSION = "%s"\n' "$(uv version --short)" >build/app/freal/_version.py
 
 for tree in build/package build/app; do
   uv run -q --no-project --python 3.13 python -m compileall -q -j 0 \

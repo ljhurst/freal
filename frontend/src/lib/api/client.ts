@@ -3,10 +3,13 @@ import type { components } from '@/lib/api/schema';
 export type LeagueSummary = components['schemas']['LeagueSummary'];
 export type SeasonReport = components['schemas']['SeasonReport'];
 export type TeamReport = components['schemas']['TeamReport'];
+type VersionInfo = components['schemas']['VersionInfo'];
 
 export interface Api {
   leagues(): Promise<LeagueSummary[]>;
   season(leagueId: number, year: number): Promise<SeasonReport>;
+  /** Null when there is no API to ask, as in demo mode. */
+  version(): Promise<string | null>;
 }
 
 export interface ApiOptions {
@@ -57,6 +60,7 @@ export function createApi(options: ApiOptions): Api {
   return {
     leagues: () => get<LeagueSummary[]>('/leagues'),
     season: (leagueId, year) => get<SeasonReport>(`/leagues/${leagueId}/seasons/${year}`),
+    version: async () => (await get<VersionInfo>('/version')).version,
   };
 }
 

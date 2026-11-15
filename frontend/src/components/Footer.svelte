@@ -1,9 +1,28 @@
 <script lang="ts">
-  const version = __APP_VERSION__;
+  import { useServices } from '@/lib/services';
+
+  const { api, session } = useServices();
+  const siteVersion = __APP_VERSION__;
+
+  let apiVersion = $state<string | null>(null);
+
+  $effect(() => {
+    if (session !== null && session.status !== 'signedIn') return;
+    api.version().then(
+      (version) => {
+        apiVersion = version;
+      },
+      () => {
+        apiVersion = null;
+      },
+    );
+  });
 </script>
 
 <footer>
-  <p>freal v{version}</p>
+  <p>
+    site v{siteVersion}{#if apiVersion !== null}{' '}· api v{apiVersion}{/if}
+  </p>
 </footer>
 
 <style>
