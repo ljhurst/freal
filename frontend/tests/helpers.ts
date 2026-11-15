@@ -8,7 +8,9 @@ import {
 } from '@/lib/api/client';
 import type { OidcClient, Session } from '@/lib/auth/session.svelte';
 import { Router } from '@/lib/router.svelte';
+import { SeasonCache } from '@/lib/season/cache';
 import { SERVICES_KEY, type Services } from '@/lib/services';
+import { Theme } from '@/lib/theme.svelte';
 import demoSeason from '../public/demo/season-2025.json';
 
 export function contextFor(services: Services): Map<symbol, Services> {
@@ -62,9 +64,12 @@ export function services(
   options: { api?: Api; session?: Session | null; path?: string } = {},
 ): Services {
   window.history.replaceState({}, '', options.path ?? '/');
+  const api = options.api ?? fakeApi();
   return {
-    api: options.api ?? fakeApi(),
+    api,
+    seasons: new SeasonCache(api),
     router: new Router(window),
+    theme: new Theme(document.documentElement, null),
     session: options.session === undefined ? null : options.session,
   };
 }

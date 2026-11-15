@@ -11,10 +11,14 @@ import {
   LASSO_SCOPE,
 } from '@/lib/config';
 import { Router } from '@/lib/router.svelte';
+import { SeasonCache } from '@/lib/season/cache';
+import { Theme } from '@/lib/theme.svelte';
 
 export interface Services {
   api: Api;
+  seasons: SeasonCache;
   router: Router;
+  theme: Theme;
   /** Null in demo mode, which has no login. */
   session: Session | null;
 }
@@ -27,8 +31,10 @@ export function useServices(): Services {
 
 export function createServices(win: Window): Services {
   const router = new Router(win);
+  const theme = new Theme(win.document.documentElement, safeStorage(win));
   if (isDemoMode(win.location)) {
-    return { api: createDemoApi(win.fetch.bind(win)), router, session: null };
+    const demoApi = createDemoApi(win.fetch.bind(win));
+    return { api: demoApi, seasons: new SeasonCache(demoApi), router, theme, session: null };
   }
 
   const session = new Session(
@@ -52,5 +58,13 @@ export function createServices(win: Window): Services {
       await session.reauthenticate(win.location.pathname + win.location.search);
     },
   });
-  return { api, router, session };
+  return { api, seasons: new SeasonCache(api), router, theme, session };
+}
+
+function safeStorage(win: Window): Storage | null {
+  try {
+    return win.localStorage;
+  } catch {
+    return null;
+  }
 }

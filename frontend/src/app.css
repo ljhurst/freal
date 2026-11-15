@@ -10,39 +10,96 @@
     U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+/*
+ * Colors are roles, not hex, so a theme is one block of values. Dark is the default; the OS
+ * preference switches to light unless the toggle has pinned a theme. The series colors are the
+ * validated blue and orange pair, checked against these exact surfaces in both themes.
+ */
 :root {
-  --bg: #0b0e14;
-  --surface: #131824;
-  --surface-raised: #1b2233;
-  --border: #283149;
-  --text: #e9edf6;
-  --muted: #9aa5bd;
+  color-scheme: dark;
+
+  --bg: #0a0e17;
+  --surface: #121826;
+  --surface-raised: #1a2234;
+  --border: rgba(255, 255, 255, 0.09);
+  --text: #eef1f8;
+  --text-2: #c0c8da;
+  --muted: #8d97b0;
+
   --accent: #b8f35c;
-  --accent-ink: #0b0e14;
-  --warn: #f5b84a;
-  --danger: #ff7a7a;
+  --accent-ink: #0a0e17;
 
-  --font: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --radius: 0.75rem;
-  --gutter: clamp(1rem, 4vw, 2rem);
-  --max-width: 72rem;
+  --unlucky: #3987e5;
+  --lucky: #d95926;
+  --neutral: #5d6882;
+  --grid: rgba(255, 255, 255, 0.07);
+  --axis: rgba(255, 255, 255, 0.16);
 
-  color-scheme: dark light;
+  --glow: radial-gradient(60rem 28rem at 50% -8rem, rgba(184, 243, 92, 0.1), transparent 70%);
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 @media (prefers-color-scheme: light) {
-  :root {
+  :root:where(:not([data-theme="dark"])) {
+    color-scheme: light;
+
     --bg: #f4f6fb;
     --surface: #ffffff;
     --surface-raised: #eef1f8;
-    --border: #d6dcec;
+    --border: rgba(11, 14, 23, 0.1);
     --text: #131824;
-    --muted: #5b6579;
+    --text-2: #4a556b;
+    --muted: #5f6a81;
+
     --accent: #3f7d0a;
     --accent-ink: #ffffff;
-    --warn: #a86a00;
-    --danger: #b3261e;
+
+    --unlucky: #2a78d6;
+    --lucky: #eb6834;
+    --neutral: #8b94a6;
+    --grid: rgba(11, 14, 23, 0.07);
+    --axis: rgba(11, 14, 23, 0.18);
+
+    --glow: radial-gradient(60rem 28rem at 50% -8rem, rgba(63, 125, 10, 0.08), transparent 70%);
+    --shadow: 0 1px 2px rgba(11, 14, 23, 0.06), 0 8px 24px rgba(11, 14, 23, 0.06);
   }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --surface-raised: #eef1f8;
+  --border: rgba(11, 14, 23, 0.1);
+  --text: #131824;
+  --text-2: #4a556b;
+  --muted: #5f6a81;
+
+  --accent: #3f7d0a;
+  --accent-ink: #ffffff;
+
+  --unlucky: #2a78d6;
+  --lucky: #eb6834;
+  --neutral: #8b94a6;
+  --grid: rgba(11, 14, 23, 0.07);
+  --axis: rgba(11, 14, 23, 0.18);
+
+  --glow: radial-gradient(60rem 28rem at 50% -8rem, rgba(63, 125, 10, 0.08), transparent 70%);
+  --shadow: 0 1px 2px rgba(11, 14, 23, 0.06), 0 8px 24px rgba(11, 14, 23, 0.06);
+}
+
+:root {
+  --font: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --radius: 0.9rem;
+  --radius-sm: 0.55rem;
+  --gutter: clamp(1rem, 4vw, 2rem);
+  --max-width: 72rem;
+
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-fast: 140ms;
+  --dur: 260ms;
+  --dur-slow: 520ms;
 }
 
 *,
@@ -53,11 +110,15 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  background: var(--bg);
 }
 
 body {
   margin: 0;
-  background: var(--bg);
+  min-height: 100vh;
+  background:
+    var(--glow) no-repeat top center,
+    var(--bg);
   color: var(--text);
   font-family: var(--font);
   font-size: 1rem;
@@ -68,8 +129,8 @@ body {
 h1,
 h2,
 h3 {
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
   margin: 0 0 0.5rem;
 }
 
@@ -77,7 +138,8 @@ a {
   color: inherit;
 }
 
-button {
+button,
+select {
   font: inherit;
 }
 
@@ -86,12 +148,39 @@ button {
   outline-offset: 2px;
 }
 
+.eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Elements rise into place one after another; --i is each element's position in the sequence. */
+.rise {
+  animation: rise var(--dur-slow) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     /* biome-ignore lint/complexity/noImportantStyles: the reduced-motion reset must beat component styles */
     animation-duration: 0.001ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: the reduced-motion reset must beat component styles */
+    animation-delay: 0ms !important;
     /* biome-ignore lint/complexity/noImportantStyles: the reduced-motion reset must beat component styles */
     transition-duration: 0.001ms !important;
   }
