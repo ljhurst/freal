@@ -4,30 +4,36 @@
   import Hero from '@/components/Hero.svelte';
   import LuckView from '@/components/LuckView.svelte';
   import SeasonHeader from '@/components/SeasonHeader.svelte';
+  import SeasonSkeleton from '@/components/SeasonSkeleton.svelte';
   import Standings from '@/components/Standings.svelte';
   import StatTiles from '@/components/StatTiles.svelte';
   import type { SeasonTab } from '@/lib/router.svelte';
   import { highlights as overview } from '@/lib/season/highlights';
   import { useServices } from '@/lib/services';
   import Card from '@/lib/ui/Card.svelte';
-  import Skeleton from '@/lib/ui/Skeleton.svelte';
 
   let { leagueId, year, tab }: { leagueId: number; year: number; tab: SeasonTab } = $props();
 
   const { seasons } = useServices();
   const report = $derived(seasons.get(leagueId, year));
+
+  let loading = $state(true);
+
+  $effect(() => {
+    const current = report;
+    loading = true;
+    const settle = () => {
+      if (current === report) loading = false;
+    };
+    current.then(settle, settle);
+  });
 </script>
 
+<SeasonHeader {leagueId} {year} {tab} {loading} />
+
 {#await report}
-  <div class="loading" role="status">
-    <span class="visually-hidden">Loading the {year} season…</span>
-    <Skeleton width="9rem" height="0.9rem" />
-    <Skeleton width="min(24rem, 80%)" height="2.6rem" />
-    <Skeleton height="2.5rem" />
-    <Skeleton height="14rem" />
-  </div>
+  <SeasonSkeleton {tab} {year} />
 {:then season}
-  <SeasonHeader name={season.name} {leagueId} {year} {tab} />
   {#key tab}
     {#if tab === 'overview'}
       {@const picks = overview(season)}
@@ -45,19 +51,3 @@
 {:catch error}
   <ErrorPanel {error} />
 {/await}
-
-<style>
-  .loading {
-    display: grid;
-    gap: 1rem;
-  }
-
-  .visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-</style>

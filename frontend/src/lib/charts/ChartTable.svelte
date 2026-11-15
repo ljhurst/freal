@@ -76,12 +76,4 @@
   tbody tr:last-child > * {
     border-bottom: 0;
   }
-
-  .visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
 </style>

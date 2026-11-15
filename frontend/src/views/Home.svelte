@@ -4,8 +4,8 @@
   import { seasonPath } from '@/lib/router.svelte';
   import { useServices } from '@/lib/services';
 
-  const { api, router } = useServices();
-  const leagues = api.leagues();
+  const { leagues: leaguesCache, router } = useServices();
+  const leagues = leaguesCache.get();
 </script>
 
 <section>

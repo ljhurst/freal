@@ -10,12 +10,14 @@ import {
   LASSO_CLIENT_ID,
   LASSO_SCOPE,
 } from '@/lib/config';
+import { LeaguesCache } from '@/lib/leagues/cache';
 import { Router } from '@/lib/router.svelte';
 import { SeasonCache } from '@/lib/season/cache';
 import { Theme } from '@/lib/theme.svelte';
 
 export interface Services {
   api: Api;
+  leagues: LeaguesCache;
   seasons: SeasonCache;
   router: Router;
   theme: Theme;
@@ -34,7 +36,14 @@ export function createServices(win: Window): Services {
   const theme = new Theme(win.document.documentElement, safeStorage(win));
   if (isDemoMode(win.location)) {
     const demoApi = createDemoApi(win.fetch.bind(win));
-    return { api: demoApi, seasons: new SeasonCache(demoApi), router, theme, session: null };
+    return {
+      api: demoApi,
+      leagues: new LeaguesCache(demoApi),
+      seasons: new SeasonCache(demoApi),
+      router,
+      theme,
+      session: null,
+    };
   }
 
   const session = new Session(
@@ -58,7 +67,14 @@ export function createServices(win: Window): Services {
       await session.reauthenticate(win.location.pathname + win.location.search);
     },
   });
-  return { api, seasons: new SeasonCache(api), router, theme, session };
+  return {
+    api,
+    leagues: new LeaguesCache(api),
+    seasons: new SeasonCache(api),
+    router,
+    theme,
+    session,
+  };
 }
 
 function safeStorage(win: Window): Storage | null {

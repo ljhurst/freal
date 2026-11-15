@@ -101,13 +101,13 @@ describe('App with a login', () => {
     const client = new FakeOidcClient();
     client.callbackUser = fakeUser({ state: '/leagues/7/2025' });
     const session = new Session(client);
-    const api = fakeApi({ season: async () => seasonReport() });
+    const api = fakeApi({ leagues: async () => [league()], season: async () => seasonReport() });
     const appServices = services({ api, session, path: '/auth/callback' });
 
     render(App, { context: contextFor(appServices) });
 
     await waitFor(() => expect(window.location.pathname).toBe('/leagues/7/2025'));
-    expect(await screen.findByRole('heading', { name: 'Demo League' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Family League' })).toBeInTheDocument();
   });
 
   it('offers another try when the login redirect fails', async () => {
@@ -177,7 +177,7 @@ describe('navigation', () => {
 
     await userEvent.click(await screen.findByRole('link', { name: '2025 season' }));
 
-    expect(await screen.findByRole('heading', { name: 'Demo League' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Family League' })).toBeInTheDocument();
     expect(window.location.pathname).toBe('/leagues/7/2025');
   });
 

@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/svelte';
+import { render, screen, waitFor, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import App from '@/App.svelte';
@@ -17,7 +17,7 @@ describe('the season page', () => {
   it('opens on the overview with every view one tap away', async () => {
     renderSeason('/leagues/1/2025');
 
-    expect(await screen.findByRole('heading', { name: 'Demo League' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Family League' })).toBeInTheDocument();
     const tabs = screen.getByRole('navigation', { name: 'Season views' });
     expect(within(tabs).getByRole('link', { name: 'Overview' })).toHaveAttribute(
       'aria-current',
@@ -182,7 +182,7 @@ describe('the season page', () => {
   it('shows no switchers for a single league with a single season', async () => {
     renderSeason('/leagues/1/2025', [league({ league_id: 1, years: [2025] })]);
 
-    await screen.findByRole('heading', { name: 'Demo League' });
+    await screen.findByRole('heading', { name: 'Family League' });
 
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
   });
@@ -196,5 +196,108 @@ describe('the app shell', () => {
 
     expect(document.documentElement.dataset.theme).toBe('dark');
     expect(screen.getByRole('button', { name: /Theme: Dark/ })).toBeInTheDocument();
+  });
+});
+
+function slowSeason() {
+  const release: { resolve: () => void } = { resolve: () => {} };
+  const gate = new Promise<void>((resolve) => {
+    release.resolve = resolve;
+  });
+  return { release, gate };
+}
+
+describe('switching seasons', () => {
+  function renderSlow(leagues = [league({ league_id: 1, years: [2024, 2025] })]) {
+    const { release, gate } = slowSeason();
+    let first = true;
+    const appServices = services({
+      path: '/leagues/1/2025',
+      api: fakeApi({
+        leagues: async () => leagues,
+        season: async () => {
+          if (first) {
+            first = false;
+            return seasonReport();
+          }
+          await gate;
+          return seasonReport();
+        },
+      }),
+    });
+    render(App, { context: contextFor(appServices) });
+    return release;
+  }
+
+  it('keeps the league name, tabs and pickers while the next season loads', async () => {
+    renderSlow();
+    await screen.findByText('Standings');
+
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Season' }), '2024');
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Loading the 2024 season');
+    expect(screen.getByRole('heading', { name: 'Family League' })).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: 'Season views' })).toBeInTheDocument();
+    expect(screen.queryByText('Standings')).not.toBeInTheDocument();
+  });
+
+  it('disables the season picker until the season arrives', async () => {
+    const release = renderSlow();
+    await screen.findByText('Standings');
+
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Season' }), '2024');
+
+    await waitFor(() => expect(screen.getByRole('combobox', { name: 'Season' })).toBeDisabled());
+    release.resolve();
+    await waitFor(() => expect(screen.getByRole('combobox', { name: 'Season' })).toBeEnabled());
+    expect(await screen.findByText('Standings')).toBeInTheDocument();
+  });
+
+  it('keeps the tabs usable while loading', async () => {
+    renderSlow();
+    await screen.findByText('Standings');
+
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Season' }), '2024');
+    await userEvent.click(screen.getByRole('link', { name: 'Luck' }));
+
+    expect(window.location.pathname).toBe('/leagues/1/2024/luck');
+    expect(screen.getByRole('link', { name: 'Luck' })).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('loads a skeleton shaped like the view it is on', async () => {
+    const { release, gate } = slowSeason();
+    const appServices = services({
+      path: '/leagues/1/2025/luck',
+      api: fakeApi({
+        leagues: async () => [league({ league_id: 1, years: [2024, 2025] })],
+        season: async () => {
+          await gate;
+          return seasonReport();
+        },
+      }),
+    });
+    const { container } = render(App, { context: contextFor(appServices) });
+
+    await screen.findByRole('status');
+    expect(container.querySelectorAll('section.card')).toHaveLength(2);
+
+    release.resolve();
+    expect(await screen.findByRole('heading', { name: 'Who got the breaks?' })).toBeInTheDocument();
+  });
+
+  it('still shows the page when the leagues list cannot be fetched', async () => {
+    const appServices = services({
+      path: '/leagues/1/2025',
+      api: fakeApi({
+        leagues: async () => {
+          throw new Error('offline');
+        },
+        season: async () => seasonReport(),
+      }),
+    });
+    render(App, { context: contextFor(appServices) });
+
+    expect(await screen.findByText('Standings')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'League' })).toBeInTheDocument();
   });
 });

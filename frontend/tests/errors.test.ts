@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ApiError } from '@/lib/api/client';
+import { BRAND_NAME } from '@/lib/brand';
 import { describeError } from '@/lib/errors';
 
 describe('describeError', () => {
@@ -11,7 +12,7 @@ describe('describeError', () => {
     ['league_not_found', 'Not found'],
     ['season_not_found', 'Not found'],
     ['not_configured', 'No leagues set up'],
-    ['network_error', "Can't reach freal"],
+    ['network_error', `Can't reach ${BRAND_NAME}`],
     ['something_new', 'Something went wrong'],
   ])('explains %s', (code, title) => {
     expect(describeError(new ApiError(502, code)).title).toBe(title);

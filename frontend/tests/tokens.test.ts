@@ -50,3 +50,11 @@ describe('theme tokens', () => {
     expect(light).toEqual(dark);
   });
 });
+
+describe('reduced motion', () => {
+  it('switches animations off everywhere except the loading skeleton, which fades instead', () => {
+    const block = /@media \(prefers-reduced-motion: reduce\) \{\s*([^{]+)\{/.exec(css);
+
+    expect(block?.[1]).toContain('*:not(.skeleton)');
+  });
+});
