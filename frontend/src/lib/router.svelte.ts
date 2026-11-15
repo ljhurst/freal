@@ -72,3 +72,8 @@ function teamParam(search: string): number | undefined {
   const value = new URLSearchParams(search).get('team');
   return value !== null && /^\d+$/.test(value) ? Number(value) : undefined;
 }
+
+/** Where a team's own story lives: its week by week, with that team selected. */
+export function teamPath(leagueId: number, year: number, teamId: number): string {
+  return seasonPath(leagueId, year, 'weekly', teamId);
+}

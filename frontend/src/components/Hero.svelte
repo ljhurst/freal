@@ -1,7 +1,10 @@
 <script lang="ts">
+  import { teamPath } from '@/lib/router.svelte';
   import type { Highlights } from '@/lib/season/highlights';
+  import PlainLink from '@/lib/ui/PlainLink.svelte';
 
-  let { highlights }: { highlights: Highlights } = $props();
+  let { highlights, leagueId, year }: { highlights: Highlights; leagueId: number; year: number } =
+    $props();
 </script>
 
 <section class="hero rise">
@@ -9,7 +12,10 @@
   {#if highlights.stamped.length > 0}
     <ul>
       {#each highlights.stamped as team (team.team_id)}
-        <li><span class="badge" aria-hidden="true">✓</span>{team.name}</li>
+        <li>
+          <span class="badge" aria-hidden="true">✓</span>
+          <PlainLink href={teamPath(leagueId, year, team.team_id)}>{team.name}</PlainLink>
+        </li>
       {/each}
     </ul>
   {:else}
@@ -47,6 +53,7 @@
     line-height: 1.2;
     overflow-wrap: anywhere;
   }
+
 
   .badge {
     flex: none;
