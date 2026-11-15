@@ -200,30 +200,49 @@
 
     .row {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) max-content;
-      align-items: center;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas:
+        'name value'
+        'track track';
+      column-gap: 0.75rem;
+      align-items: baseline;
+      padding: 0.6rem 0 0.2rem;
       border-bottom: 1px solid var(--border);
-      padding: 0.5rem 0 0.25rem;
-    }
-
-    .row > * {
-      border-bottom: 0;
     }
 
     .row:last-child {
       border-bottom: 0;
     }
 
-    .name {
-      grid-column: 1 / -1;
+    .name,
+    .value,
+    .track {
       height: auto;
-      padding: 0 0 0.2rem;
+      padding: 0;
+      border-bottom: 0;
+    }
+
+    .name {
+      grid-area: name;
       white-space: normal;
     }
 
     .value {
-      height: 2rem;
-      padding-left: 0.75rem;
+      grid-area: value;
+    }
+
+    .track {
+      grid-area: track;
+      height: 1.75rem;
+    }
+
+    .track::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      border-top: 1px solid var(--grid);
     }
 
     .axis {
