@@ -74,14 +74,16 @@ describe('scheduleView', () => {
     expect(view.rows[0]?.team.name).toBe('Team 5');
   });
 
-  it('measures each team against the league average', () => {
+  it('measures each team against the league average, negative when the schedule was easier', () => {
     const mean = view.rows.reduce((sum, row) => sum + row.opponentPoints, 0) / view.rows.length;
 
     expect(view.leagueAverage).toBeCloseTo(mean, 6);
     for (const row of view.rows) {
-      expect(row.edge).toBeCloseTo(view.leagueAverage - row.opponentPoints, 6);
+      expect(row.difference).toBeCloseTo(row.opponentPoints - view.leagueAverage, 6);
     }
-    expect(view.rows.reduce((sum, row) => sum + row.edge, 0)).toBeCloseTo(0, 6);
+    expect(view.rows[0]?.difference).toBeLessThan(0);
+    expect(view.rows.at(-1)?.difference).toBeGreaterThan(0);
+    expect(view.rows.reduce((sum, row) => sum + row.difference, 0)).toBeCloseTo(0, 6);
   });
 
   it('is empty with no teams', () => {

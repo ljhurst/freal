@@ -64,9 +64,9 @@
         ? `lucky by ${Math.abs(team.luck.luck).toFixed(1)} wins`
         : dot.polarity === 'unlucky'
           ? `unlucky by ${Math.abs(team.luck.luck).toFixed(1)} wins`
-          : 'record matches scoring';
+          : 'record matches expected';
     const stamp = team.for_real ? ', for real' : '';
-    return `${team.name}: scoring earned ${dot.expected.toFixed(1)} wins, record ${formatRecord(team.standing.wins, team.standing.losses, team.standing.ties)}, ${mood}${stamp}`;
+    return `${team.name}: expected ${dot.expected.toFixed(1)} wins, record ${formatRecord(team.standing.wins, team.standing.losses, team.standing.ties)}, ${mood}${stamp}`;
   }
 
   function reach(event: PointerEvent): void {
@@ -117,14 +117,14 @@
     <text class="region" x={width - MARGIN.right - 8} y={height - MARGIN.bottom - 8} text-anchor="end">▼ Unlucky</text>
 
     <text class="axis-title" x={(MARGIN.left + width - MARGIN.right) / 2} y={height - 8} text-anchor="middle">
-      Wins the scoring earned
+      Expected wins
     </text>
     <text
       class="axis-title"
       transform="translate(14 {(MARGIN.top + height - MARGIN.bottom) / 2}) rotate(-90)"
       text-anchor="middle"
     >
-      Wins in the record
+      Actual wins
     </text>
 
     {#each points as point, index (point.dot.team.team_id)}
@@ -150,7 +150,7 @@
     <Tooltip x={shown.cx} y={shown.cy} {width}>
       <strong>{shown.dot.team.name}</strong>
       <span>Record {formatRecord(shown.dot.team.standing.wins, shown.dot.team.standing.losses, shown.dot.team.standing.ties)}</span>
-      <span>Scoring earned {shown.dot.expected.toFixed(1)} wins</span>
+      <span>Expected {shown.dot.expected.toFixed(1)} wins</span>
       <span>Luck {formatSigned(shown.dot.team.luck.luck)} wins</span>
     </Tooltip>
   {/if}
@@ -162,7 +162,7 @@
     { label: 'Unlucky', kind: 'unlucky' },
     { label: 'About as expected', kind: 'neutral' },
     { label: 'For real', kind: 'stamp' },
-    { label: 'Record matches scoring', kind: 'dash' },
+    { label: 'Actual matches expected', kind: 'dash' },
   ]}
 />
 

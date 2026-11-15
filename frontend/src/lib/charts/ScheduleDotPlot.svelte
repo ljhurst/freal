@@ -11,16 +11,16 @@
   const high = $derived(Math.ceil(Math.max(...values) + 1));
   const percent = $derived(linearScale([low, high], [0, 100]));
 
-  function tone(edge: number): 'helped' | 'hurt' | 'even' {
-    return edge > 0 ? 'helped' : edge < 0 ? 'hurt' : 'even';
+  function tone(difference: number): 'helped' | 'hurt' | 'even' {
+    return difference < 0 ? 'helped' : difference > 0 ? 'hurt' : 'even';
   }
 
   function sentence(row: ScheduleView['rows'][number]): string {
-    const gap = Math.abs(row.edge).toFixed(1);
+    const gap = Math.abs(row.difference).toFixed(1);
     const how =
-      row.edge > 0
+      row.difference < 0
         ? `${gap} points easier than average`
-        : row.edge < 0
+        : row.difference > 0
           ? `${gap} points tougher than average`
           : 'an average schedule';
     return `${row.team.name} faced ${row.opponentPoints.toFixed(1)} points per game, ${how}`;
@@ -28,9 +28,9 @@
 </script>
 
 <div class="scroll">
-  <ol class="plot" aria-label="Average points scored against each team, easiest schedule first">
+  <ol class="plot" aria-label="Average opponent points for each team, easiest schedule first">
     <li class="axis" aria-hidden="true">
-      <span></span>
+      <span class="axis-title">Avg opponent points</span>
       <span class="scale">
         <span class="end">{low}</span>
         <span class="average" style:left="{percent(view.leagueAverage)}%">
@@ -46,13 +46,13 @@
         <span class="track" role="img" aria-label={sentence(row)}>
           <span class="average-line" style:left="{percent(view.leagueAverage)}%"></span>
           <span
-            class="dot {tone(row.edge)}"
+            class="dot {tone(row.difference)}"
             style:left="{percent(row.opponentPoints)}%"
           ></span>
         </span>
         <span class="value" aria-hidden="true">
           {formatPoints(row.opponentPoints)}
-          <span class="edge">{formatSigned(row.edge)}</span>
+          <span class="difference">{formatSigned(row.difference)}</span>
         </span>
       </li>
     {/each}
@@ -148,10 +148,21 @@
     white-space: nowrap;
   }
 
-  .edge {
+  .difference {
     margin-left: 0.5rem;
     color: var(--muted);
     font-size: 0.82rem;
+  }
+
+  .axis-title {
+    align-self: end;
+    padding: 0 1rem 0.2rem 0;
+    white-space: nowrap;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .scale {

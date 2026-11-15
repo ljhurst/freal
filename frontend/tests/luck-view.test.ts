@@ -22,22 +22,22 @@ describe('the luck map', () => {
   it('has one dot per team, each described in words', () => {
     renderLuck();
 
-    const dots = screen.getAllByRole('img', { name: /scoring earned/ });
+    const dots = screen.getAllByRole('img', { name: /expected \d/ });
 
     expect(dots).toHaveLength(8);
     expect(
       screen.getByRole('img', {
-        name: 'Team 6: scoring earned 10.0 wins, record 8-6, unlucky by 2.0 wins, for real',
+        name: 'Team 6: expected 10.0 wins, record 8-6, unlucky by 2.0 wins, for real',
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole('img', {
-        name: 'Team 5: scoring earned 10.7 wins, record 13-1, lucky by 2.3 wins, for real',
+        name: 'Team 5: expected 10.7 wins, record 13-1, lucky by 2.3 wins, for real',
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole('img', {
-        name: 'Team 2: scoring earned 7.3 wins, record 8-6, record matches scoring',
+        name: 'Team 2: expected 7.3 wins, record 8-6, record matches expected',
       }),
     ).toBeInTheDocument();
   });
@@ -56,7 +56,7 @@ describe('the luck map', () => {
     expect(container.querySelectorAll('.mark.even')).toHaveLength(4);
   });
 
-  it('draws the record-matches-scoring diagonal and a legend', () => {
+  it('draws the actual-matches-expected diagonal and a legend', () => {
     const { container } = renderLuck();
 
     expect(container.querySelector('line.diagonal')).toBeInTheDocument();
@@ -90,8 +90,8 @@ describe('the luck map', () => {
       within(team6)
         .getAllByRole('cell')
         .map((cell) => cell.textContent),
-    ).toEqual(['8-6', '10.0 wins', '−2.0 wins']);
-    expect(screen.queryByRole('img', { name: /scoring earned/ })).not.toBeInTheDocument();
+    ).toEqual(['8-6', '10.0', '−2.0 wins']);
+    expect(screen.queryByRole('img', { name: /expected \d/ })).not.toBeInTheDocument();
   });
 
   it('says so when no games have been played', () => {
@@ -119,7 +119,7 @@ describe('the luck map tooltip', () => {
     await fireEvent.pointerMove(chartOf(container), { clientX: x + 6, clientY: y + 4 });
 
     expect(screen.getByText('Record 13-1')).toBeInTheDocument();
-    expect(screen.getByText('Scoring earned 10.7 wins')).toBeInTheDocument();
+    expect(screen.getByText('Expected 10.7 wins')).toBeInTheDocument();
     expect(screen.getByText('Luck +2.3 wins')).toBeInTheDocument();
 
     await fireEvent.pointerLeave(chartOf(container), { pointerType: 'mouse' });
@@ -132,7 +132,7 @@ describe('the luck map tooltip', () => {
 
     await fireEvent.pointerMove(chartOf(container), { clientX: 2, clientY: 2 });
 
-    expect(screen.queryByText(/^Scoring earned/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Expected \d/)).not.toBeInTheDocument();
   });
 
   it('keeps the tooltip after a finger lifts, and drops it on a tap elsewhere', async () => {
@@ -169,6 +169,14 @@ describe('the schedule dot plot', () => {
     );
   });
 
+  it('shows each team against the league average, minus when its opponents scored less', () => {
+    renderLuck();
+
+    expect(screen.getByText('−3.2')).toBeInTheDocument();
+    expect(screen.getByText('+3.2')).toBeInTheDocument();
+    expect(screen.getByText('Avg opponent points')).toBeInTheDocument();
+  });
+
   it('splits teams whose schedule helped from those it hurt', () => {
     const { container } = renderLuck();
 
@@ -200,7 +208,7 @@ describe('the schedule dot plot', () => {
     await userEvent.click(buttons[1] as HTMLElement);
 
     const table = screen.getByRole('table', {
-      name: 'Average points scored against each team, easiest schedule first',
+      name: 'Average opponent points for each team, easiest schedule first',
     });
     expect(within(table).getAllByRole('row')).toHaveLength(9);
   });

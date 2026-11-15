@@ -13,8 +13,8 @@ export interface LuckDot {
 export interface ScheduleRow {
   team: TeamReport;
   opponentPoints: number;
-  /** Positive when the schedule was easier than the league's average. */
-  edge: number;
+  /** Opponent points minus the league average: negative means an easier schedule. */
+  difference: number;
 }
 
 export interface ScheduleView {
@@ -22,7 +22,7 @@ export interface ScheduleView {
   leagueAverage: number;
 }
 
-/** One dot per team: what its scoring earned against what its record shows. */
+/** One dot per team: the wins its scoring should have earned (expected) against the wins in its record (actual). */
 export function luckDots(season: SeasonReport): LuckDot[] {
   return [...season.teams].sort(byStanding).map((team) => ({
     team,
@@ -44,13 +44,13 @@ export function scheduleView(season: SeasonReport): ScheduleView {
     .map((team) => ({
       team,
       opponentPoints: team.schedule.average_opponent_points,
-      edge: leagueAverage - team.schedule.average_opponent_points,
+      difference: team.schedule.average_opponent_points - leagueAverage,
     }))
-    .sort((a, b) => b.edge - a.edge);
+    .sort((a, b) => a.difference - b.difference);
   return { rows, leagueAverage };
 }
 
-/** Both axes share a domain, so the "record matches scoring" diagonal is a true y = x. */
+/** Both axes share a domain, so the "actual matches expected" diagonal is a true y = x. */
 export function sharedDomain(dots: readonly LuckDot[]): [number, number] {
   if (dots.length === 0) {
     return [0, 1];

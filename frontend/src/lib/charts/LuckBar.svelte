@@ -8,10 +8,10 @@
   const wins = $derived(Math.abs(Math.round(luck * 10) / 10).toFixed(1));
   const label = $derived(
     luck > 0
-      ? `${wins} wins luckier than scoring earned`
+      ? `${wins} wins luckier than expected`
       : luck < 0
-        ? `${wins} wins unluckier than scoring earned`
-        : 'Record matches what scoring earned',
+        ? `${wins} wins unluckier than expected`
+        : 'Record matches expected',
   );
 </script>
 
