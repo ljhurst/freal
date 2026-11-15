@@ -13,15 +13,12 @@ from freal.reports.season import build_season_report
 
 FIXTURE = Path("tests/fixtures/season_2025.json")
 DEFAULT_OUTPUT_DIR = Path("frontend/public/demo")
-DEMO_LEAGUE_NAME = "Demo League"
 
 
 def main(output_dir: Path) -> None:
     season = Season.model_validate_json(FIXTURE.read_text())
     report = build_season_report(season)
-    leagues = [
-        LeagueSummary(league_id=season.league_id, name=DEMO_LEAGUE_NAME, years=(season.year,))
-    ]
+    leagues = [LeagueSummary(league_id=season.league_id, name=season.name, years=(season.year,))]
 
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / f"season-{season.year}.json").write_text(report.model_dump_json() + "\n")
