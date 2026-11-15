@@ -141,11 +141,6 @@
 
   /* On a phone the verdict matters more than the points, and there is no room for both. */
   @media (max-width: 36rem) {
-    .chips {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
     th,
     td {
       padding: 0.7rem 0.3rem;
