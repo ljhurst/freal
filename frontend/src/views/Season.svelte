@@ -1,92 +1,54 @@
 <script lang="ts">
+  import ComingSoon from '@/components/ComingSoon.svelte';
   import ErrorPanel from '@/components/ErrorPanel.svelte';
-  import type { TeamReport } from '@/lib/api/client';
-  import { formatPoints, formatRecord, formatSigned } from '@/lib/format';
+  import SeasonHeader from '@/components/SeasonHeader.svelte';
+  import Standings from '@/components/Standings.svelte';
+  import type { SeasonTab } from '@/lib/router.svelte';
   import { useServices } from '@/lib/services';
+  import Card from '@/lib/ui/Card.svelte';
+  import Skeleton from '@/lib/ui/Skeleton.svelte';
 
-  let { leagueId, year }: { leagueId: number; year: number } = $props();
+  let { leagueId, year, tab }: { leagueId: number; year: number; tab: SeasonTab } = $props();
 
-  const { api } = useServices();
-  const report = $derived(api.season(leagueId, year));
-
-  function byStanding(a: TeamReport, b: TeamReport): number {
-    return b.standing.wins - a.standing.wins || b.standing.points_for - a.standing.points_for;
-  }
+  const { seasons } = useServices();
+  const report = $derived(seasons.get(leagueId, year));
 </script>
 
 {#await report}
-  <p class="status" role="status">Loading the {year} season…</p>
-{:then season}
-  <h1>{season.name}</h1>
-  <p class="subtitle">{season.year} season</p>
-  <div class="scroll">
-    <table>
-      <thead>
-        <tr>
-          <th scope="col">Team</th>
-          <th scope="col">Record</th>
-          <th scope="col">PF</th>
-          <th scope="col">PA</th>
-          <th scope="col">Luck</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each [...season.teams].sort(byStanding) as team (team.team_id)}
-          <tr>
-            <th scope="row">{team.name}</th>
-            <td>{formatRecord(team.standing.wins, team.standing.losses, team.standing.ties)}</td>
-            <td>{formatPoints(team.standing.points_for)}</td>
-            <td>{formatPoints(team.standing.points_against)}</td>
-            <td>{formatSigned(team.luck.luck)}</td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
+  <div class="loading" role="status">
+    <span class="visually-hidden">Loading the {year} season…</span>
+    <Skeleton width="9rem" height="0.9rem" />
+    <Skeleton width="min(24rem, 80%)" height="2.6rem" />
+    <Skeleton height="2.5rem" />
+    <Skeleton height="14rem" />
   </div>
+{:then season}
+  <SeasonHeader name={season.name} {leagueId} {year} {tab} />
+  {#key tab}
+    {#if tab === 'overview'}
+      <Card title="Standings" eyebrow="Record against what the scoring earned">
+        <Standings teams={season.teams} />
+      </Card>
+    {:else}
+      <ComingSoon {tab} />
+    {/if}
+  {/key}
 {:catch error}
   <ErrorPanel {error} />
 {/await}
 
 <style>
-  .status,
-  .subtitle {
-    color: var(--muted);
+  .loading {
+    display: grid;
+    gap: 1rem;
   }
 
-  .scroll {
-    overflow-x: auto;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface);
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  th,
-  td {
-    padding: 0.7rem 1rem;
-    text-align: right;
-    border-bottom: 1px solid var(--border);
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
     white-space: nowrap;
-  }
-
-  th:first-child,
-  th[scope='row'] {
-    text-align: left;
-    font-weight: 600;
-  }
-
-  thead th {
-    color: var(--muted);
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  tbody tr:last-child > * {
-    border-bottom: 0;
   }
 </style>

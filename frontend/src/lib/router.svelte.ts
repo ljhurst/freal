@@ -1,10 +1,13 @@
+export const SEASON_TABS = ['overview', 'luck', 'lineups', 'weekly'] as const;
+export type SeasonTab = (typeof SEASON_TABS)[number];
+
 export type Route =
   | { name: 'home' }
-  | { name: 'season'; leagueId: number; year: number }
+  | { name: 'season'; leagueId: number; year: number; tab: SeasonTab }
   | { name: 'authCallback' }
   | { name: 'notFound' };
 
-const SEASON_PATH = /^\/leagues\/(\d+)\/(\d{4})\/?$/;
+const SEASON_PATH = new RegExp(`^/leagues/(\\d+)/(\\d{4})(?:/(${SEASON_TABS.join('|')}))?/?$`);
 
 export class Router {
   route = $state<Route>({ name: 'home' });
@@ -41,11 +44,17 @@ export function parseRoute(pathname: string): Route {
   }
   const season = SEASON_PATH.exec(pathname);
   if (season) {
-    return { name: 'season', leagueId: Number(season[1]), year: Number(season[2]) };
+    return {
+      name: 'season',
+      leagueId: Number(season[1]),
+      year: Number(season[2]),
+      tab: (season[3] as SeasonTab | undefined) ?? 'overview',
+    };
   }
   return { name: 'notFound' };
 }
 
-export function seasonPath(leagueId: number, year: number): string {
-  return `/leagues/${leagueId}/${year}`;
+export function seasonPath(leagueId: number, year: number, tab: SeasonTab = 'overview'): string {
+  const base = `/leagues/${leagueId}/${year}`;
+  return tab === 'overview' ? base : `${base}/${tab}`;
 }
