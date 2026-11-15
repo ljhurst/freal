@@ -18,6 +18,16 @@
 {:else}
   <div class="stack">
     <ChartFrame title="Who got the breaks?" index={0}>
+      {#snippet help()}
+        <p>
+          Expected wins are the games a team's scoring should have won against everyone every
+          week. Actual wins are its record.
+        </p>
+        <p>
+          Above the dashed line the record is better than the scoring deserves (lucky). Below it,
+          the record is worse (unlucky).
+        </p>
+      {/snippet}
       {#snippet chart()}
         <LuckMap {dots} />
       {/snippet}
@@ -41,6 +51,13 @@
     </ChartFrame>
 
     <ChartFrame title="Did the schedule help?" index={1}>
+      {#snippet help()}
+        <p>
+          This is the average points a team's opponents scored per game. Below the league average
+          means an easier schedule; above it means a tougher one. The small number beside it is the
+          gap to the league average.
+        </p>
+      {/snippet}
       {#snippet chart()}
         <ScheduleDotPlot view={schedule} />
       {/snippet}

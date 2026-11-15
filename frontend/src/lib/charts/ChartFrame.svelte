@@ -7,6 +7,7 @@
     title,
     index = 0,
     controls,
+    help,
     chart,
     table,
   }: {
@@ -14,6 +15,8 @@
     index?: number;
     /** Shown above both views, so a choice can be changed from either. */
     controls?: Snippet;
+    /** Plain words on how to read this card. */
+    help?: Snippet;
     chart: Snippet;
     table: Snippet;
   } = $props();
@@ -21,7 +24,7 @@
   let view = $state<View>('chart');
 </script>
 
-<Card {title} {index}>
+<Card {title} {index} {help}>
   {#snippet actions()}
     <ViewToggle bind:view />
   {/snippet}

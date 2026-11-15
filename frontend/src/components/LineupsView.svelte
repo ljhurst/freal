@@ -15,6 +15,14 @@
   <p class="empty">No lineups have been set yet.</p>
 {:else}
   <ChartFrame title="Who sets the best lineup?" index={0}>
+    {#snippet help()}
+      <p>
+        Each week the best lineup a roster allowed is worked out. The bar adds those up: the solid
+        part is what the team scored, and the hatched part is the points it missed by its lineup
+        choices.
+      </p>
+      <p>The percentage is points scored divided by the best possible.</p>
+    {/snippet}
     {#snippet chart()}
       <LineupBars {view} />
     {/snippet}

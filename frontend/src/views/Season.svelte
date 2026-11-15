@@ -46,6 +46,17 @@
       <Hero highlights={picks} {leagueId} {year} />
       <StatTiles highlights={picks} {leagueId} {year} />
       <Card title="Standings" index={6}>
+        {#snippet help()}
+          <p>
+            Luck is actual wins minus expected wins. Orange means the record flatters the team; blue
+            means it undersells it. Lineup is how much of the best possible lineup the team set.
+            Trend is its points each week.
+          </p>
+          <p>
+            Lucky or Unlucky shows when the gap is a full win or more. Otherwise you see how good
+            the scoring is: Good, Average or Bad. "For real" is explained at the top of the page.
+          </p>
+        {/snippet}
         <Standings teams={season.teams} weeks={season.weeks} {leagueId} {year} />
       </Card>
     {:else if tab === 'luck'}
