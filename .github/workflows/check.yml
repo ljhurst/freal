@@ -16,6 +16,7 @@ jobs:
     with:
       setup-uv: true
       setup-command: uv sync --locked
+      node-version-file: frontend/.nvmrc
       terraform-version: "1.17.0"
 
   test:
@@ -27,6 +28,35 @@ jobs:
       paths: |
         src/**
         tests/**
+        pyproject.toml
+        uv.lock
+        .github/workflows/check.yml
+
+  frontend:
+    uses: ljhurst/stych/.github/workflows/test.yml@v1
+    with:
+      command: npm run check && npm test
+      setup-command: npm ci
+      working-directory: frontend
+      node-version-file: frontend/.nvmrc
+      paths: |
+        frontend/**
+        .github/workflows/check.yml
+
+  contract:
+    uses: ljhurst/stych/.github/workflows/test.yml@v1
+    with:
+      command: scripts/check_contract.sh
+      setup-command: uv sync --locked && npm ci --prefix frontend
+      setup-uv: true
+      node-version-file: frontend/.nvmrc
+      paths: |
+        src/**
+        tests/fixtures/**
+        scripts/export_*.py
+        scripts/check_contract.sh
+        frontend/src/lib/api/**
+        frontend/public/demo/**
         pyproject.toml
         uv.lock
         .github/workflows/check.yml
