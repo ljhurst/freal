@@ -80,6 +80,78 @@ describe('the season page', () => {
     ]);
   });
 
+  it('leads with the teams that are for real and five season standouts', async () => {
+    renderSeason('/leagues/1/2025');
+
+    const hero = (await screen.findByRole('heading', { name: "Who's for real?" })).closest(
+      'section',
+    );
+    expect(
+      within(hero as HTMLElement)
+        .getAllByRole('listitem')
+        .map((item) => item.textContent?.replace(/^\u2713/, '')),
+    ).toEqual(['Team 5', 'Team 6']);
+    for (const label of ['Luckiest', 'Unluckiest', 'Best manager', 'Top week', 'Steadiest']) {
+      expect(screen.getByText(label)).toBeInTheDocument();
+    }
+  });
+
+  it('says what each standout number measures', async () => {
+    renderSeason('/leagues/1/2025');
+
+    expect(await screen.findByText('92.5% of optimal points')).toBeInTheDocument();
+    expect(screen.getByText('187.9 points in week 12')).toBeInTheDocument();
+    expect(screen.getByText('±13.1 points per week')).toBeInTheDocument();
+  });
+
+  it('draws one trend point per game played in every standings row', async () => {
+    renderSeason('/leagues/1/2025');
+
+    const rows = (await screen.findAllByRole('row')).slice(1);
+
+    expect(rows).toHaveLength(8);
+    for (const row of rows) {
+      const trend = within(row).getByRole('img', { name: /^Weekly points over 14 games/ });
+      expect(trend.querySelector('polyline')?.getAttribute('points')?.split(' ')).toHaveLength(14);
+    }
+  });
+
+  it('shows the full name of a long-named team in the tiles', async () => {
+    const long = 'The Extraordinarily Long-Named Gridiron Gladiators of Springfield';
+    const report = seasonReport();
+    const renamed = {
+      ...report,
+      teams: report.teams.map((team) => (team.for_real ? { ...team, name: long } : team)),
+    };
+    render(App, {
+      context: contextFor(
+        services({
+          path: '/leagues/1/2025',
+          api: fakeApi({
+            leagues: async () => [league({ league_id: 1 })],
+            season: async () => renamed,
+          }),
+        }),
+      ),
+    });
+
+    expect((await screen.findAllByText(long)).length).toBeGreaterThan(2);
+  });
+
+  it('leaves the season to the dropdown when there are several', async () => {
+    renderSeason('/leagues/1/2025');
+
+    await screen.findByRole('combobox', { name: 'Season' });
+
+    expect(screen.queryByText('2025 season')).not.toBeInTheDocument();
+  });
+
+  it('names the season above the league when there is nothing to switch', async () => {
+    renderSeason('/leagues/1/2025', [league({ league_id: 1, years: [2025] })]);
+
+    expect(await screen.findByText('2025 season')).toBeInTheDocument();
+  });
+
   it('lets people switch seasons', async () => {
     renderSeason('/leagues/1/2025');
 

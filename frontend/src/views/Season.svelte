@@ -1,9 +1,12 @@
 <script lang="ts">
   import ComingSoon from '@/components/ComingSoon.svelte';
   import ErrorPanel from '@/components/ErrorPanel.svelte';
+  import Hero from '@/components/Hero.svelte';
   import SeasonHeader from '@/components/SeasonHeader.svelte';
   import Standings from '@/components/Standings.svelte';
+  import StatTiles from '@/components/StatTiles.svelte';
   import type { SeasonTab } from '@/lib/router.svelte';
+  import { highlights as overview } from '@/lib/season/highlights';
   import { useServices } from '@/lib/services';
   import Card from '@/lib/ui/Card.svelte';
   import Skeleton from '@/lib/ui/Skeleton.svelte';
@@ -26,8 +29,11 @@
   <SeasonHeader name={season.name} {leagueId} {year} {tab} />
   {#key tab}
     {#if tab === 'overview'}
-      <Card title="Standings" eyebrow="Record against what the scoring earned">
-        <Standings teams={season.teams} />
+      {@const picks = overview(season)}
+      <Hero highlights={picks} />
+      <StatTiles highlights={picks} />
+      <Card title="Standings" index={6}>
+        <Standings teams={season.teams} weeks={season.weeks} />
       </Card>
     {:else}
       <ComingSoon {tab} />
