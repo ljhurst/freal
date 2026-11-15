@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ChartRows from '@/lib/charts/ChartRows.svelte';
   import Legend from '@/lib/charts/Legend.svelte';
   import { linearScale } from '@/lib/charts/scales';
   import { formatPoints, formatSigned } from '@/lib/format';
@@ -27,37 +28,34 @@
   }
 </script>
 
-<div class="scroll">
-  <ol class="plot" aria-label="Average opponent points for each team, easiest schedule first">
-    <li class="axis" aria-hidden="true">
-      <span class="axis-title">Avg opponent points</span>
-      <span class="scale">
-        <span class="end">{low}</span>
-        <span class="average" style:left="{percent(view.leagueAverage)}%">
-          League average {formatPoints(view.leagueAverage)}
-        </span>
-        <span class="end right">{high}</span>
+<ChartRows
+  label="Average opponent points for each team, easiest schedule first"
+  rows={view.rows}
+  key={(row) => row.team.team_id}
+  name={(row) => row.team.name}
+  describe={sentence}
+  rowHeight="2rem"
+  guide
+>
+  {#snippet headName()}Avg opponent points{/snippet}
+  {#snippet headTrack()}
+    <span class="scale">
+      <span class="end">{low}</span>
+      <span class="average" style:left="{percent(view.leagueAverage)}%">
+        League average {formatPoints(view.leagueAverage)}
       </span>
-      <span></span>
-    </li>
-    {#each view.rows as row, index (row.team.team_id)}
-      <li class="row" style:--i={index}>
-        <span class="name">{row.team.name}</span>
-        <span class="track" role="img" aria-label={sentence(row)}>
-          <span class="average-line" style:left="{percent(view.leagueAverage)}%"></span>
-          <span
-            class="dot {tone(row.difference)}"
-            style:left="{percent(row.opponentPoints)}%"
-          ></span>
-        </span>
-        <span class="value" aria-hidden="true">
-          {formatPoints(row.opponentPoints)}
-          <span class="difference">{formatSigned(row.difference)}</span>
-        </span>
-      </li>
-    {/each}
-  </ol>
-</div>
+      <span class="end right">{high}</span>
+    </span>
+  {/snippet}
+  {#snippet track(row)}
+    <span class="average-line" style:left="{percent(view.leagueAverage)}%"></span>
+    <span class="dot {tone(row.difference)}" style:left="{percent(row.opponentPoints)}%"></span>
+  {/snippet}
+  {#snippet value(row)}
+    {formatPoints(row.opponentPoints)}
+    <span class="difference">{formatSigned(row.difference)}</span>
+  {/snippet}
+</ChartRows>
 
 <Legend
   items={[
@@ -67,49 +65,6 @@
 />
 
 <style>
-  .scroll {
-    overflow-x: auto;
-  }
-
-  .plot {
-    display: grid;
-    grid-template-columns: max-content minmax(9rem, 1fr) max-content;
-    align-items: center;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    min-width: 22rem;
-  }
-
-  .row,
-  .axis {
-    display: contents;
-  }
-
-  .name {
-    padding-right: 1rem;
-    font-weight: 650;
-    white-space: nowrap;
-  }
-
-  .track {
-    position: relative;
-    height: 2rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .name,
-  .value {
-    display: flex;
-    align-items: center;
-    height: 2rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .row:last-child > * {
-    border-bottom: 0;
-  }
-
   .average-line {
     position: absolute;
     top: 0;
@@ -142,27 +97,10 @@
     background: var(--neutral);
   }
 
-  .value {
-    justify-content: flex-end;
-    padding-left: 1rem;
-    white-space: nowrap;
-  }
-
   .difference {
     margin-left: 0.5rem;
     color: var(--muted);
     font-size: 0.82rem;
-  }
-
-  .axis-title {
-    align-self: end;
-    padding: 0 1rem 0.2rem 0;
-    white-space: nowrap;
-    color: var(--muted);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
   }
 
   .scale {
@@ -190,63 +128,5 @@
     bottom: 0.2rem;
     transform: translateX(-50%);
     white-space: nowrap;
-  }
-
-  @media (max-width: 36rem) {
-    .plot {
-      display: block;
-      min-width: 0;
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      grid-template-areas:
-        'name value'
-        'track track';
-      column-gap: 0.75rem;
-      align-items: baseline;
-      padding: 0.6rem 0 0.2rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .row:last-child {
-      border-bottom: 0;
-    }
-
-    .name,
-    .value,
-    .track {
-      height: auto;
-      padding: 0;
-      border-bottom: 0;
-    }
-
-    .name {
-      grid-area: name;
-      white-space: normal;
-    }
-
-    .value {
-      grid-area: value;
-    }
-
-    .track {
-      grid-area: track;
-      height: 1.75rem;
-    }
-
-    .track::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 50%;
-      border-top: 1px solid var(--grid);
-    }
-
-    .axis {
-      display: block;
-    }
   }
 </style>
