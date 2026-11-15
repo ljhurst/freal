@@ -15,5 +15,7 @@ export default defineConfig({
     environment: 'jsdom',
     include: ['tests/**/*.test.ts'],
     setupFiles: ['tests/setup.ts'],
+    // CSS is stubbed in tests unless asked for; the token tests read the stylesheet itself.
+    css: { include: [/app\.css/] },
   },
 });
