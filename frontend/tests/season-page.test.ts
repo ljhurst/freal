@@ -67,6 +67,7 @@ describe('the season page', () => {
         .getAllByText(/^[\u2713\u25B2\u25BC\u25CF]?\s*(For real|Lucky|Unlucky|Good|Average|Bad)$/)
         .map((chip) => chip.textContent?.replace(/^[\u2713\u25B2\u25BC\u25CF]\s*/, '')),
     );
+    expect(chips.every((row) => row.length > 0)).toBe(true);
     expect(chips).toEqual([
       ['Lucky', 'For real'],
       ['Lucky'],
