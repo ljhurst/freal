@@ -46,6 +46,13 @@ repos:
     hooks:
       - id: zizmor
 
+  - repo: https://github.com/biomejs/pre-commit
+    rev: v2.6.7
+    hooks:
+      - id: biome-check
+        # pre-commit's Node installer fails on the newest Node release; use the system Node.
+        language_version: system
+
   - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.109.5
     hooks:

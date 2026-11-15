@@ -35,6 +35,26 @@ TOKEN=$(uv run python scripts/get_token.py)   # logs in to Lasso in a browser
 curl -H "Authorization: Bearer $TOKEN" localhost:8000/leagues
 ```
 
+## Frontend
+
+`frontend/` is a Svelte 5 app built with Vite: a client-side app served as static files, with
+the Lasso login done in the browser. Node comes from `frontend/.nvmrc`.
+
+```bash
+cd frontend
+npm ci
+npm run dev      # http://localhost:4321, the origin Lasso allows for login
+npm run check    # svelte-check
+npm test
+```
+
+Add `?demo` to any address to browse the anonymized sample season without logging in; PR
+previews are always in demo mode, since they can't log in.
+
+The frontend's API types (`frontend/src/lib/api/schema.d.ts`) and the demo data are generated
+from the API, so they can't drift from it. After changing an API model, run
+`scripts/check_contract.sh` and commit what it regenerates; CI fails if they differ.
+
 ## Deploying
 
 Merging to `main` deploys: stych's Terraform workflow builds `dist/freal.zip`

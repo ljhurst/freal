@@ -23,7 +23,7 @@ def anonymize(season: Season) -> Season:
     return season.model_copy(
         update={
             "league_id": 1,
-            "name": "Test League",
+            "name": "Demo League",
             "teams": tuple(
                 Team(
                     team_id=t.team_id,
