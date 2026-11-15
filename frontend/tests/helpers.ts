@@ -83,10 +83,11 @@ export function seasonReport(): SeasonReport {
   const report = structuredClone(demoSeason);
   return {
     ...report,
-    // JSON modules widen string literals, so only the verdict needs narrowing back.
+    // JSON modules widen string literals, so the verdict and strength need narrowing back.
     teams: report.teams.map((team) => ({
       ...team,
       verdict: team.verdict as TeamReport['verdict'],
+      strength: team.strength as TeamReport['strength'],
     })),
   };
 }

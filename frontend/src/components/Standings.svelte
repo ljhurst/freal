@@ -2,7 +2,7 @@
   import type { TeamReport } from '@/lib/api/client';
   import { formatPoints, formatRecord, formatSigned } from '@/lib/format';
   import Chip from '@/lib/ui/Chip.svelte';
-  import { verdictLabel } from '@/lib/verdict';
+  import { verdictLabels } from '@/lib/verdict';
 
   let { teams }: { teams: readonly TeamReport[] } = $props();
 
@@ -27,14 +27,20 @@
     </thead>
     <tbody>
       {#each ranked as team (team.team_id)}
-        {@const verdict = verdictLabel(team)}
-        <tr>
+        {@const chips = verdictLabels(team)}
+        <tr class:for-real={team.for_real}>
           <th scope="row">{team.name}</th>
           <td>{formatRecord(team.standing.wins, team.standing.losses, team.standing.ties)}</td>
           <td class="points">{formatPoints(team.standing.points_for)}</td>
           <td class="points">{formatPoints(team.standing.points_against)}</td>
           <td>{formatSigned(team.luck.luck)}</td>
-          <td class="verdict"><Chip tone={verdict.tone} label={verdict.label} /></td>
+          <td class="verdict">
+            <span class="chips">
+              {#each chips as chip (chip.label)}
+                <Chip tone={chip.tone} label={chip.label} />
+              {/each}
+            </span>
+          </td>
         </tr>
       {/each}
     </tbody>
@@ -85,6 +91,15 @@
 
   tbody tr:hover {
     background: var(--surface-raised);
+  }
+
+  tbody tr.for-real {
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+
+  .chips {
+    display: inline-flex;
+    gap: 0.35rem;
   }
 
   tbody tr:last-child > * {

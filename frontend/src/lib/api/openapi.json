@@ -258,6 +258,15 @@
         "title": "Standing",
         "type": "object"
       },
+      "Strength": {
+        "enum": [
+          "good",
+          "average",
+          "bad"
+        ],
+        "title": "Strength",
+        "type": "string"
+      },
       "TeamReport": {
         "properties": {
           "consistency": {
@@ -265,6 +274,10 @@
           },
           "efficiency": {
             "$ref": "#/components/schemas/LineupEfficiency"
+          },
+          "for_real": {
+            "title": "For Real",
+            "type": "boolean"
           },
           "luck": {
             "$ref": "#/components/schemas/Luck"
@@ -278,6 +291,9 @@
           },
           "standing": {
             "$ref": "#/components/schemas/Standing"
+          },
+          "strength": {
+            "$ref": "#/components/schemas/Strength"
           },
           "team_id": {
             "title": "Team Id",
@@ -293,6 +309,8 @@
           "standing",
           "luck",
           "verdict",
+          "strength",
+          "for_real",
           "schedule",
           "efficiency",
           "consistency"

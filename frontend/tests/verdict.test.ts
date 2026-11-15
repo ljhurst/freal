@@ -1,28 +1,42 @@
 import { describe, expect, it } from 'vitest';
 import type { TeamReport } from '@/lib/api/client';
-import { verdictLabel } from '@/lib/verdict';
+import { verdictLabels } from '@/lib/verdict';
 import { seasonReport } from './helpers';
 
-function team(verdict: TeamReport['verdict'], wins: number, losses: number): TeamReport {
-  const base = seasonReport().teams[0] as TeamReport;
-  return { ...base, verdict, standing: { ...base.standing, wins, losses } };
+function team(overrides: Partial<TeamReport>): TeamReport {
+  return { ...(seasonReport().teams[0] as TeamReport), ...overrides };
 }
 
-describe('verdictLabel', () => {
-  it('names lucky and unlucky teams whatever their record', () => {
-    expect(verdictLabel(team('lucky', 13, 1))).toEqual({ tone: 'lucky', label: 'Lucky' });
-    expect(verdictLabel(team('unlucky', 8, 6))).toEqual({ tone: 'unlucky', label: 'Unlucky' });
+describe('verdictLabels', () => {
+  it('stamps a good team, and says if luck held it back', () => {
+    expect(
+      verdictLabels(team({ for_real: true, strength: 'good', verdict: 'as_expected' })),
+    ).toEqual([{ tone: 'forReal', label: 'For real' }]);
+    expect(verdictLabels(team({ for_real: true, strength: 'good', verdict: 'unlucky' }))).toEqual([
+      { tone: 'forReal', label: 'For real' },
+      { tone: 'unlucky', label: 'Unlucky' },
+    ]);
   });
 
-  it('calls a winning record that is earned "For real"', () => {
-    expect(verdictLabel(team('as_expected', 9, 5))).toEqual({ tone: 'neutral', label: 'For real' });
-    expect(verdictLabel(team('as_expected', 7, 7)).label).toBe('For real');
+  it('stamps a lucky team too when its scoring is good, and says it was lucky', () => {
+    expect(verdictLabels(team({ for_real: true, strength: 'good', verdict: 'lucky' }))).toEqual([
+      { tone: 'forReal', label: 'For real' },
+      { tone: 'lucky', label: 'Lucky' },
+    ]);
   });
 
-  it('is honest about a losing record that is earned', () => {
-    expect(verdictLabel(team('as_expected', 2, 12))).toEqual({
-      tone: 'neutral',
-      label: 'Rough, for real',
-    });
+  it('does not stamp a lucky team whose scoring is only average', () => {
+    expect(verdictLabels(team({ for_real: false, strength: 'average', verdict: 'lucky' }))).toEqual(
+      [{ tone: 'lucky', label: 'Lucky' }],
+    );
+  });
+
+  it('says how good a team is when luck has nothing to add', () => {
+    expect(
+      verdictLabels(team({ for_real: false, strength: 'average', verdict: 'as_expected' })),
+    ).toEqual([{ tone: 'neutral', label: 'Average' }]);
+    expect(
+      verdictLabels(team({ for_real: false, strength: 'bad', verdict: 'as_expected' })),
+    ).toEqual([{ tone: 'neutral', label: 'Bad' }]);
   });
 });

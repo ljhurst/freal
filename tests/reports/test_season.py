@@ -3,7 +3,7 @@ import json
 import pytest
 
 from freal.leagues.models import Season
-from freal.metrics.verdict import Verdict
+from freal.metrics.verdict import Strength, Verdict
 from freal.reports.season import SeasonReport, build_season_report
 from tests.factories import matchup, season, side
 
@@ -72,3 +72,19 @@ def test_the_verdict_is_published_as_a_plain_word(season_2025: Season) -> None:
     payload = json.loads(build_season_report(season_2025).model_dump_json())
 
     assert {team["verdict"] for team in payload["teams"]} == {"lucky", "unlucky", "as_expected"}
+
+
+def test_the_good_teams_get_the_for_real_stamp_lucky_or_not(season_2025: Season) -> None:
+    report = build_season_report(season_2025)
+
+    assert {team.team_id for team in report.teams if team.for_real} == {5, 6}
+    assert {team.team_id: team.strength for team in report.teams} == {
+        5: Strength.GOOD,
+        6: Strength.GOOD,
+        4: Strength.AVERAGE,
+        2: Strength.AVERAGE,
+        1: Strength.AVERAGE,
+        7: Strength.AVERAGE,
+        8: Strength.BAD,
+        3: Strength.BAD,
+    }
