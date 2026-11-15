@@ -32,7 +32,7 @@
       {@const picks = overview(season)}
       <Hero highlights={picks} />
       <StatTiles highlights={picks} />
-      <Card title="Standings" eyebrow="Record against what the scoring earned" index={6}>
+      <Card title="Standings" index={6}>
         <Standings teams={season.teams} weeks={season.weeks} />
       </Card>
     {:else}

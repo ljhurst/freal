@@ -18,7 +18,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
-    justify-content: flex-end;
+    justify-content: flex-start;
   }
 
   .track {

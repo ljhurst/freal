@@ -37,9 +37,9 @@
         <th scope="col">Record</th>
         <th scope="col" class="points">PF</th>
         <th scope="col" class="points">PA</th>
-        <th scope="col">Luck</th>
-        <th scope="col" class="extra">Lineup</th>
-        <th scope="col" class="extra">Trend</th>
+        <th scope="col" class="mark">Luck</th>
+        <th scope="col" class="mark extra">Lineup</th>
+        <th scope="col" class="mark extra">Trend</th>
         <th scope="col" class="verdict">Verdict</th>
       </tr>
     </thead>
@@ -51,9 +51,9 @@
           <td>{formatRecord(team.standing.wins, team.standing.losses, team.standing.ties)}</td>
           <td class="points">{formatPoints(team.standing.points_for)}</td>
           <td class="points">{formatPoints(team.standing.points_against)}</td>
-          <td><LuckBar luck={team.luck.luck} limit={luckScale} /></td>
-          <td class="extra"><Meter value={team.efficiency.efficiency} label="Lineup efficiency" /></td>
-          <td class="extra"><Sparkline points={pointsOf(team)} {...scoreRange} /></td>
+          <td class="mark"><LuckBar luck={team.luck.luck} limit={luckScale} /></td>
+          <td class="mark extra"><Meter value={team.efficiency.efficiency} label="Lineup efficiency" /></td>
+          <td class="mark extra"><Sparkline points={pointsOf(team)} {...scoreRange} /></td>
           <td class="verdict">
             <span class="chips">
               {#each chips as chip (chip.label)}
@@ -89,15 +89,13 @@
 
   th:first-child,
   th[scope='row'],
+  .mark,
   .verdict {
     text-align: left;
   }
 
   th[scope='row'] {
     font-weight: 650;
-    white-space: normal;
-    overflow-wrap: break-word;
-    min-width: 8rem;
   }
 
   thead th {
@@ -143,10 +141,6 @@
 
   /* On a phone the verdict matters more than the points, and there is no room for both. */
   @media (max-width: 36rem) {
-    th[scope='row'] {
-      min-width: 6rem;
-    }
-
     .chips {
       flex-direction: column;
       align-items: flex-start;

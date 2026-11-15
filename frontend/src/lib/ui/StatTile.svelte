@@ -31,6 +31,8 @@
     box-shadow: var(--shadow);
     padding: 0.9rem 1rem;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   p {
@@ -38,6 +40,7 @@
   }
 
   .name {
+    margin-top: 0.4rem;
     font-size: 1.15rem;
     font-weight: 750;
     letter-spacing: -0.015em;
@@ -46,10 +49,16 @@
   }
 
   .figure {
-    margin-top: 0.35rem;
-    font-size: 1.05rem;
-    font-weight: 700;
+    margin-top: auto;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.82rem;
+    font-weight: 600;
     color: var(--text-2);
+  }
+
+  .name {
+    margin-bottom: 0.85rem;
   }
 
   .mark {
