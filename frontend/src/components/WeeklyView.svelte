@@ -35,6 +35,12 @@
 {:else}
   <div class="stack">
     <ChartFrame title="How did the season unfold?" index={0}>
+      {#snippet help()}
+        <p>
+          Each line is one team's points by week. Pick a team to highlight it. Filled dots are wins,
+          hollow dots are losses, and the dashed line is the league median for that week.
+        </p>
+      {/snippet}
       {#snippet controls()}
         <TeamChips
           teams={view.teams.map((entry) => entry.team)}
@@ -69,6 +75,13 @@
     </ChartFrame>
 
     <ChartFrame title="Steady or boom-or-bust?" index={1}>
+      {#snippet help()}
+        <p>
+          Each dot is one week for that team, and the tick is its average. Swing is how far a typical
+          week sits from the team's own average, in points, so high scorers have more room to move:
+          read it next to the average.
+        </p>
+      {/snippet}
       {#snippet chart()}
         <BoomBustRows {view} {selectedId} />
       {/snippet}
