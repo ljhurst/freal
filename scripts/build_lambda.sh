@@ -24,6 +24,11 @@ uv pip install -q \
   --target build/package \
   -r build/requirements.txt
 
+# Console scripts start with the build machine's Python path, and RECORD files list their hashes,
+# so the package would differ per machine and per Python patch release. Lambda runs neither.
+rm -rf build/package/bin
+find build/package -name RECORD -delete
+
 rsync -a --exclude='*.pyc' --exclude='__pycache__' src/freal build/app/
 
 for tree in build/package build/app; do
@@ -35,9 +40,10 @@ done
 
 find build -exec touch -t 202001010000.00 {} +
 
-# App code goes into a fresh archive first: zip's -x excludes only apply on creation.
-(cd build/app && zip -Xrq "../../${zip_path}" freal)
-(cd build/package && zip -Xrq "../../${zip_path}" .)
+# Files are added in sorted order because zip otherwise records them in the order the
+# filesystem lists them, which differs between machines and changes the hash.
+(cd build/app && find freal -type f | LC_ALL=C sort | zip -Xq "../../${zip_path}" -@)
+(cd build/package && find . -type f | LC_ALL=C sort | zip -Xq "../../${zip_path}" -@)
 
 rm -rf build
 
