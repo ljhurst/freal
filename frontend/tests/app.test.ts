@@ -90,7 +90,7 @@ describe('App with a login', () => {
     render(App, { context: contextFor(appServices) });
 
     await waitFor(() => expect(window.location.pathname).toBe('/leagues/7/2025'));
-    expect(await screen.findByRole('heading', { name: 'Family League' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Demo League' })).toBeInTheDocument();
   });
 
   it('offers another try when the login redirect fails', async () => {
@@ -109,14 +109,24 @@ describe('the season page', () => {
   it('ranks teams by wins and shows their record and luck', async () => {
     const api = fakeApi({ season: async () => seasonReport() });
 
-    render(App, { context: contextFor(services({ api, path: '/leagues/7/2025' })) });
+    render(App, { context: contextFor(services({ api, path: '/leagues/1/2025' })) });
 
     const rows = await screen.findAllByRole('row');
     const names = rows.slice(1).map((row) => within(row).getByRole('rowheader').textContent);
-    expect(names).toEqual(['High Wins', 'Low Wins']);
-    expect(within(rows[1] as HTMLElement).getByText('10-4')).toBeInTheDocument();
-    expect(within(rows[1] as HTMLElement).getByText('+3.0')).toBeInTheDocument();
-    expect(within(rows[2] as HTMLElement).getByText('−3.0')).toBeInTheDocument();
+    expect(names).toEqual([
+      'Team 5',
+      'Team 4',
+      'Team 6',
+      'Team 2',
+      'Team 1',
+      'Team 7',
+      'Team 8',
+      'Team 3',
+    ]);
+    expect(within(rows[1] as HTMLElement).getByText('13-1')).toBeInTheDocument();
+    expect(within(rows[1] as HTMLElement).getByText('+2.3')).toBeInTheDocument();
+    expect(within(rows[8] as HTMLElement).getByText('2-12')).toBeInTheDocument();
+    expect(within(rows[8] as HTMLElement).getByText('\u22120.9')).toBeInTheDocument();
   });
 
   it('explains an expired ESPN login instead of showing a blank page', async () => {
@@ -150,7 +160,7 @@ describe('navigation', () => {
 
     await userEvent.click(await screen.findByRole('link', { name: '2025 season' }));
 
-    expect(await screen.findByRole('heading', { name: 'Family League' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Demo League' })).toBeInTheDocument();
     expect(window.location.pathname).toBe('/leagues/7/2025');
   });
 

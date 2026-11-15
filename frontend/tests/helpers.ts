@@ -3,6 +3,7 @@ import { type Api, ApiError, type LeagueSummary, type SeasonReport } from '@/lib
 import type { OidcClient, Session } from '@/lib/auth/session.svelte';
 import { Router } from '@/lib/router.svelte';
 import { SERVICES_KEY, type Services } from '@/lib/services';
+import demoSeason from '../public/demo/season-2025.json';
 
 export function contextFor(services: Services): Map<symbol, Services> {
   return new Map([[SERVICES_KEY, services]]);
@@ -66,41 +67,7 @@ export function league(overrides: Partial<LeagueSummary> = {}): LeagueSummary {
   return { league_id: 7, name: 'Family League', years: [2024, 2025], ...overrides };
 }
 
+/** The sample season that demo mode serves, checked against the generated API types. */
 export function seasonReport(): SeasonReport {
-  const team = (id: number, name: string, wins: number, losses: number, pointsFor: number) => ({
-    team_id: id,
-    name,
-    standing: {
-      team_id: id,
-      wins,
-      losses,
-      ties: 0,
-      points_for: pointsFor,
-      points_against: 1000,
-    },
-    luck: {
-      team_id: id,
-      expected_wins: 7,
-      luck: wins - 7,
-      all_play_wins: 50,
-      all_play_ties: 0,
-      all_play_losses: 48,
-    },
-    schedule: { team_id: id, average_opponent_points: 120 },
-    efficiency: {
-      team_id: id,
-      points: 1000,
-      optimal_points: 1100,
-      left_on_bench: 100,
-      efficiency: 0.91,
-    },
-    consistency: { team_id: id, mean: 120, stdev: 20 },
-  });
-  return {
-    league_id: 7,
-    year: 2025,
-    name: 'Family League',
-    teams: [team(1, 'Low Wins', 4, 10, 1100), team(2, 'High Wins', 10, 4, 1500)],
-    weeks: [],
-  } as SeasonReport;
+  return structuredClone(demoSeason);
 }
