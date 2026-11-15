@@ -44,11 +44,11 @@ describe('the season page', () => {
     });
     render(App, { context: contextFor(appServices) });
 
-    await userEvent.click(await screen.findByRole('link', { name: 'Lineups' }));
+    await userEvent.click(await screen.findByRole('link', { name: 'Weekly' }));
 
-    expect(window.location.pathname).toBe('/leagues/1/2025/lineups');
+    expect(window.location.pathname).toBe('/leagues/1/2025/weekly');
     expect(await screen.findByText('Coming soon')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Lineups' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Weekly' })).toHaveAttribute('aria-current', 'page');
     expect(fetches).toBe(1);
   });
 
@@ -262,6 +262,30 @@ describe('switching seasons', () => {
 
     expect(window.location.pathname).toBe('/leagues/1/2024/luck');
     expect(screen.getByRole('link', { name: 'Luck' })).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('loads a skeleton of bar rows on the lineups view', async () => {
+    const { release, gate } = slowSeason();
+    const appServices = services({
+      path: '/leagues/1/2025/lineups',
+      api: fakeApi({
+        leagues: async () => [league({ league_id: 1, years: [2024, 2025] })],
+        season: async () => {
+          await gate;
+          return seasonReport();
+        },
+      }),
+    });
+    const { container } = render(App, { context: contextFor(appServices) });
+
+    await screen.findByRole('status');
+    expect(container.querySelectorAll('section.card')).toHaveLength(1);
+    expect(container.querySelectorAll('.skeleton').length).toBeGreaterThanOrEqual(9);
+
+    release.resolve();
+    expect(
+      await screen.findByRole('heading', { name: 'Who sets the best lineup?' }),
+    ).toBeInTheDocument();
   });
 
   it('loads a skeleton shaped like the view it is on', async () => {

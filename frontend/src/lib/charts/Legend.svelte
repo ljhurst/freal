@@ -1,7 +1,7 @@
 <script lang="ts">
   export interface LegendItem {
     label: string;
-    kind: 'lucky' | 'unlucky' | 'neutral' | 'stamp' | 'dash';
+    kind: 'lucky' | 'unlucky' | 'neutral' | 'stamp' | 'dash' | 'series' | 'hatch';
   }
 
   let { items }: { items: readonly LegendItem[] } = $props();
@@ -55,6 +55,16 @@
     box-shadow:
       0 0 0 2px var(--surface),
       0 0 0 4px var(--accent);
+  }
+
+  .series {
+    background: var(--muted);
+  }
+
+  .hatch {
+    background: var(--hatch);
+    box-shadow: inset 0 0 0 1.5px var(--muted);
+    border-radius: 2px;
   }
 
   .dash {

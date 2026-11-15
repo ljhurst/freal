@@ -37,6 +37,15 @@
       <Skeleton width="10rem" height="1.2rem" />
       <div class="chart"><Skeleton height="12rem" /></div>
     </Card>
+  {:else if tab === 'lineups'}
+    <Card>
+      <Skeleton width="12rem" height="1.2rem" />
+      <div class="rows">
+        {#each [1, 2, 3, 4, 5, 6, 7, 8] as row (row)}
+          <Skeleton height="1.4rem" />
+        {/each}
+      </div>
+    </Card>
   {:else}
     <Card>
       <Skeleton width="10rem" height="1.2rem" />

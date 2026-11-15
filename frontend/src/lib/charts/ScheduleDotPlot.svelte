@@ -192,7 +192,7 @@
     white-space: nowrap;
   }
 
-  @media (max-width: 36rem) {
+  @media (max-width: 52rem) {
     .plot {
       display: block;
       min-width: 0;
