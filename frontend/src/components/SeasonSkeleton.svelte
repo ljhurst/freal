@@ -46,10 +46,23 @@
         {/each}
       </div>
     </Card>
-  {:else}
+  {:else if tab === 'weekly'}
     <Card>
-      <Skeleton width="10rem" height="1.2rem" />
+      <Skeleton width="13rem" height="1.2rem" />
+      <div class="chips">
+        {#each [1, 2, 3, 4, 5, 6] as chip (chip)}
+          <Skeleton width="5.5rem" height="1.8rem" />
+        {/each}
+      </div>
       <div class="chart"><Skeleton height="16rem" /></div>
+    </Card>
+    <Card>
+      <Skeleton width="11rem" height="1.2rem" />
+      <div class="rows">
+        {#each [1, 2, 3, 4, 5, 6] as row (row)}
+          <Skeleton height="1.4rem" />
+        {/each}
+      </div>
     </Card>
   {/if}
 </div>
@@ -80,6 +93,13 @@
   }
 
   .chart {
+    margin-top: 1rem;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
     margin-top: 1rem;
   }
 </style>

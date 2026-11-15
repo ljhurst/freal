@@ -27,6 +27,25 @@ describe('parseRoute', () => {
     expect(parseRoute(seasonPath(12, 2024, 'lineups'))).toMatchObject({ tab: 'lineups' });
   });
 
+  it('reads the selected team from the query, and ignores anything that is not a team number', () => {
+    expect(parseRoute('/leagues/7/2025/weekly', '?team=6')).toEqual({
+      name: 'season',
+      leagueId: 7,
+      year: 2025,
+      tab: 'weekly',
+      team: 6,
+    });
+    expect(parseRoute('/leagues/7/2025/weekly', '?team=abc')).not.toHaveProperty('team');
+    expect(parseRoute('/leagues/7/2025/weekly', '?team=-1')).not.toHaveProperty('team');
+    expect(parseRoute('/leagues/7/2025/weekly', '?other=1')).not.toHaveProperty('team');
+  });
+
+  it('builds an address with a team and reads it back', () => {
+    expect(seasonPath(7, 2025, 'weekly', 6)).toBe('/leagues/7/2025/weekly?team=6');
+    expect(seasonPath(7, 2025, 'overview', 6)).toBe('/leagues/7/2025?team=6');
+    expect(parseRoute('/leagues/7/2025/weekly', '?team=6')).toMatchObject({ team: 6 });
+  });
+
   it('keeps the overview at the short address', () => {
     expect(seasonPath(12, 2024)).toBe('/leagues/12/2024');
     expect(seasonPath(12, 2024, 'luck')).toBe('/leagues/12/2024/luck');
@@ -34,6 +53,24 @@ describe('parseRoute', () => {
 });
 
 describe('Router', () => {
+  it('follows the team in the query when navigating and replacing', () => {
+    window.history.replaceState({}, '', '/');
+    const router = new Router(window);
+
+    router.navigate('/leagues/1/2025/weekly?team=4');
+    expect(router.route).toMatchObject({ tab: 'weekly', team: 4 });
+    expect(window.location.search).toBe('?team=4');
+
+    router.replace('/leagues/1/2025/weekly?team=5');
+    expect(router.route).toMatchObject({ team: 5 });
+  });
+
+  it('starts from the team in the current address', () => {
+    window.history.replaceState({}, '', '/leagues/3/2025/weekly?team=2');
+
+    expect(new Router(window).route).toMatchObject({ tab: 'weekly', team: 2 });
+  });
+
   it('starts at the current location', () => {
     window.history.replaceState({}, '', '/leagues/3/2025');
 

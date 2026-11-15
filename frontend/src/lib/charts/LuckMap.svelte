@@ -1,6 +1,7 @@
 <script lang="ts">
   import Legend from '@/lib/charts/Legend.svelte';
   import { placeLabels } from '@/lib/charts/labels';
+  import { pointerReach } from '@/lib/charts/pointer';
   import { integerTicks, linearScale, nearestPoint } from '@/lib/charts/scales';
   import Tooltip from '@/lib/charts/Tooltip.svelte';
   import { formatRecord, formatSigned } from '@/lib/format';
@@ -69,22 +70,16 @@
     return `${team.name}: expected ${dot.expected.toFixed(1)} wins, record ${formatRecord(team.standing.wins, team.standing.losses, team.standing.ties)}, ${mood}${stamp}`;
   }
 
-  function reach(event: PointerEvent): void {
-    if (!svg) return;
-    const box = svg.getBoundingClientRect();
-    active = nearestPoint(points, event.clientX - box.left, event.clientY - box.top, HOVER_REACH);
-  }
-
-  function leave(event: PointerEvent): void {
-    if (event.pointerType !== 'touch') active = null;
-  }
-
-  function dismiss(event: PointerEvent): void {
-    if (!svg?.contains(event.target as Node)) active = null;
-  }
+  const pointer = pointerReach({
+    target: () => svg,
+    find: (x, y) => nearestPoint(points, x, y, HOVER_REACH),
+    set: (index) => {
+      active = index;
+    },
+  });
 </script>
 
-<svelte:window onpointerdown={dismiss} />
+<svelte:window onpointerdown={pointer.dismiss} />
 
 <div class="map" bind:clientWidth={width}>
   <svg
@@ -94,9 +89,9 @@
     viewBox="0 0 {width} {height}"
     role="group"
     aria-label="Expected wins against actual wins for {dots.length} teams. A dot above the dashed line is lucky; below it is unlucky."
-    onpointermove={reach}
-    onpointerdown={reach}
-    onpointerleave={leave}
+    onpointermove={pointer.move}
+    onpointerdown={pointer.move}
+    onpointerleave={pointer.leave}
   >
     {#each ticks as tick (tick)}
       <line class="grid" x1={xScale(tick)} x2={xScale(tick)} y1={MARGIN.top} y2={height - MARGIN.bottom} />

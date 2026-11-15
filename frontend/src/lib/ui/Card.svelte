@@ -3,13 +3,11 @@
 
   let {
     title,
-    eyebrow,
     index = 0,
     actions,
     children,
   }: {
     title?: string;
-    eyebrow?: string;
     index?: number;
     actions?: Snippet;
     children: Snippet;
@@ -17,7 +15,6 @@
 </script>
 
 <section class="card rise" style:--i={index}>
-  {#if eyebrow}<p class="eyebrow">{eyebrow}</p>{/if}
   {#if title || actions}
     <header>
       {#if title}<h2>{title}</h2>{/if}
@@ -36,9 +33,6 @@
     padding: 1.25rem 1.25rem 1rem;
   }
 
-  .eyebrow {
-    margin: 0 0 0.25rem;
-  }
 
   header {
     display: flex;

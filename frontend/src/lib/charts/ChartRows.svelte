@@ -13,6 +13,7 @@
     headTrack,
     rowHeight = '2.2rem',
     guide = false,
+    marked,
   }: {
     label: string;
     rows: readonly T[];
@@ -27,11 +28,13 @@
     rowHeight?: string;
     /** Draws a faint line under a row's marks when the layout stacks, so they read on a shared axis. */
     guide?: boolean;
+    /** Rows to tint, so a selection reads without relying on color alone. */
+    marked?: (row: T) => boolean;
   } = $props();
 </script>
 
 <div class="scroll" style:--row-height={rowHeight}>
-  <ol class="rows" aria-label={label}>
+  <ol class="rows" class:has-marks={marked !== undefined} aria-label={label}>
     {#if headName || headTrack}
       <li class="head" aria-hidden="true">
         <span class="head-name">{@render headName?.()}</span>
@@ -40,7 +43,7 @@
       </li>
     {/if}
     {#each rows as row, index (key(row))}
-      <li class="row" style:--i={index}>
+      <li class="row" class:marked={marked?.(row)} style:--i={index}>
         <span class="name">{name(row)}</span>
         <span class="track" class:guide role="img" aria-label={describe(row)}>
           {@render track(row)}
@@ -100,6 +103,19 @@
     white-space: nowrap;
   }
 
+  .has-marks .name,
+  .has-marks .head-name {
+    padding-left: 0.5rem;
+  }
+
+  .has-marks .value {
+    padding-right: 0.5rem;
+  }
+
+  .marked > * {
+    background: color-mix(in srgb, var(--accent) 9%, transparent);
+  }
+
   .head-name {
     align-self: end;
     padding: 0 1rem 0.2rem 0;
@@ -157,6 +173,22 @@
     .track {
       grid-area: track;
       height: 1.75rem;
+    }
+
+    .has-marks .row {
+      padding-inline: 0.5rem;
+    }
+
+    .has-marks .head {
+      padding-inline: 0.5rem;
+    }
+
+    .row.marked {
+      background: color-mix(in srgb, var(--accent) 9%, transparent);
+    }
+
+    .marked > * {
+      background: none;
     }
 
     .guide::before {

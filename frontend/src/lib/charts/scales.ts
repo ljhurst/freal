@@ -41,3 +41,21 @@ export function nearestPoint(
   });
   return nearest;
 }
+
+/** Round-numbered ticks (1, 2 or 5 times a power of ten) across a domain, about `count` of them. */
+export function niceTicks(domain: readonly [number, number], count: number): number[] {
+  const [low, high] = domain;
+  const span = high - low;
+  if (span <= 0) {
+    return [low];
+  }
+  const rough = span / Math.max(1, count);
+  const power = 10 ** Math.floor(Math.log10(rough));
+  const fraction = rough / power;
+  const step = (fraction <= 1 ? 1 : fraction <= 2 ? 2 : fraction <= 5 ? 5 : 10) * power;
+  const ticks: number[] = [];
+  for (let k = Math.ceil(low / step); k <= Math.floor(high / step); k += 1) {
+    ticks.push(Number((k * step).toFixed(10)));
+  }
+  return ticks;
+}

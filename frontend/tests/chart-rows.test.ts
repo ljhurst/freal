@@ -53,6 +53,19 @@ describe('ChartRows', () => {
     expect(container.querySelectorAll('.track.guide')).toHaveLength(2);
   });
 
+  it('tints only the rows it is asked to mark', () => {
+    const { container, rerender } = render(Harness, { rows: ROWS });
+    expect(container.querySelector('.row.marked')).not.toBeInTheDocument();
+    expect(container.querySelector('.has-marks')).not.toBeInTheDocument();
+
+    rerender({ rows: ROWS, tint: true });
+
+    const marked = container.querySelectorAll('.row.marked');
+    expect(marked).toHaveLength(1);
+    expect(within(marked[0] as HTMLElement).getByText('Alpha')).toBeInTheDocument();
+    expect(container.querySelector('.has-marks')).toBeInTheDocument();
+  });
+
   it('sets the row height for every cell from one value', () => {
     const { container } = render(Harness, { rows: ROWS });
 

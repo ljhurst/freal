@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { integerTicks, linearScale, nearestPoint } from '@/lib/charts/scales';
+import { integerTicks, linearScale, nearestPoint, niceTicks } from '@/lib/charts/scales';
 
 describe('integerTicks', () => {
   it('has a tick at every whole number when there is room', () => {
@@ -62,5 +62,22 @@ describe('nearestPoint', () => {
 
   it('finds nothing when there are no points', () => {
     expect(nearestPoint([], 0, 0, 40)).toBeNull();
+  });
+});
+
+describe('niceTicks', () => {
+  it('uses round steps and stays inside the domain', () => {
+    expect(niceTicks([60, 200], 7)).toEqual([60, 80, 100, 120, 140, 160, 180, 200]);
+    expect(niceTicks([75, 190], 5)).toEqual([100, 150]);
+  });
+
+  it('picks a step of 1, 2 or 5 times a power of ten', () => {
+    expect(niceTicks([0, 10], 10)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect(niceTicks([0, 100], 4)).toEqual([0, 50, 100]);
+    expect(niceTicks([0, 1], 4)).toEqual([0, 0.5, 1]);
+  });
+
+  it('has a single tick for an empty domain', () => {
+    expect(niceTicks([5, 5], 5)).toEqual([5]);
   });
 });

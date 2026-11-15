@@ -47,7 +47,9 @@ describe('the season page', () => {
     await userEvent.click(await screen.findByRole('link', { name: 'Weekly' }));
 
     expect(window.location.pathname).toBe('/leagues/1/2025/weekly');
-    expect(await screen.findByText('Coming soon')).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'How did the season unfold?' }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Weekly' })).toHaveAttribute('aria-current', 'page');
     expect(fetches).toBe(1);
   });
@@ -55,7 +57,9 @@ describe('the season page', () => {
   it('opens straight on a view from its address', async () => {
     renderSeason('/leagues/1/2025/weekly');
 
-    expect(await screen.findByRole('heading', { name: 'Week by week' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'How did the season unfold?' }),
+    ).toBeInTheDocument();
   });
 
   it('puts words on every team and the stamp only on teams that are for real', async () => {

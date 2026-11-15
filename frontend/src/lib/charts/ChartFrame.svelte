@@ -5,19 +5,27 @@
 
   let {
     title,
-    eyebrow,
     index = 0,
+    controls,
     chart,
     table,
-  }: { title: string; eyebrow?: string; index?: number; chart: Snippet; table: Snippet } = $props();
+  }: {
+    title: string;
+    index?: number;
+    /** Shown above both views, so a choice can be changed from either. */
+    controls?: Snippet;
+    chart: Snippet;
+    table: Snippet;
+  } = $props();
 
   let view = $state<View>('chart');
 </script>
 
-<Card {title} {eyebrow} {index}>
+<Card {title} {index}>
   {#snippet actions()}
     <ViewToggle bind:view />
   {/snippet}
+  {@render controls?.()}
   {#if view === 'chart'}
     {@render chart()}
   {:else}
