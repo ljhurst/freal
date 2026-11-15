@@ -157,17 +157,50 @@ describe('the weekly lines', () => {
     expect(screen.queryByText('Week 3')).not.toBeInTheDocument();
   });
 
-  it('shows the same scores as a table', async () => {
+  it('labels both axes', async () => {
+    const { container } = renderWeekly();
+    await screen.findByRole('group', { name: 'Team to highlight' });
+
+    const titles = [...container.querySelectorAll('svg text.axis-title')].map((title) =>
+      title.textContent?.trim(),
+    );
+
+    expect(titles).toEqual(['Week', 'Points']);
+  });
+
+  it('shows the selected team week by week as a table', async () => {
     renderWeekly();
     await screen.findByRole('group', { name: 'Team to highlight' });
 
     await userEvent.click(screen.getAllByRole('button', { name: 'Table' })[0] as HTMLElement);
 
-    const rows = screen.getAllByRole('row');
-    expect(within(rows[0] as HTMLElement).getAllByRole('columnheader')).toHaveLength(15);
-    const team6 = rows.find((row) => within(row).queryByText('Team 6')) as HTMLElement;
-    expect(within(team6).getAllByRole('cell')).toHaveLength(14);
-    expect(within(team6).getAllByRole('cell')[0]?.textContent).toBe('112.1');
+    const table = screen.getByRole('table', {
+      name: 'Team 5 week by week, with the league median',
+    });
+    const rows = within(table).getAllByRole('row');
+    expect(
+      within(rows[0] as HTMLElement)
+        .getAllByRole('columnheader')
+        .map((header) => header.textContent),
+    ).toEqual(['Week', 'Opponent', 'Score', 'Their score', 'Result', 'League median']);
+    expect(rows).toHaveLength(15);
+    const week1 = within(rows[1] as HTMLElement);
+    expect(week1.getByRole('rowheader')).toHaveTextContent('1');
+    expect(week1.getAllByRole('cell')).toHaveLength(5);
+    expect(['Won', 'Lost']).toContain(week1.getAllByRole('cell')[3]?.textContent);
+  });
+
+  it('keeps the team chips in the table view, and the table follows them', async () => {
+    renderWeekly();
+    await screen.findByRole('group', { name: 'Team to highlight' });
+    await userEvent.click(screen.getAllByRole('button', { name: 'Table' })[0] as HTMLElement);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Team 3' }));
+
+    expect(
+      screen.getByRole('table', { name: 'Team 3 week by week, with the league median' }),
+    ).toBeInTheDocument();
+    expect(pressed()).toBe('Team 3');
   });
 });
 

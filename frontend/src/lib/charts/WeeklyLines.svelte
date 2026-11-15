@@ -89,6 +89,13 @@
       <text class="tick" x={xScale(tick)} y={height - MARGIN.bottom + 18} text-anchor="middle">{tick}</text>
     {/each}
     <text class="axis-title" x={(MARGIN.left + width - MARGIN.right) / 2} y={height - 6} text-anchor="middle">Week</text>
+    <text
+      class="axis-title"
+      transform="translate(14 {(MARGIN.top + height - MARGIN.bottom) / 2}) rotate(-90)"
+      text-anchor="middle"
+    >
+      Points
+    </text>
 
     {#each others as entry, index (entry.team.team_id)}
       <path class="other draw" d={linePath(entry)} pathLength="1" style:--i={index} />

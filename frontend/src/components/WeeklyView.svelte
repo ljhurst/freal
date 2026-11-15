@@ -21,6 +21,9 @@
 
   const view = $derived(weeklyView(season));
   const selectedId = $derived(selectedTeamId(view, requestedTeam));
+  const selected = $derived(view.teams.find((entry) => entry.team.team_id === selectedId));
+
+  const RESULT_WORDS = { win: 'Won', loss: 'Lost', tie: 'Tied' } as const;
 
   function choose(teamId: number): void {
     router.replace(seasonPath(leagueId, year, 'weekly', teamId));
@@ -32,23 +35,34 @@
 {:else}
   <div class="stack">
     <ChartFrame title="How did the season unfold?" index={0}>
+      {#snippet controls()}
+        <TeamChips
+          teams={view.teams.map((entry) => entry.team)}
+          selected={selectedId}
+          onselect={choose}
+        />
+      {/snippet}
       {#snippet chart()}
-        <TeamChips teams={view.teams.map((entry) => entry.team)} selected={selectedId} onselect={choose} />
         <WeeklyLines {view} {selectedId} />
       {/snippet}
       {#snippet table()}
         <ChartTable
-          caption="Points scored by each team in each week"
+          caption="{selected?.team.name ?? 'Team'} week by week, with the league median"
           columns={[
-            { label: 'Team' },
-            ...view.weeks.map((week) => ({ label: `Wk ${week}`, numeric: true })),
+            { label: 'Week' },
+            { label: 'Opponent' },
+            { label: 'Score', numeric: true },
+            { label: 'Their score', numeric: true },
+            { label: 'Result' },
+            { label: 'League median', numeric: true },
           ]}
-          rows={view.teams.map((entry) => [
-            entry.team.name,
-            ...view.weeks.map((week) => {
-              const game = entry.games.find((candidate) => candidate.week === week);
-              return game ? formatPoints(game.points) : '–';
-            }),
+          rows={(selected?.games ?? []).map((game) => [
+            String(game.week),
+            game.opponent?.name ?? '–',
+            formatPoints(game.points),
+            formatPoints(game.opponentPoints),
+            RESULT_WORDS[game.result],
+            formatPoints(view.medians.get(game.week) ?? 0),
           ])}
         />
       {/snippet}
