@@ -171,6 +171,7 @@ export interface components {
             standing: components["schemas"]["Standing"];
             /** Team Id */
             team_id: number;
+            verdict: components["schemas"]["Verdict"];
         };
         /** TeamWeek */
         TeamWeek: {
@@ -198,6 +199,11 @@ export interface components {
             /** Error Type */
             type: string;
         };
+        /**
+         * Verdict
+         * @enum {string}
+         */
+        Verdict: "lucky" | "unlucky" | "as_expected";
     };
     responses: never;
     parameters: never;
