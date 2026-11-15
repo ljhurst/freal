@@ -60,6 +60,23 @@ describe('App with a login', () => {
     expect(client.redirectedWith).toEqual(['/leagues/7/2025']);
   });
 
+  it('shows the login is under way, and lets people retry if it fails to start', async () => {
+    const client = new FakeOidcClient();
+    let fail = true;
+    client.signinRedirect = () =>
+      fail ? Promise.reject(new Error('offline')) : new Promise(() => {});
+    render(App, { context: contextFor(services({ session: new Session(client) })) });
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Log in' }));
+    expect(await screen.findByRole('button', { name: 'Log in' })).toBeEnabled();
+
+    fail = false;
+    await userEvent.click(screen.getByRole('button', { name: 'Log in' }));
+    const busy = await screen.findByRole('button', { name: 'Logging in' });
+    expect(busy).toBeDisabled();
+    expect(busy).toHaveAttribute('aria-busy', 'true');
+  });
+
   it('greets a signed-in user and lists their leagues', async () => {
     const { session } = signedIn();
     const api = fakeApi({ leagues: async () => [league()] });
