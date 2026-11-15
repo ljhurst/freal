@@ -1,21 +1,24 @@
 import type { TeamReport } from '@/lib/api/client';
 
+export type Tone = 'forReal' | 'lucky' | 'unlucky' | 'neutral';
+
 export interface VerdictLabel {
-  tone: 'lucky' | 'unlucky' | 'neutral';
+  tone: Tone;
   label: string;
 }
 
-/** The words for a team's verdict; a record that is what it looks like also says which way. */
-export function verdictLabel(team: TeamReport): VerdictLabel {
-  switch (team.verdict) {
-    case 'lucky':
-      return { tone: 'lucky', label: 'Lucky' };
-    case 'unlucky':
-      return { tone: 'unlucky', label: 'Unlucky' };
-    case 'as_expected':
-      return {
-        tone: 'neutral',
-        label: team.standing.wins >= team.standing.losses ? 'For real' : 'Rough, for real',
-      };
-  }
+/** The chips for a team: how luck treated it, then the stamp if it earned one, or else how good it is. */
+export function verdictLabels(team: TeamReport): VerdictLabel[] {
+  const chips: VerdictLabel[] = [];
+  if (team.verdict === 'lucky') chips.push({ tone: 'lucky', label: 'Lucky' });
+  if (team.verdict === 'unlucky') chips.push({ tone: 'unlucky', label: 'Unlucky' });
+  if (team.for_real) chips.push({ tone: 'forReal', label: 'For real' });
+  if (chips.length === 0) chips.push({ tone: 'neutral', label: STRENGTH_WORDS[team.strength] });
+  return chips;
 }
+
+const STRENGTH_WORDS = {
+  good: 'Good',
+  average: 'Average',
+  bad: 'Bad',
+} as const satisfies Record<TeamReport['strength'], string>;

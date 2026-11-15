@@ -58,23 +58,24 @@ describe('the season page', () => {
     expect(await screen.findByRole('heading', { name: 'Week by week' })).toBeInTheDocument();
   });
 
-  it('puts a verdict on every team, in words as well as color', async () => {
+  it('puts words on every team and the stamp only on teams that are for real', async () => {
     renderSeason('/leagues/1/2025');
 
-    const rows = await screen.findAllByRole('row');
-    const verdicts = rows
-      .slice(1)
-      .map((row) => within(row).getByText(/Lucky|Unlucky|For real|Rough, for real/).textContent)
-      .map((text) => text?.replace(/^[\u25B2\u25BC\u25CF]\s*/, ''));
-    expect(verdicts).toEqual([
-      'Lucky',
-      'Lucky',
-      'Unlucky',
-      'For real',
-      'Rough, for real',
-      'Rough, for real',
-      'Unlucky',
-      'Rough, for real',
+    const rows = (await screen.findAllByRole('row')).slice(1);
+    const chips = rows.map((row) =>
+      within(row)
+        .getAllByText(/^[\u2713\u25B2\u25BC\u25CF]?\s*(For real|Lucky|Unlucky|Good|Average|Bad)$/)
+        .map((chip) => chip.textContent?.replace(/^[\u2713\u25B2\u25BC\u25CF]\s*/, '')),
+    );
+    expect(chips).toEqual([
+      ['Lucky', 'For real'],
+      ['Lucky'],
+      ['Unlucky', 'For real'],
+      ['Average'],
+      ['Average'],
+      ['Average'],
+      ['Unlucky'],
+      ['Bad'],
     ]);
   });
 

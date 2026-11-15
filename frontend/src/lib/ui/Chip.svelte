@@ -1,7 +1,14 @@
 <script lang="ts">
-  let { tone, label }: { tone: 'lucky' | 'unlucky' | 'neutral'; label: string } = $props();
+  import type { Tone } from '@/lib/verdict';
 
-  const GLYPHS = { lucky: '▲', unlucky: '▼', neutral: '●' } as const;
+  let { tone, label }: { tone: Tone; label: string } = $props();
+
+  const GLYPHS = {
+    forReal: '✓',
+    lucky: '▲',
+    unlucky: '▼',
+    neutral: '●',
+  } as const satisfies Record<Tone, string>;
 </script>
 
 <span class="chip">
@@ -26,6 +33,14 @@
 
   .mark {
     font-size: 0.65rem;
+  }
+
+  .forReal {
+    color: var(--accent);
+  }
+
+  .chip:has(.forReal) {
+    border-color: var(--accent);
   }
 
   .lucky {

@@ -160,15 +160,23 @@ export interface components {
             /** Wins */
             wins: number;
         };
+        /**
+         * Strength
+         * @enum {string}
+         */
+        Strength: "good" | "average" | "bad";
         /** TeamReport */
         TeamReport: {
             consistency: components["schemas"]["Consistency"];
             efficiency: components["schemas"]["LineupEfficiency"];
+            /** For Real */
+            for_real: boolean;
             luck: components["schemas"]["Luck"];
             /** Name */
             name: string;
             schedule: components["schemas"]["ScheduleStrength"];
             standing: components["schemas"]["Standing"];
+            strength: components["schemas"]["Strength"];
             /** Team Id */
             team_id: number;
             verdict: components["schemas"]["Verdict"];
