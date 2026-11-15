@@ -68,9 +68,9 @@ describe('the season page', () => {
         .map((chip) => chip.textContent?.replace(/^[\u2713\u25B2\u25BC\u25CF]\s*/, '')),
     );
     expect(chips).toEqual([
-      ['For real', 'Lucky'],
+      ['Lucky', 'For real'],
       ['Lucky'],
-      ['For real', 'Unlucky'],
+      ['Unlucky', 'For real'],
       ['Average'],
       ['Average'],
       ['Average'],

@@ -13,15 +13,15 @@ describe('verdictLabels', () => {
       verdictLabels(team({ for_real: true, strength: 'good', verdict: 'as_expected' })),
     ).toEqual([{ tone: 'forReal', label: 'For real' }]);
     expect(verdictLabels(team({ for_real: true, strength: 'good', verdict: 'unlucky' }))).toEqual([
-      { tone: 'forReal', label: 'For real' },
       { tone: 'unlucky', label: 'Unlucky' },
+      { tone: 'forReal', label: 'For real' },
     ]);
   });
 
   it('stamps a lucky team too when its scoring is good, and says it was lucky', () => {
     expect(verdictLabels(team({ for_real: true, strength: 'good', verdict: 'lucky' }))).toEqual([
-      { tone: 'forReal', label: 'For real' },
       { tone: 'lucky', label: 'Lucky' },
+      { tone: 'forReal', label: 'For real' },
     ]);
   });
 
