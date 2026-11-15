@@ -12,6 +12,9 @@
 
   const { api, router } = useServices();
   const leagues = api.leagues().catch(() => []);
+  const yearsKnown = leagues.then(
+    (options) => (options.find((league) => league.league_id === leagueId)?.years.length ?? 0) > 1,
+  );
 
   const TABS: readonly { id: SeasonTab; label: string }[] = [
     { id: 'overview', label: 'Overview' },
@@ -44,7 +47,9 @@
 
 <header>
   <div class="title rise">
-    <p class="eyebrow">{year} season</p>
+    {#await yearsKnown then hasSwitcher}
+      {#if !hasSwitcher}<p class="eyebrow">{year} season</p>{/if}
+    {/await}
     <h1>{name}</h1>
   </div>
 
