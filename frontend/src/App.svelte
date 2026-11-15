@@ -30,7 +30,12 @@
   {:else if router.route.name === 'home'}
     <Home />
   {:else if router.route.name === 'season'}
-    <Season leagueId={router.route.leagueId} year={router.route.year} tab={router.route.tab} />
+    <Season
+      leagueId={router.route.leagueId}
+      year={router.route.year}
+      tab={router.route.tab}
+      team={router.route.team}
+    />
   {:else}
     <NotFound />
   {/if}

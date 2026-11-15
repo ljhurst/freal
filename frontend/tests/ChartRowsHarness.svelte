@@ -11,7 +11,8 @@
     rows,
     header = false,
     guide = false,
-  }: { rows: Item[]; header?: boolean; guide?: boolean } = $props();
+    tint = false,
+  }: { rows: Item[]; header?: boolean; guide?: boolean; tint?: boolean } = $props();
 </script>
 
 {#snippet head()}Header title{/snippet}
@@ -28,5 +29,6 @@
   value={shown}
   headName={header ? head : undefined}
   {guide}
+  marked={tint ? (row) => row.id === 1 : undefined}
   rowHeight="3rem"
 />

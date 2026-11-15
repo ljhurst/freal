@@ -1,7 +1,20 @@
 <script lang="ts">
   export interface LegendItem {
     label: string;
-    kind: 'lucky' | 'unlucky' | 'neutral' | 'stamp' | 'dash' | 'series' | 'hatch';
+    kind:
+      | 'lucky'
+      | 'unlucky'
+      | 'neutral'
+      | 'stamp'
+      | 'dash'
+      | 'series'
+      | 'hatch'
+      | 'selected'
+      | 'others'
+      | 'median'
+      | 'win'
+      | 'loss'
+      | 'mean';
   }
 
   let { items }: { items: readonly LegendItem[] } = $props();
@@ -65,6 +78,43 @@
     background: var(--hatch);
     box-shadow: inset 0 0 0 1.5px var(--muted);
     border-radius: 2px;
+  }
+
+  .selected,
+  .others,
+  .median {
+    width: 1.1rem;
+    height: 0;
+    border-radius: 0;
+    background: none;
+    border-top: 3px solid var(--accent);
+  }
+
+  .others {
+    border-top: 2px solid var(--muted);
+    opacity: 0.45;
+  }
+
+  .median {
+    border-top: 2px dashed var(--text-2);
+  }
+
+  .mean {
+    width: 0;
+    height: 0.8rem;
+    border-radius: 0;
+    background: none;
+    border-left: 2px solid var(--text);
+    margin: 0 0.3rem;
+  }
+
+  .win {
+    background: var(--accent);
+  }
+
+  .loss {
+    background: var(--surface);
+    box-shadow: inset 0 0 0 2px var(--accent);
   }
 
   .dash {

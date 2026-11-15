@@ -1,4 +1,5 @@
 <script lang="ts">
+  import AxisEnds from '@/lib/charts/AxisEnds.svelte';
   import ChartRows from '@/lib/charts/ChartRows.svelte';
   import Legend from '@/lib/charts/Legend.svelte';
   import { linearScale } from '@/lib/charts/scales';
@@ -39,13 +40,14 @@
 >
   {#snippet headName()}Avg opponent points{/snippet}
   {#snippet headTrack()}
-    <span class="scale">
-      <span class="end">{low}</span>
-      <span class="average" style:left="{percent(view.leagueAverage)}%">
-        League average {formatPoints(view.leagueAverage)}
-      </span>
-      <span class="end right">{high}</span>
-    </span>
+    <AxisEnds
+      {low}
+      {high}
+      marker={{
+        at: percent(view.leagueAverage),
+        label: `League average ${formatPoints(view.leagueAverage)}`,
+      }}
+    />
   {/snippet}
   {#snippet track(row)}
     <span class="average-line" style:left="{percent(view.leagueAverage)}%"></span>
@@ -101,32 +103,5 @@
     margin-left: 0.5rem;
     color: var(--muted);
     font-size: 0.82rem;
-  }
-
-  .scale {
-    position: relative;
-    display: block;
-    height: 1.6rem;
-    color: var(--muted);
-    font-size: 0.72rem;
-    font-weight: 700;
-  }
-
-  .end {
-    position: absolute;
-    left: 0;
-    bottom: 0.2rem;
-  }
-
-  .right {
-    left: auto;
-    right: 0;
-  }
-
-  .average {
-    position: absolute;
-    bottom: 0.2rem;
-    transform: translateX(-50%);
-    white-space: nowrap;
   }
 </style>
