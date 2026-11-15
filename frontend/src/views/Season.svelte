@@ -2,6 +2,7 @@
   import ComingSoon from '@/components/ComingSoon.svelte';
   import ErrorPanel from '@/components/ErrorPanel.svelte';
   import Hero from '@/components/Hero.svelte';
+  import LuckView from '@/components/LuckView.svelte';
   import SeasonHeader from '@/components/SeasonHeader.svelte';
   import Standings from '@/components/Standings.svelte';
   import StatTiles from '@/components/StatTiles.svelte';
@@ -35,6 +36,8 @@
       <Card title="Standings" index={6}>
         <Standings teams={season.teams} weeks={season.weeks} />
       </Card>
+    {:else if tab === 'luck'}
+      <LuckView {season} />
     {:else}
       <ComingSoon {tab} />
     {/if}

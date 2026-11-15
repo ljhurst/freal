@@ -6,10 +6,7 @@
 
   const COPY: Record<SeasonTab, { title: string; text: string }> = {
     overview: { title: 'Overview', text: '' },
-    luck: {
-      title: 'The luck map',
-      text: 'Expected wins against actual wins, with every team labeled and the schedule alongside.',
-    },
+    luck: { title: 'The luck map', text: '' },
     lineups: {
       title: 'Lineups',
       text: 'Points scored and points left on the bench, ranked by efficiency.',

@@ -4,7 +4,7 @@
   import Meter from '@/lib/charts/Meter.svelte';
   import Sparkline from '@/lib/charts/Sparkline.svelte';
   import { formatPoints, formatRecord } from '@/lib/format';
-  import { byStanding } from '@/lib/season/highlights';
+  import { byStanding } from '@/lib/season/order';
   import Chip from '@/lib/ui/Chip.svelte';
   import { verdictLabels } from '@/lib/verdict';
 
