@@ -7,6 +7,7 @@ import {
   type TeamReport,
 } from '@/lib/api/client';
 import type { OidcClient, Session } from '@/lib/auth/session.svelte';
+import { LeaguesCache } from '@/lib/leagues/cache';
 import { Router } from '@/lib/router.svelte';
 import { SeasonCache } from '@/lib/season/cache';
 import { SERVICES_KEY, type Services } from '@/lib/services';
@@ -68,6 +69,7 @@ export function services(
   const api = options.api ?? fakeApi();
   return {
     api,
+    leagues: new LeaguesCache(api),
     seasons: new SeasonCache(api),
     router: new Router(window),
     theme: new Theme(document.documentElement, null),

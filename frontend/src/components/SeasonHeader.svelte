@@ -12,10 +12,10 @@
     loading = false,
   }: { leagueId: number; year: number; tab: SeasonTab; loading?: boolean } = $props();
 
-  const { api, router } = useServices();
+  const { leagues, router } = useServices();
 
-  let options = $state<LeagueSummary[] | null>(null);
-  void api.leagues().then(
+  let options = $state<LeagueSummary[] | null>(leagues.peek() ?? null);
+  void leagues.get().then(
     (list) => {
       options = list;
     },

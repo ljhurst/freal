@@ -200,7 +200,7 @@ select {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
+  *:not(.skeleton),
   *::before,
   *::after {
     /* biome-ignore lint/complexity/noImportantStyles: the reduced-motion reset must beat component styles */

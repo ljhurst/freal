@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import App from '@/App.svelte';
+import SeasonHeader from '@/components/SeasonHeader.svelte';
 import { Session } from '@/lib/auth/session.svelte';
 import { BRAND_NAME } from '@/lib/brand';
 import indexHtml from '../index.html?raw';
@@ -73,5 +74,30 @@ describe('the header', () => {
     renderAt('/', new Session(client));
 
     expect(await screen.findByRole('link', { name: 'Leagues' })).toBeInTheDocument();
+  });
+});
+
+describe('the season header', () => {
+  it('shows the league name on its first paint when the list is already loaded', async () => {
+    const appServices = services({ api: fakeApi({ leagues: async () => [league()] }) });
+    await appServices.leagues.get();
+
+    render(SeasonHeader, {
+      context: contextFor(appServices),
+      props: { leagueId: 7, year: 2025, tab: 'overview' },
+    });
+
+    expect(screen.getByRole('heading', { name: 'Family League' })).toBeInTheDocument();
+  });
+
+  it('waits for the list when nothing has loaded yet', () => {
+    const appServices = services({ api: fakeApi({ leagues: () => new Promise(() => {}) }) });
+
+    render(SeasonHeader, {
+      context: contextFor(appServices),
+      props: { leagueId: 7, year: 2025, tab: 'overview' },
+    });
+
+    expect(screen.queryByRole('heading')).not.toBeInTheDocument();
   });
 });
