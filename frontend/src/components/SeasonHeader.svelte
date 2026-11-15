@@ -1,20 +1,31 @@
 <script lang="ts">
+  import type { LeagueSummary } from '@/lib/api/client';
   import { type SeasonTab, seasonPath } from '@/lib/router.svelte';
   import { useServices } from '@/lib/services';
+  import Skeleton from '@/lib/ui/Skeleton.svelte';
   import Tabs from '@/lib/ui/Tabs.svelte';
 
   let {
-    name,
     leagueId,
     year,
     tab,
-  }: { name: string; leagueId: number; year: number; tab: SeasonTab } = $props();
+    loading = false,
+  }: { leagueId: number; year: number; tab: SeasonTab; loading?: boolean } = $props();
 
   const { api, router } = useServices();
-  const leagues = api.leagues().catch(() => []);
-  const yearsKnown = leagues.then(
-    (options) => (options.find((league) => league.league_id === leagueId)?.years.length ?? 0) > 1,
+
+  let options = $state<LeagueSummary[] | null>(null);
+  void api.leagues().then(
+    (list) => {
+      options = list;
+    },
+    () => {
+      options = [];
+    },
   );
+
+  const current = $derived(options?.find((league) => league.league_id === leagueId));
+  const hasSeasonPicker = $derived((current?.years.length ?? 0) > 1);
 
   const TABS: readonly { id: SeasonTab; label: string }[] = [
     { id: 'overview', label: 'Overview' },
@@ -47,29 +58,30 @@
 
 <header>
   <div class="title rise">
-    {#await yearsKnown then hasSwitcher}
-      {#if !hasSwitcher}<p class="eyebrow">{year} season</p>{/if}
-    {/await}
-    <h1>{name}</h1>
+    {#if options === null}
+      <Skeleton width="min(20rem, 70%)" height="2.6rem" />
+    {:else}
+      {#if !hasSeasonPicker}<p class="eyebrow">{year} season</p>{/if}
+      <h1>{current?.name ?? 'League'}</h1>
+    {/if}
   </div>
 
-  {#await leagues then options}
-    {@const current = options.find((league) => league.league_id === leagueId)}
+  {#if options !== null}
     <div class="switchers rise" style:--i="1">
       {#if options.length > 1}
         <label>
           <span class="eyebrow">League</span>
-          <select value={leagueId} onchange={(event) => pickLeague(event, options)}>
+          <select value={leagueId} onchange={(event) => pickLeague(event, options ?? [])}>
             {#each options as league (league.league_id)}
               <option value={league.league_id}>{league.name}</option>
             {/each}
           </select>
         </label>
       {/if}
-      {#if current && current.years.length > 1}
+      {#if current && hasSeasonPicker}
         <label>
           <span class="eyebrow">Season</span>
-          <select value={year} onchange={pickYear}>
+          <select value={year} onchange={pickYear} disabled={loading}>
             {#each current.years as option (option)}
               <option value={option}>{option}</option>
             {/each}
@@ -77,7 +89,7 @@
         </label>
       {/if}
     </div>
-  {/await}
+  {/if}
 
   <div class="tabs rise" style:--i="2">
     <Tabs {items} active={tab} {router} label="Season views" />
@@ -114,6 +126,11 @@
 
   label .eyebrow {
     margin-bottom: 0.2rem;
+  }
+
+  select:disabled {
+    cursor: progress;
+    opacity: 0.6;
   }
 
   select {

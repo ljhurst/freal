@@ -4,6 +4,8 @@
   import ThemeToggle from '@/lib/ui/ThemeToggle.svelte';
 
   const { router, session } = useServices();
+
+  const inLeagues = $derived(router.route.name === 'home' || router.route.name === 'season');
 </script>
 
 <header>
@@ -13,8 +15,21 @@
         <rect width="32" height="32" rx="8" fill="var(--accent)" />
         <path d="M10 23V9.5h11M10 16h8" stroke="var(--accent-ink)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
       </svg>
-      <span>freal</span>
+      <span class="wordmark">F<span class="tick">'</span>Real</span>
     </a>
+    {#if session === null || session.status === 'signedIn'}
+      <nav aria-label="Main">
+        <a
+          class="section"
+          class:active={inLeagues}
+          href="/"
+          use:link={router}
+          aria-current={router.route.name === 'home' ? 'page' : inLeagues ? 'true' : undefined}
+        >
+          Leagues
+        </a>
+      </nav>
+    {/if}
     <div class="actions">
       <ThemeToggle />
       {#if session?.status === 'signedIn'}
@@ -55,6 +70,47 @@
     font-size: 1.25rem;
     letter-spacing: -0.04em;
     text-decoration: none;
+  }
+
+  .tick {
+    color: var(--accent);
+  }
+
+  nav {
+    flex: 1;
+    margin-left: 1.25rem;
+  }
+
+  .section {
+    position: relative;
+    display: inline-block;
+    padding: 0.5rem 0.25rem;
+    color: var(--muted);
+    font-weight: 650;
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .section:hover,
+  .section.active {
+    color: var(--text);
+  }
+
+  .section::after {
+    content: '';
+    position: absolute;
+    left: 0.25rem;
+    right: 0.25rem;
+    bottom: -0.7rem;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  .section.active::after {
+    transform: scaleX(1);
   }
 
   .actions {
