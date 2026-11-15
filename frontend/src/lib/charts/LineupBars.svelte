@@ -9,7 +9,7 @@
   const percent = $derived(linearScale([0, view.max], [0, 100]));
 
   function sentence(row: LineupView['rows'][number]): string {
-    return `${row.team.name} scored ${formatPoints(row.scored)} of a possible ${formatPoints(row.best)} points, ${formatPercent(row.efficiency)}, leaving ${formatPoints(row.benched)} on the bench`;
+    return `${row.team.name} scored ${formatPoints(row.scored)} of a possible ${formatPoints(row.best)} points, ${formatPercent(row.efficiency)}, missing ${formatPoints(row.missed)} points`;
   }
 </script>
 
@@ -20,11 +20,11 @@
         <span class="name">{row.team.name}</span>
         <span class="track" role="img" aria-label={sentence(row)}>
           <span class="scored" style:width="{percent(row.scored)}%"></span>
-          <span class="benched" style:width="{percent(row.benched)}%"></span>
+          <span class="missed" style:width="{percent(row.missed)}%"></span>
         </span>
         <span class="value" aria-hidden="true">
           <strong>{formatPercent(row.efficiency)}</strong>
-          <span class="cost">{formatPoints(row.benched)} benched</span>
+          <span class="cost">{formatPoints(row.missed)} missed</span>
         </span>
       </li>
     {/each}
@@ -34,7 +34,7 @@
 <Legend
   items={[
     { label: 'Points scored', kind: 'series' },
-    { label: 'Left on the bench (the bar ends at the best possible lineup)', kind: 'hatch' },
+    { label: 'Points missed (the bar ends at your best possible lineups)', kind: 'hatch' },
   ]}
 />
 
@@ -81,7 +81,7 @@
   }
 
   .scored,
-  .benched {
+  .missed {
     display: block;
     height: 1.05rem;
     transform-origin: left;
@@ -94,7 +94,7 @@
     border-radius: 3px 0 0 3px;
   }
 
-  .benched {
+  .missed {
     background: var(--hatch);
     box-shadow: inset 0 0 0 1.5px var(--muted);
     border-radius: 0 3px 3px 0;

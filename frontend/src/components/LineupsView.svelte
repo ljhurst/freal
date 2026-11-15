@@ -20,19 +20,19 @@
     {/snippet}
     {#snippet table()}
       <ChartTable
-        caption="Points scored, best possible lineup, points left on the bench and efficiency for each team"
+        caption="Points scored, best possible lineup, points missed and efficiency for each team"
         columns={[
           { label: 'Team' },
           { label: 'Points', numeric: true },
           { label: 'Best possible', numeric: true },
-          { label: 'Left on bench', numeric: true },
+          { label: 'Points missed', numeric: true },
           { label: 'Efficiency', numeric: true },
         ]}
         rows={view.rows.map((row) => [
           row.team.name,
           formatPoints(row.scored),
           formatPoints(row.best),
-          formatPoints(row.benched),
+          formatPoints(row.missed),
           formatPercent(row.efficiency),
         ])}
       />

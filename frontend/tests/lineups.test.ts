@@ -20,9 +20,9 @@ describe('lineupView', () => {
     ]);
   });
 
-  it('has points scored plus points benched equal to the best possible lineup', () => {
+  it('has points scored plus points missed equal to the best possible lineup', () => {
     for (const row of view.rows) {
-      expect(row.scored + row.benched).toBeCloseTo(row.best, 6);
+      expect(row.scored + row.missed).toBeCloseTo(row.best, 6);
       expect(row.efficiency).toBeCloseTo(row.scored / row.best, 6);
     }
   });

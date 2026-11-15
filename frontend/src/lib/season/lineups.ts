@@ -6,7 +6,8 @@ export interface LineupRow {
   scored: number;
   /** What the best possible lineup would have scored. */
   best: number;
-  benched: number;
+  /** What the best lineup would have added over the lineup that was set. */
+  missed: number;
   efficiency: number;
 }
 
@@ -25,7 +26,7 @@ export function lineupView(season: SeasonReport): LineupView {
       team,
       scored: team.efficiency.points,
       best: team.efficiency.optimal_points,
-      benched: team.efficiency.left_on_bench,
+      missed: team.efficiency.left_on_bench,
       efficiency: team.efficiency.efficiency,
     }))
     .sort((a, b) => b.efficiency - a.efficiency || byStanding(a.team, b.team));
