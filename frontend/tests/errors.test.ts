@@ -6,6 +6,7 @@ describe('describeError', () => {
   it.each([
     ['espn_auth_expired', 'ESPN needs a refresh'],
     ['espn_unavailable', "ESPN isn't answering"],
+    ['invalid_token', "Couldn't sign you in"],
     ['insufficient_scope', 'No access yet'],
     ['league_not_found', 'Not found'],
     ['season_not_found', 'Not found'],

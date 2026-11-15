@@ -48,7 +48,9 @@ export function createServices(win: Window): Services {
   const api = createApi({
     baseUrl: API_BASE_URL,
     accessToken: () => session.accessToken(),
-    onUnauthorized: () => session.signIn(win.location.pathname + win.location.search),
+    onUnauthorized: async () => {
+      await session.reauthenticate(win.location.pathname + win.location.search);
+    },
   });
   return { api, router, session };
 }

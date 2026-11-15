@@ -2,6 +2,9 @@ import type { User } from 'oidc-client-ts';
 
 export type SessionStatus = 'loading' | 'signedOut' | 'signedIn';
 
+const LAST_SIGN_IN_KEY = 'freal.last-sign-in';
+const LOOP_WINDOW_MS = 60_000;
+
 /** The part of oidc-client-ts's UserManager the session uses. */
 export interface OidcClient {
   getUser(): Promise<User | null>;
@@ -14,14 +17,32 @@ export class Session {
   status = $state<SessionStatus>('loading');
   givenName = $state('');
 
-  constructor(private readonly client: OidcClient) {}
+  constructor(
+    private readonly client: OidcClient,
+    private readonly storage: Pick<Storage, 'getItem' | 'setItem'> = globalThis.sessionStorage,
+    private readonly now: () => number = Date.now,
+  ) {}
 
   async start(): Promise<void> {
     this.apply(await this.client.getUser());
   }
 
   async signIn(returnTo: string): Promise<void> {
+    this.storage.setItem(LAST_SIGN_IN_KEY, String(this.now()));
     await this.client.signinRedirect({ state: returnTo });
+  }
+
+  /**
+   * Restarts the login after the API rejected a token. Returns false, without redirecting, when
+   * a login was only just started: the API would reject the new token too, and the page would loop.
+   */
+  async reauthenticate(returnTo: string): Promise<boolean> {
+    const last = Number(this.storage.getItem(LAST_SIGN_IN_KEY) ?? 0);
+    if (this.now() - last < LOOP_WINDOW_MS) {
+      return false;
+    }
+    await this.signIn(returnTo);
+    return true;
   }
 
   /** Finishes the login redirect and returns the path the user started from. */

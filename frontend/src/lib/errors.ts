@@ -18,6 +18,11 @@ export function describeError(error: unknown): ErrorMessage {
       };
     case 'espn_unavailable':
       return { title: "ESPN isn't answering", detail: 'Try again in a minute.' };
+    case 'invalid_token':
+      return {
+        title: "Couldn't sign you in",
+        detail: 'Your login was rejected. Sign out and back in, or try again in a minute.',
+      };
     case 'insufficient_scope':
       return {
         title: 'No access yet',

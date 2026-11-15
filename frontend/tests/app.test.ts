@@ -2,7 +2,7 @@ import { render, screen, waitFor, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import App from '@/App.svelte';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, createApi } from '@/lib/api/client';
 import { Session } from '@/lib/auth/session.svelte';
 import {
   contextFor,
@@ -158,5 +158,42 @@ describe('navigation', () => {
     render(App, { context: contextFor(services({ path: '/nope' })) });
 
     expect(screen.getByRole('heading', { name: 'Not found' })).toBeInTheDocument();
+  });
+});
+
+describe('when the API rejects a valid-looking token', () => {
+  function rejectingSetup() {
+    const client = new FakeOidcClient();
+    client.user = fakeUser();
+    const session = new Session(client);
+    const api = createApi({
+      baseUrl: 'https://api.test',
+      accessToken: () => session.accessToken(),
+      onUnauthorized: async () => {
+        await session.reauthenticate('/leagues/7/2025');
+      },
+      fetch: (async () =>
+        Response.json({ error: 'invalid_token' }, { status: 401 })) as typeof fetch,
+    });
+    return { client, session, api };
+  }
+
+  it('restarts the login once when no login has happened lately', async () => {
+    const { client, session, api } = rejectingSetup();
+
+    render(App, { context: contextFor(services({ api, session, path: '/leagues/7/2025' })) });
+
+    expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't sign you in");
+    expect(client.redirectedWith).toEqual(['/leagues/7/2025']);
+  });
+
+  it('shows an error instead of looping when a login just happened', async () => {
+    const { client, session, api } = rejectingSetup();
+    await session.signIn('/leagues/7/2025');
+
+    render(App, { context: contextFor(services({ api, session, path: '/leagues/7/2025' })) });
+
+    expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't sign you in");
+    expect(client.redirectedWith).toEqual(['/leagues/7/2025']);
   });
 });

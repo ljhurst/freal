@@ -84,4 +84,59 @@ describe('Session', () => {
 
     expect(client.signedOut).toBe(true);
   });
+
+  describe('after the API rejects a token', () => {
+    function timed(start = 1_000_000) {
+      const client = new FakeOidcClient();
+      let now = start;
+      const session = new Session(client, sessionStorage, () => now);
+      return { client, session, advance: (ms: number) => (now += ms) };
+    }
+
+    it('restarts the login when none was started recently', async () => {
+      const { client, session } = timed();
+
+      await expect(session.reauthenticate('/leagues/7/2025')).resolves.toBe(true);
+
+      expect(client.redirectedWith).toEqual(['/leagues/7/2025']);
+    });
+
+    it('does not start another login right after one, which would loop', async () => {
+      const { client, session } = timed();
+      await session.signIn('/');
+
+      await expect(session.reauthenticate('/')).resolves.toBe(false);
+
+      expect(client.redirectedWith).toEqual(['/']);
+    });
+
+    it('does not loop on its own redirects either', async () => {
+      const { client, session, advance } = timed();
+      await session.reauthenticate('/');
+      advance(5_000);
+
+      await expect(session.reauthenticate('/')).resolves.toBe(false);
+
+      expect(client.redirectedWith).toHaveLength(1);
+    });
+
+    it('restarts the login again once a minute has passed', async () => {
+      const { client, session, advance } = timed();
+      await session.reauthenticate('/');
+      advance(60_000);
+
+      await expect(session.reauthenticate('/')).resolves.toBe(true);
+
+      expect(client.redirectedWith).toHaveLength(2);
+    });
+
+    it('never blocks a person who clicks Log in', async () => {
+      const { client, session } = timed();
+      await session.signIn('/');
+
+      await session.signIn('/');
+
+      expect(client.redirectedWith).toHaveLength(2);
+    });
+  });
 });
