@@ -61,8 +61,13 @@ Merging to `main` deploys: stych's Terraform workflow builds `dist/freal.zip`
 (`scripts/build_lambda.sh`) and applies `infra/` as `freal-ci-apply`. Every PR
 gets the plan as a comment.
 
-The API is served at `https://freal-api.bylukehurst.com/`. After the first apply,
-add a DNS-only `CNAME freal-api` in Cloudflare pointing at the `cname_target` output.
+The API is served at `https://freal-api.bylukehurst.com/` and the dashboard at
+`https://freal.bylukehurst.com/`. After the first apply, add a DNS-only `CNAME` in Cloudflare
+for each, pointing at the `cname_target` and `site_cname_target` outputs. The site job builds
+`frontend/` and syncs it to the `lj-freal` bucket, then clears the CloudFront cache (the
+`distribution-id` in `deploy.yml` is the `site_distribution_id` output). Every PR also gets a
+preview at `https://freal-pr-<number>.preview.bylukehurst.com/`, which shows demo data because
+previews can't log in.
 
 ## Operating
 
