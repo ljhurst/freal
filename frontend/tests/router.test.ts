@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseRoute, Router, seasonPath } from '@/lib/router.svelte';
+import { parseRoute, Router, seasonPath, teamPath } from '@/lib/router.svelte';
 
 describe('parseRoute', () => {
   it.each([
@@ -114,5 +114,15 @@ describe('Router', () => {
     window.dispatchEvent(new PopStateEvent('popstate'));
 
     expect(router.route).toEqual({ name: 'home' });
+  });
+});
+
+describe('teamPath', () => {
+  it("is a team's week by week with that team selected", () => {
+    expect(teamPath(7, 2025, 6)).toBe('/leagues/7/2025/weekly?team=6');
+    expect(parseRoute('/leagues/7/2025/weekly', '?team=6')).toMatchObject({
+      tab: 'weekly',
+      team: 6,
+    });
   });
 });

@@ -4,11 +4,23 @@
   import Meter from '@/lib/charts/Meter.svelte';
   import Sparkline from '@/lib/charts/Sparkline.svelte';
   import { formatPoints, formatRecord } from '@/lib/format';
+  import { seasonPath, teamPath } from '@/lib/router.svelte';
   import { byStanding } from '@/lib/season/order';
   import Chip from '@/lib/ui/Chip.svelte';
+  import PlainLink from '@/lib/ui/PlainLink.svelte';
   import { verdictLabels } from '@/lib/verdict';
 
-  let { teams, weeks }: { teams: readonly TeamReport[]; weeks: SeasonReport['weeks'] } = $props();
+  let {
+    teams,
+    weeks,
+    leagueId,
+    year,
+  }: {
+    teams: readonly TeamReport[];
+    weeks: SeasonReport['weeks'];
+    leagueId: number;
+    year: number;
+  } = $props();
 
   const MIN_LUCK_SCALE = 2;
 
@@ -37,9 +49,15 @@
         <th scope="col">Record</th>
         <th scope="col" class="points">PF</th>
         <th scope="col" class="points">PA</th>
-        <th scope="col" class="mark">Luck</th>
-        <th scope="col" class="mark extra">Lineup</th>
-        <th scope="col" class="mark extra">Trend</th>
+        <th scope="col" class="mark">
+          <PlainLink href={seasonPath(leagueId, year, 'luck')}>Luck</PlainLink>
+        </th>
+        <th scope="col" class="mark extra">
+          <PlainLink href={seasonPath(leagueId, year, 'lineups')}>Lineup</PlainLink>
+        </th>
+        <th scope="col" class="mark extra">
+          <PlainLink href={seasonPath(leagueId, year, 'weekly')}>Trend</PlainLink>
+        </th>
         <th scope="col" class="verdict">Verdict</th>
       </tr>
     </thead>
@@ -47,7 +65,9 @@
       {#each ranked as team (team.team_id)}
         {@const chips = verdictLabels(team)}
         <tr class:for-real={team.for_real}>
-          <th scope="row">{team.name}</th>
+          <th scope="row">
+            <PlainLink href={teamPath(leagueId, year, team.team_id)}>{team.name}</PlainLink>
+          </th>
           <td>{formatRecord(team.standing.wins, team.standing.losses, team.standing.ties)}</td>
           <td class="points">{formatPoints(team.standing.points_for)}</td>
           <td class="points">{formatPoints(team.standing.points_against)}</td>
@@ -97,6 +117,7 @@
   th[scope='row'] {
     font-weight: 650;
   }
+
 
   thead th {
     color: var(--muted);

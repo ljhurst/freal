@@ -43,10 +43,10 @@
   {#key tab}
     {#if tab === 'overview'}
       {@const picks = overview(season)}
-      <Hero highlights={picks} />
-      <StatTiles highlights={picks} />
+      <Hero highlights={picks} {leagueId} {year} />
+      <StatTiles highlights={picks} {leagueId} {year} />
       <Card title="Standings" index={6}>
-        <Standings teams={season.teams} weeks={season.weeks} />
+        <Standings teams={season.teams} weeks={season.weeks} {leagueId} {year} />
       </Card>
     {:else if tab === 'luck'}
       <LuckView {season} />

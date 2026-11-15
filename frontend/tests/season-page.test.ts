@@ -93,7 +93,7 @@ describe('the season page', () => {
     expect(
       within(hero as HTMLElement)
         .getAllByRole('listitem')
-        .map((item) => item.textContent?.replace(/^\u2713/, '')),
+        .map((item) => item.textContent?.replace(/^\u2713/, '').trim()),
     ).toEqual(['Team 5', 'Team 6']);
     for (const label of ['Luckiest', 'Unluckiest', 'Best manager', 'Top week', 'Steadiest']) {
       expect(screen.getByText(label)).toBeInTheDocument();
