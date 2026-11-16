@@ -28,6 +28,17 @@
         >
           Leagues
         </a>
+        {#if session?.isAdmin}
+          <a
+            class="section"
+            class:active={router.route.name === 'admin'}
+            href="/admin"
+            use:link={router}
+            aria-current={router.route.name === 'admin' ? 'page' : undefined}
+          >
+            Access
+          </a>
+        {/if}
       </nav>
     {/if}
     <div class="actions">
@@ -78,6 +89,8 @@
 
   nav {
     flex: 1;
+    display: flex;
+    gap: 1rem;
     margin-left: 1.25rem;
   }
 

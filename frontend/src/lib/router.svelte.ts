@@ -4,6 +4,7 @@ export type SeasonTab = (typeof SEASON_TABS)[number];
 export type Route =
   | { name: 'home' }
   | { name: 'season'; leagueId: number; year: number; tab: SeasonTab; team?: number }
+  | { name: 'admin' }
   | { name: 'authCallback' }
   | { name: 'notFound' };
 
@@ -39,6 +40,9 @@ export class Router {
 export function parseRoute(pathname: string, search = ''): Route {
   if (pathname === '/') {
     return { name: 'home' };
+  }
+  if (pathname === '/admin') {
+    return { name: 'admin' };
   }
   if (pathname === '/auth/callback') {
     return { name: 'authCallback' };

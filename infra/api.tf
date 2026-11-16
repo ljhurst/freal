@@ -39,6 +39,12 @@ data "aws_iam_policy_document" "api_permissions" {
   }
 
   statement {
+    sid       = "WriteLeagueAccess"
+    actions   = ["ssm:PutParameter"]
+    resources = ["${local.ssm_parameter_arns}/${var.project_name}/access"]
+  }
+
+  statement {
     sid       = "WriteLogs"
     actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
     resources = ["${aws_cloudwatch_log_group.api.arn}:*"]

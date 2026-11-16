@@ -48,6 +48,18 @@ describe('createApi', () => {
     });
   });
 
+  it("replaces a league's members with a JSON PUT", async () => {
+    const { api, fetchMock } = setup({ response: new Response(null, { status: 204 }) });
+
+    await api.setMembers(7, [{ sub: 'abc', label: 'Dana' }]);
+
+    expect(fetchMock).toHaveBeenCalledWith('https://api.test/admin/leagues/7/members', {
+      method: 'PUT',
+      headers: { Authorization: 'Bearer tok', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ members: [{ sub: 'abc', label: 'Dana' }] }),
+    });
+  });
+
   it('requests the season for a league and year', async () => {
     const { api, fetchMock } = setup({ response: jsonResponse({ year: 2025 }) });
 

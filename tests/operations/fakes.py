@@ -1,7 +1,11 @@
 from freal.integrations.espn.credentials import EspnCredentials
+from freal.leagues.access import Caller
 from freal.leagues.models import Season
 
 LEAGUE_ID = 7
+ADMIN = Caller(subject="admin", is_admin=True)
+MEMBER = Caller(subject="member", is_admin=False)
+STRANGER = Caller(subject="stranger", is_admin=False)
 
 
 class FakeFetcher:

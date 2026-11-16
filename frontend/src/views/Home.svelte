@@ -1,5 +1,6 @@
 <script lang="ts">
   import ErrorPanel from '@/components/ErrorPanel.svelte';
+  import { BRAND_NAME } from '@/lib/brand';
   import { link } from '@/lib/link';
   import { seasonPath } from '@/lib/router.svelte';
   import { useServices } from '@/lib/services';
@@ -14,7 +15,7 @@
     <p class="status" role="status">Loading your leagues…</p>
   {:then items}
     {#if items.length === 0}
-      <p class="status">No leagues are set up yet.</p>
+      <p class="status">No leagues yet. Ask whoever runs {BRAND_NAME} to add you.</p>
     {:else}
       <ul>
         {#each items as league (league.league_id)}

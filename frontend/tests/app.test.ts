@@ -37,7 +37,9 @@ describe('App in demo mode', () => {
   it('says so when no leagues are set up', async () => {
     render(App, { context: contextFor(services()) });
 
-    expect(await screen.findByText('No leagues are set up yet.')).toBeInTheDocument();
+    expect(
+      await screen.findByText("No leagues yet. Ask whoever runs F'Real to add you."),
+    ).toBeInTheDocument();
   });
 });
 

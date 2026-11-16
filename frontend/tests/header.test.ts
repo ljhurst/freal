@@ -77,6 +77,28 @@ describe('the header', () => {
   });
 });
 
+describe('the access tab', () => {
+  async function signedInAs(scopes: string[]) {
+    const client = new FakeOidcClient();
+    client.user = fakeUser({ scopes });
+    const session = new Session(client);
+    renderAt('/', session);
+    await screen.findByRole('link', { name: 'Leagues' });
+  }
+
+  it('is there for an admin', async () => {
+    await signedInAs(['freal:read', 'freal:admin']);
+
+    expect(await screen.findByRole('link', { name: 'Access' })).toHaveAttribute('href', '/admin');
+  });
+
+  it('is hidden from everyone else', async () => {
+    await signedInAs(['freal:read']);
+
+    expect(screen.queryByRole('link', { name: 'Access' })).not.toBeInTheDocument();
+  });
+});
+
 describe('the season header', () => {
   it('shows the league name on its first paint when the list is already loaded', async () => {
     const appServices = services({ api: fakeApi({ leagues: async () => [league()] }) });

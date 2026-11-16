@@ -22,5 +22,7 @@ export function createDemoApi(fetchFn: typeof fetch = globalThis.fetch.bind(glob
     leagues: () => load<LeagueSummary[]>('/demo/leagues.json'),
     season: (_leagueId, year) => load<SeasonReport>(`/demo/season-${year}.json`),
     version: () => Promise.resolve(null),
+    access: () => Promise.reject(new ApiError(403, 'insufficient_scope')),
+    setMembers: () => Promise.reject(new ApiError(403, 'insufficient_scope')),
   };
 }
