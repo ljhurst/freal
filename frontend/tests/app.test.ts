@@ -28,10 +28,33 @@ describe('App in demo mode', () => {
 
     expect(await screen.findByText('Demo League')).toBeInTheDocument();
     expect(screen.getByText(/Demo data/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: '2025 season' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /Demo League/ })).toHaveAttribute(
       'href',
       '/leagues/7/2025',
     );
+  });
+
+  it('is titled for what it lists, matching its tab', async () => {
+    render(App, { context: contextFor(services()) });
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Your leagues' }),
+    ).toBeInTheDocument();
+  });
+
+  it('gives each league one link and a line that says how far back it goes', async () => {
+    const api = fakeApi({
+      leagues: async () => [
+        league({ league_id: 1, name: 'Old Guard', years: [2019, 2020, 2021] }),
+        league({ league_id: 2, name: 'Newcomers', years: [2025] }),
+      ],
+    });
+
+    render(App, { context: contextFor(services({ api })) });
+
+    expect(await screen.findAllByRole('link', { name: /Old Guard|Newcomers/ })).toHaveLength(2);
+    expect(screen.getByText('Since 2019')).toBeInTheDocument();
+    expect(screen.getByText('2025 season')).toBeInTheDocument();
   });
 
   it('says so when no leagues are set up', async () => {
@@ -177,7 +200,7 @@ describe('navigation', () => {
     });
     render(App, { context: contextFor(services({ api })) });
 
-    await userEvent.click(await screen.findByRole('link', { name: '2025 season' }));
+    await userEvent.click(await screen.findByRole('link', { name: /Family League/ }));
 
     expect(await screen.findByRole('heading', { name: 'Family League' })).toBeInTheDocument();
     expect(window.location.pathname).toBe('/leagues/7/2025');

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import LeagueMenu from '@/components/LeagueMenu.svelte';
   import type { LeagueSummary } from '@/lib/api/client';
   import { type SeasonTab, seasonPath } from '@/lib/router.svelte';
   import { useServices } from '@/lib/services';
@@ -25,6 +26,7 @@
   );
 
   const current = $derived(options?.find((league) => league.league_id === leagueId));
+  const switchesLeagues = $derived((options?.length ?? 0) > 1 && current !== undefined);
   const hasSeasonPicker = $derived((current?.years.length ?? 0) > 1);
 
   const TABS: readonly { id: SeasonTab; label: string }[] = [
@@ -46,14 +48,6 @@
     const picked = Number((event.currentTarget as HTMLSelectElement).value);
     router.navigate(seasonPath(leagueId, picked, tab));
   }
-
-  function pickLeague(event: Event, options: { league_id: number; years: number[] }[]): void {
-    const picked = Number((event.currentTarget as HTMLSelectElement).value);
-    const latest = options.find((league) => league.league_id === picked)?.years.at(-1);
-    if (latest !== undefined) {
-      router.navigate(seasonPath(picked, latest));
-    }
-  }
 </script>
 
 <header>
@@ -62,22 +56,17 @@
       <Skeleton width="min(20rem, 70%)" height="2.6rem" />
     {:else}
       {#if !hasSeasonPicker}<p class="eyebrow">{year} season</p>{/if}
-      <h1>{current?.name ?? 'League'}</h1>
+      {#if switchesLeagues && options}
+        <h1 class="visually-hidden">{current?.name}</h1>
+        <LeagueMenu leagues={options} {leagueId} />
+      {:else}
+        <h1>{current?.name ?? 'League'}</h1>
+      {/if}
     {/if}
   </div>
 
   {#if options !== null}
     <div class="switchers rise" style:--i="1">
-      {#if options.length > 1}
-        <label>
-          <span class="eyebrow">League</span>
-          <select value={leagueId} onchange={(event) => pickLeague(event, options ?? [])}>
-            {#each options as league (league.league_id)}
-              <option value={league.league_id}>{league.name}</option>
-            {/each}
-          </select>
-        </label>
-      {/if}
       {#if current && hasSeasonPicker}
         <label>
           <span class="eyebrow">Season</span>
@@ -144,6 +133,13 @@
     background-position: right 0.7rem center;
     color: var(--text);
     cursor: pointer;
+  }
+
+  /* The league menu hangs below the title, so the title must paint above the tabs row. */
+  .title {
+    position: relative;
+    z-index: 2;
+    min-width: 0;
   }
 
   .tabs {
