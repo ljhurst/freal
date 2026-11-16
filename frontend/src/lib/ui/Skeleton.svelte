@@ -27,12 +27,6 @@
     }
   }
 
-  @keyframes breathe {
-    50% {
-      opacity: 0.55;
-    }
-  }
-
   @keyframes shimmer {
     from {
       background-position: 150% 0;

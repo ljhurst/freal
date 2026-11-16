@@ -218,14 +218,22 @@ select {
   }
 }
 
+@keyframes breathe {
+  50% {
+    opacity: 0.55;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  *:not(.skeleton),
+  *:not(.skeleton):not(.spinner),
   *::before,
   *::after {
     /* biome-ignore lint/complexity/noImportantStyles: the reduced-motion reset must beat component styles */
     animation-duration: 0.001ms !important;
     /* biome-ignore lint/complexity/noImportantStyles: the reduced-motion reset must beat component styles */
     animation-delay: 0ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: the reduced-motion reset must beat component styles */
+    animation-iteration-count: 1 !important;
     /* biome-ignore lint/complexity/noImportantStyles: the reduced-motion reset must beat component styles */
     transition-duration: 0.001ms !important;
   }
