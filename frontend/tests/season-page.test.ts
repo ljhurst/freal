@@ -172,15 +172,70 @@ describe('the season page', () => {
     expect(window.location.pathname).toBe('/leagues/1/2024/lineups');
   });
 
-  it('offers a league switch only when there is more than one league', async () => {
-    renderSeason('/leagues/1/2025', [
+  describe('the league menu', () => {
+    const TWO = [
       league({ league_id: 1, name: 'Family', years: [2025] }),
       league({ league_id: 2, name: 'Work', years: [2024, 2025] }),
-    ]);
+    ];
 
-    await userEvent.selectOptions(await screen.findByRole('combobox', { name: 'League' }), '2');
+    it('is the title: one heading, a collapsed button named for the league', async () => {
+      renderSeason('/leagues/1/2025', TWO);
 
-    expect(window.location.pathname).toBe('/leagues/2/2025');
+      const button = await screen.findByRole('button', { name: 'Family' });
+
+      expect(button).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+      expect(screen.queryByRole('link', { name: 'Work' })).not.toBeInTheDocument();
+    });
+
+    it('lists every league as a link, marks the current one, and goes to the one picked', async () => {
+      renderSeason('/leagues/1/2025', TWO);
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Family' }));
+
+      expect(screen.getByRole('button', { name: 'Family' })).toHaveAttribute(
+        'aria-expanded',
+        'true',
+      );
+      expect(screen.getByRole('link', { name: /Family/ })).toHaveAttribute('aria-current', 'true');
+      await userEvent.click(screen.getByRole('link', { name: /Work/ }));
+
+      expect(window.location.pathname).toBe('/leagues/2/2025');
+      expect(screen.queryByRole('link', { name: /Work/ })).not.toBeInTheDocument();
+    });
+
+    it('closes on Escape and gives focus back to the button', async () => {
+      renderSeason('/leagues/1/2025', TWO);
+      const button = await screen.findByRole('button', { name: 'Family' });
+      await userEvent.click(button);
+
+      await userEvent.keyboard('{Escape}');
+
+      expect(button).toHaveAttribute('aria-expanded', 'false');
+      expect(button).toHaveFocus();
+    });
+
+    it('closes when keyboard focus moves past it', async () => {
+      renderSeason('/leagues/1/2025', TWO);
+      const button = await screen.findByRole('button', { name: 'Family' });
+      await userEvent.click(button);
+
+      await userEvent.tab();
+      await userEvent.tab();
+      await userEvent.tab();
+
+      expect(button).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('closes on a click outside it', async () => {
+      renderSeason('/leagues/1/2025', TWO);
+      const button = await screen.findByRole('button', { name: 'Family' });
+      await userEvent.click(button);
+
+      await userEvent.click(document.body);
+
+      expect(button).toHaveAttribute('aria-expanded', 'false');
+    });
   });
 
   it('shows no switchers for a single league with a single season', async () => {
