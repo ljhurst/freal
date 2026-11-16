@@ -55,3 +55,12 @@ def test_a_failed_computation_is_not_cached() -> None:
         cache.get_or_compute("k", fail)
 
     assert cache.get_or_compute("k", lambda: "recovered") == "recovered"
+
+
+def test_an_invalidated_key_is_recomputed() -> None:
+    cache = TtlCache[str](60, FakeClock())
+    cache.get_or_compute("k", lambda: "old")
+
+    cache.invalidate("k")
+
+    assert cache.get_or_compute("k", lambda: "new") == "new"

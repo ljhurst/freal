@@ -11,8 +11,9 @@ from pydantic import BaseModel, SecretStr
 from freal.integrations.espn.client import EspnAuthError, EspnUnavailable
 from freal.integrations.espn.credentials import EspnCredentials
 from freal.integrations.lasso.tokens import VerifiedToken
+from freal.leagues.access import Caller, Member
 from freal.leagues.errors import AccountNotFound, LeagueNotFound, SeasonNotFound
-from freal.operations.service import LeagueService, LeagueSummary
+from freal.operations.service import LeagueAccessView, LeagueService, LeagueSummary
 from freal.operations.version import app_version
 from freal.reports.season import SeasonReport
 from freal.storage.leagues import LeaguesNotConfigured
@@ -23,6 +24,7 @@ TokenValidator = Callable[[str], VerifiedToken | None]
 
 READ_SCOPE = "freal:read"
 CONNECT_SCOPE = "freal:connect"
+ADMIN_SCOPE = "freal:admin"
 
 ALLOWED_ORIGINS = (
     r"^(https://(freal|freal-pr-\d+\.preview)\.bylukehurst\.com|http://localhost(:\d+)?)$"
@@ -44,6 +46,10 @@ class ConnectRequest(BaseModel):
     swid: SecretStr
 
 
+class MembersRequest(BaseModel):
+    members: list[Member]
+
+
 class VersionInfo(BaseModel):
     version: str
 
@@ -61,7 +67,7 @@ def create_app(service: LeagueService, validate_token: TokenValidator) -> FastAP
     app.add_middleware(
         CORSMiddleware,
         allow_origin_regex=ALLOWED_ORIGINS,
-        allow_methods=["GET", "POST"],
+        allow_methods=["GET", "POST", "PUT"],
         allow_headers=["Authorization", "Content-Type"],
     )
 
@@ -103,19 +109,37 @@ def create_app(service: LeagueService, validate_token: TokenValidator) -> FastAP
 
         return check
 
+    def read_caller(
+        token: Annotated[VerifiedToken, Depends(require_scope(READ_SCOPE))],
+    ) -> Caller:
+        return Caller(subject=token.subject, is_admin=ADMIN_SCOPE in token.scopes)
+
     @app.get("/version", dependencies=[Depends(require_scope(READ_SCOPE))])
     def version() -> VersionInfo:
         return VersionInfo(version=app_version())
 
-    @app.get("/leagues", dependencies=[Depends(require_scope(READ_SCOPE))])
-    def leagues() -> list[LeagueSummary]:
-        return service.leagues()
+    @app.get("/leagues")
+    def leagues(caller: Annotated[Caller, Depends(read_caller)]) -> list[LeagueSummary]:
+        return service.leagues(caller)
 
-    @app.get(
-        "/leagues/{league_id}/seasons/{year}", dependencies=[Depends(require_scope(READ_SCOPE))]
-    )
-    def season(league_id: int, year: int) -> SeasonReport:
-        return service.season_report(league_id, year)
+    @app.get("/leagues/{league_id}/seasons/{year}")
+    def season(
+        league_id: int, year: int, caller: Annotated[Caller, Depends(read_caller)]
+    ) -> SeasonReport:
+        return service.season_report(league_id, year, caller)
+
+    @app.get("/admin/access", dependencies=[Depends(require_scope(ADMIN_SCOPE))])
+    def access() -> list[LeagueAccessView]:
+        return service.access()
+
+    @app.put("/admin/leagues/{league_id}/members", status_code=204)
+    def set_members(
+        league_id: int,
+        request: MembersRequest,
+        token: Annotated[VerifiedToken, Depends(require_scope(ADMIN_SCOPE))],
+    ) -> Response:
+        service.set_members(league_id, tuple(request.members), token.subject)
+        return Response(status_code=204)
 
     @app.post("/connect", status_code=204)
     def connect(

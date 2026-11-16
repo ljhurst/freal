@@ -5,6 +5,7 @@ describe('parseRoute', () => {
   it.each([
     ['/', { name: 'home' }],
     ['/auth/callback', { name: 'authCallback' }],
+    ['/admin', { name: 'admin' }],
     ['/leagues/7/2025', { name: 'season', leagueId: 7, year: 2025, tab: 'overview' }],
     ['/leagues/7/2025/', { name: 'season', leagueId: 7, year: 2025, tab: 'overview' }],
     ['/leagues/7/2025/luck', { name: 'season', leagueId: 7, year: 2025, tab: 'luck' }],

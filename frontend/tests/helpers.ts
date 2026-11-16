@@ -23,6 +23,8 @@ export function fakeApi(overrides: Partial<Api> = {}): Api {
     leagues: () => Promise.resolve([]),
     season: () => Promise.reject(new ApiError(404, 'season_not_found')),
     version: () => Promise.resolve('0.0.0-test'),
+    access: () => Promise.resolve([]),
+    setMembers: () => Promise.resolve(),
     ...overrides,
   };
 }
@@ -32,6 +34,7 @@ export function fakeUser(overrides: Partial<User> = {}): User {
     access_token: 'token-123',
     expired: false,
     state: undefined,
+    scopes: ['freal:read'],
     profile: { given_name: 'Ada' },
     ...overrides,
   } as unknown as User;

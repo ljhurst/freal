@@ -30,6 +30,22 @@ describe('Session', () => {
     expect(session.givenName).toBe('Ada Lovelace');
   });
 
+  it('knows an admin by the admin scope on the login', async () => {
+    const { session } = setup(fakeUser({ scopes: ['freal:read', 'freal:admin'] }));
+
+    await session.start();
+
+    expect(session.isAdmin).toBe(true);
+  });
+
+  it('is not an admin with only the read scope', async () => {
+    const { session } = setup();
+
+    await session.start();
+
+    expect(session.isAdmin).toBe(false);
+  });
+
   it.each([
     ['no stored user', null],
     ['an expired user', fakeUser({ expired: true })],

@@ -20,9 +20,13 @@ FREAL_ORIGIN = "https://freal.bylukehurst.com"
 TOKENS = {
     "reader": VerifiedToken(subject="reader", scopes=("freal:read",)),
     "connector": VerifiedToken(subject="owner", scopes=("freal:connect",)),
+    "stranger": VerifiedToken(subject="stranger", scopes=("freal:read",)),
+    "admin": VerifiedToken(subject="admin", scopes=("freal:read", "freal:admin")),
 }
 READER = {"Authorization": "Bearer reader"}
 CONNECTOR = {"Authorization": "Bearer connector"}
+STRANGER = {"Authorization": "Bearer stranger"}
+ADMIN = {"Authorization": "Bearer admin"}
 
 
 @pytest.fixture
@@ -268,3 +272,46 @@ def test_an_unhandled_error_is_logged_with_its_traceback_and_answered_as_json(
 def _request_log(caplog: pytest.LogCaptureFixture) -> dict[str, Any]:
     (record,) = [r for r in caplog.records if r.name == "freal.operations.api"]
     return vars(record)
+
+
+def test_a_stranger_sees_no_leagues_and_a_404_for_a_league_they_are_not_in(
+    anonymous: TestClient,
+) -> None:
+    leagues = anonymous.get("/leagues", headers=STRANGER)
+    season = anonymous.get(f"/leagues/{LEAGUE_ID}/seasons/2025", headers=STRANGER)
+
+    assert (leagues.status_code, leagues.json()) == (200, [])
+    assert (season.status_code, season.json()) == (404, {"error": "league_not_found"})
+
+
+def test_admin_routes_need_the_admin_scope(client: TestClient) -> None:
+    listing = client.get("/admin/access")
+    update = client.put(f"/admin/leagues/{LEAGUE_ID}/members", json={"members": []})
+
+    assert (listing.status_code, update.status_code) == (403, 403)
+
+
+def test_an_admin_sets_members_and_reads_them_back(anonymous: TestClient) -> None:
+    update = anonymous.put(
+        f"/admin/leagues/{LEAGUE_ID}/members",
+        json={"members": [{"sub": "stranger", "label": "Sam"}]},
+        headers=ADMIN,
+    )
+    listing = anonymous.get("/admin/access", headers=ADMIN)
+    season = anonymous.get(f"/leagues/{LEAGUE_ID}/seasons/2025", headers=STRANGER)
+
+    assert update.status_code == 204
+    assert listing.json() == [
+        {
+            "league_id": LEAGUE_ID,
+            "name": "Family",
+            "members": [{"sub": "stranger", "label": "Sam"}],
+        }
+    ]
+    assert season.status_code == 200
+
+
+def test_members_cannot_be_set_for_an_unknown_league(anonymous: TestClient) -> None:
+    response = anonymous.put("/admin/leagues/999/members", json={"members": []}, headers=ADMIN)
+
+    assert (response.status_code, response.json()) == (404, {"error": "league_not_found"})

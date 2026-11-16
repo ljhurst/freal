@@ -5,6 +5,7 @@ import pytest
 
 from freal.leagues.models import Season
 from freal.operations.service import LeagueService
+from freal.storage.access import ACCESS_PARAMETER
 from freal.storage.leagues import LEAGUES_PARAMETER
 from freal.storage.parameters import MemoryParameterStore
 from tests.operations.fakes import LEAGUE_ID, FakeClock, FakeFetcher
@@ -13,7 +14,15 @@ from tests.operations.fakes import LEAGUE_ID, FakeClock, FakeFetcher
 @pytest.fixture
 def parameters() -> MemoryParameterStore:
     leagues = [{"league_id": LEAGUE_ID, "name": "Family", "account": "luke", "first_year": 2024}]
-    return MemoryParameterStore({LEAGUES_PARAMETER: json.dumps(leagues)})
+    access = [
+        {
+            "league_id": LEAGUE_ID,
+            "members": [{"sub": "member", "label": "Dana"}, {"sub": "reader", "label": "Reader"}],
+        }
+    ]
+    return MemoryParameterStore(
+        {LEAGUES_PARAMETER: json.dumps(leagues), ACCESS_PARAMETER: json.dumps(access)}
+    )
 
 
 @pytest.fixture

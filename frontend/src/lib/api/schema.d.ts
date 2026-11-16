@@ -4,6 +4,40 @@
  */
 
 export interface paths {
+    "/admin/access": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Access */
+        get: operations["access_admin_access_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/leagues/{league_id}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set Members */
+        put: operations["set_members_admin_leagues__league_id__members_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/connect": {
         parameters: {
             query?: never;
@@ -105,6 +139,15 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** LeagueAccessView */
+        LeagueAccessView: {
+            /** League Id */
+            league_id: number;
+            /** Members */
+            members: components["schemas"]["Member"][];
+            /** Name */
+            name: string;
+        };
         /** LeagueSummary */
         LeagueSummary: {
             /** League Id */
@@ -141,6 +184,21 @@ export interface components {
             luck: number;
             /** Team Id */
             team_id: number;
+        };
+        /** Member */
+        Member: {
+            /**
+             * Label
+             * @default
+             */
+            label: string;
+            /** Sub */
+            sub: string;
+        };
+        /** MembersRequest */
+        MembersRequest: {
+            /** Members */
+            members: components["schemas"]["Member"][];
         };
         /** ScheduleStrength */
         ScheduleStrength: {
@@ -243,6 +301,72 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    access_admin_access_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeagueAccessView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_members_admin_leagues__league_id__members_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                league_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MembersRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     connect_connect_post: {
         parameters: {
             query?: never;

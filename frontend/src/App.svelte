@@ -3,6 +3,7 @@
   import Footer from '@/components/Footer.svelte';
   import Header from '@/components/Header.svelte';
   import { useServices } from '@/lib/services';
+  import Admin from '@/views/Admin.svelte';
   import AuthCallback from '@/views/AuthCallback.svelte';
   import Home from '@/views/Home.svelte';
   import NotFound from '@/views/NotFound.svelte';
@@ -29,6 +30,8 @@
     <SignedOut />
   {:else if router.route.name === 'home'}
     <Home />
+  {:else if router.route.name === 'admin'}
+    <Admin />
   {:else if router.route.name === 'season'}
     <Season
       leagueId={router.route.leagueId}

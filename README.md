@@ -15,8 +15,10 @@ serves the result to people who log in through [Lasso](https://lasso.bylukehurst
 - `src/freal/operations/` holds the entry points: `service.py` is the application
   logic with no HTTP in it, `api.py` is the HTTP layer (FastAPI on a Lambda Function
   URL), and `lambda_handler.py` wires them together. Every route needs a Lasso access
-  token: `freal:read` to see data, `freal:connect` to store fresh ESPN cookies.
-- League config and cookies live in SSM under `/freal/`, never in the repo or
+  token: `freal:read` to use the app, `freal:connect` to store fresh ESPN cookies,
+  `freal:admin` to see every league and edit who sees each one. A user sees a league
+  only when listed for it.
+- League config, league access and cookies live in SSM under `/freal/`, never in the repo or
   Terraform state.
 
 ## Local development
@@ -76,6 +78,16 @@ Grant people access from the Lasso repo:
 ```bash
 npx tsx scripts/bootstrap/add-user.ts --grant-role freal:read --email <email>
 npx tsx scripts/bootstrap/add-user.ts --grant-role freal:connect --email <email>   # may refresh cookies
+npx tsx scripts/bootstrap/add-user.ts --grant-role freal:admin --email <email>     # sees all leagues, edits access
+```
+
+`freal:read` only lets someone in. They see a league once they are listed for it, on the
+Access page (admins only) or by writing the list directly. A user's ID (`sub`) is in the
+Lasso admin portal:
+
+```bash
+aws ssm put-parameter --name /freal/access --type SecureString --overwrite --value \
+  '[{"league_id": <league id>, "members": [{"sub": "<sub>", "label": "<name>"}]}]'
 ```
 
 Add or change leagues (no deploy needed). `account` names the cookie set the

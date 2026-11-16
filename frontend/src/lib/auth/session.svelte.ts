@@ -2,6 +2,7 @@ import type { User } from 'oidc-client-ts';
 
 export type SessionStatus = 'loading' | 'signedOut' | 'signedIn';
 
+const ADMIN_SCOPE = 'freal:admin';
 const LAST_SIGN_IN_KEY = 'freal.last-sign-in';
 const LOOP_WINDOW_MS = 60_000;
 
@@ -16,6 +17,7 @@ export interface OidcClient {
 export class Session {
   status = $state<SessionStatus>('loading');
   givenName = $state('');
+  isAdmin = $state(false);
 
   constructor(
     private readonly client: OidcClient,
@@ -66,9 +68,11 @@ export class Session {
     if (user && !user.expired) {
       this.status = 'signedIn';
       this.givenName = user.profile.given_name ?? user.profile.name ?? '';
+      this.isAdmin = user.scopes.includes(ADMIN_SCOPE);
     } else {
       this.status = 'signedOut';
       this.givenName = '';
+      this.isAdmin = false;
     }
   }
 }

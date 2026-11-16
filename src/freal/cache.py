@@ -16,3 +16,6 @@ class TtlCache[T]:
         value = compute()
         self._entries[key] = (self._clock(), value)
         return value
+
+    def invalidate(self, key: Hashable) -> None:
+        self._entries.pop(key, None)
