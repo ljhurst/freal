@@ -1,3 +1,6 @@
+import logging
+from typing import Any
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -199,3 +202,69 @@ def test_other_origins_are_not_allowed(anonymous: TestClient, origin: str) -> No
 
 def _connect_body(account: str = "luke") -> dict[str, str]:
     return {"account": account, "espn_s2": "s2-value", "swid": "{SWID}"}
+
+
+def test_a_read_logs_who_asked_for_which_route_without_the_league_id(
+    client: TestClient, caplog: pytest.LogCaptureFixture
+) -> None:
+    with caplog.at_level(logging.INFO, logger="freal.operations.api"):
+        client.get(f"/leagues/{LEAGUE_ID}/seasons/2025")
+
+    record = _request_log(caplog)
+    assert record["levelno"] == logging.INFO
+    assert (record["subject"], record["method"], record["status"]) == ("reader", "GET", 200)
+    assert record["route"] == "/leagues/{league_id}/seasons/{year}"
+    assert isinstance(record["duration_ms"], int)
+    assert str(LEAGUE_ID) not in caplog.text
+
+
+def test_a_refused_request_is_logged_without_a_subject_or_its_token(
+    anonymous: TestClient, caplog: pytest.LogCaptureFixture
+) -> None:
+    with caplog.at_level(logging.INFO, logger="freal.operations.api"):
+        anonymous.get("/leagues", headers={"Authorization": "Bearer unknown"})
+
+    record = _request_log(caplog)
+    assert (record["subject"], record["status"]) == (None, 401)
+    assert "unknown" not in caplog.text
+
+
+def test_a_request_with_the_wrong_scope_is_logged_under_its_subject(
+    anonymous: TestClient, caplog: pytest.LogCaptureFixture
+) -> None:
+    with caplog.at_level(logging.INFO, logger="freal.operations.api"):
+        anonymous.get("/leagues", headers=CONNECTOR)
+
+    record = _request_log(caplog)
+    assert (record["subject"], record["status"]) == ("owner", 403)
+
+
+def test_an_expired_espn_session_is_logged_as_a_warning(
+    client: TestClient, fetcher: FakeFetcher, caplog: pytest.LogCaptureFixture
+) -> None:
+    fetcher.error = EspnAuthError("denied")
+
+    with caplog.at_level(logging.INFO, logger="freal.operations.api"):
+        client.get(f"/leagues/{LEAGUE_ID}/seasons/2025")
+
+    record = _request_log(caplog)
+    assert (record["levelno"], record["status"]) == (logging.WARNING, 502)
+
+
+def test_an_unhandled_error_is_logged_with_its_traceback_and_answered_as_json(
+    client: TestClient, fetcher: FakeFetcher, caplog: pytest.LogCaptureFixture
+) -> None:
+    fetcher.error = RuntimeError("boom")
+
+    with caplog.at_level(logging.INFO, logger="freal.operations.api"):
+        response = client.get(f"/leagues/{LEAGUE_ID}/seasons/2025")
+
+    log = _request_log(caplog)
+    assert (response.status_code, response.json()) == (500, {"error": "internal_error"})
+    assert (log["levelno"], log["status"], log["subject"]) == (logging.ERROR, 500, "reader")
+    assert log["exc_info"][0] is RuntimeError
+
+
+def _request_log(caplog: pytest.LogCaptureFixture) -> dict[str, Any]:
+    (record,) = [r for r in caplog.records if r.name == "freal.operations.api"]
+    return vars(record)

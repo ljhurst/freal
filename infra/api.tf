@@ -74,7 +74,7 @@ resource "aws_lambda_function" "api" {
   reserved_concurrent_executions = 5
 
   logging_config {
-    log_format = "Text"
+    log_format = "JSON"
     log_group  = aws_cloudwatch_log_group.api.name
   }
 
