@@ -1,4 +1,6 @@
-from collections.abc import Callable
+import logging
+import time
+from collections.abc import Awaitable, Callable
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Header, Request, Response
@@ -14,6 +16,8 @@ from freal.operations.service import LeagueService, LeagueSummary
 from freal.operations.version import app_version
 from freal.reports.season import SeasonReport
 from freal.storage.leagues import LeaguesNotConfigured
+
+logger = logging.getLogger(__name__)
 
 TokenValidator = Callable[[str], VerifiedToken | None]
 
@@ -70,12 +74,29 @@ def create_app(service: LeagueService, validate_token: TokenValidator) -> FastAP
     for error_type, (status_code, code) in ERROR_RESPONSES.items():
         app.add_exception_handler(error_type, _error_response(status_code, code))
 
-    def require_scope(scope: str) -> Callable[[str | None], VerifiedToken]:
-        def check(authorization: Annotated[str | None, Header()] = None) -> VerifiedToken:
+    @app.middleware("http")
+    async def log_request(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        started = time.perf_counter()
+        try:
+            response = await call_next(request)
+        except Exception:  # noqa: BLE001 - last boundary: log once, answer in the API's error shape
+            response = JSONResponse({"error": "internal_error"}, status_code=500)
+            _log_request(request, response, started, failed=True)
+            return response
+        _log_request(request, response, started, failed=False)
+        return response
+
+    def require_scope(scope: str) -> Callable[[Request, str | None], VerifiedToken]:
+        def check(
+            request: Request, authorization: Annotated[str | None, Header()] = None
+        ) -> VerifiedToken:
             token = _bearer_token(authorization)
             verified = validate_token(token) if token else None
             if verified is None:
                 raise ApiError(401, "invalid_token", {"WWW-Authenticate": "Bearer"})
+            request.state.subject = verified.subject
             if scope not in verified.scopes:
                 raise ApiError(403, "insufficient_scope")
             return verified
@@ -118,3 +139,29 @@ def _error_response(status_code: int, code: str) -> Callable[[Request, Exception
 def _bearer_token(authorization: str | None) -> str | None:
     scheme, _, token = (authorization or "").partition(" ")
     return token.strip() if scheme.lower() == "bearer" and token.strip() else None
+
+
+def _route_template(request: Request) -> str:
+    route = request.scope.get("route")
+    return getattr(route, "path", "unmatched")
+
+
+def _log_request(request: Request, response: Response, started: float, *, failed: bool) -> None:
+    if failed:
+        level = logging.ERROR
+    elif response.status_code >= 500:
+        level = logging.WARNING
+    else:
+        level = logging.INFO
+    logger.log(
+        level,
+        "request",
+        exc_info=failed,
+        extra={
+            "subject": getattr(request.state, "subject", None),
+            "method": request.method,
+            "route": _route_template(request),
+            "status": response.status_code,
+            "duration_ms": round((time.perf_counter() - started) * 1000),
+        },
+    )
