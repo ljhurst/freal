@@ -52,9 +52,19 @@ describe('theme tokens', () => {
 });
 
 describe('reduced motion', () => {
-  it('switches animations off everywhere except the loading skeleton, which fades instead', () => {
+  it('switches animations off everywhere except the loading skeleton and login spinner, which fade instead', () => {
     const block = /@media \(prefers-reduced-motion: reduce\) \{\s*([^{]+)\{/.exec(css);
 
-    expect(block?.[1]).toContain('*:not(.skeleton)');
+    expect(block?.[1]).toContain('*:not(.skeleton):not(.spinner)');
+  });
+
+  it('plays any other animation once, so a looping one cannot flicker', () => {
+    const reset = declarations(/\*:not\(\.skeleton\):not\(\.spinner\)/).join(' ');
+
+    expect(reset).toContain('animation-iteration-count: 1 !important');
+  });
+
+  it('gives the skeleton and the spinner one shared fade', () => {
+    expect(css).toContain('@keyframes breathe');
   });
 });

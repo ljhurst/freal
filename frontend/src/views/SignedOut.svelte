@@ -68,7 +68,13 @@
     border: 2px solid currentColor;
     border-right-color: transparent;
     border-radius: 50%;
-    animation: spin 700ms linear infinite;
+    animation: spin 900ms linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spinner {
+      animation: breathe 2s ease-in-out infinite;
+    }
   }
 
   @keyframes spin {

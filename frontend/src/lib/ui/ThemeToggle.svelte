@@ -28,6 +28,7 @@
 
 <style>
   button {
+    flex: none;
     display: grid;
     place-items: center;
     width: 2.25rem;

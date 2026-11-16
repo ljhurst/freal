@@ -139,6 +139,8 @@
     border: 1px solid var(--border);
     border-radius: 999px;
     padding: 0.3rem 0.9rem;
+    flex: none;
+    white-space: nowrap;
     cursor: pointer;
     transition: background var(--dur-fast) var(--ease-out);
   }
@@ -160,6 +162,17 @@
   @media (max-width: 30rem) {
     .who {
       display: none;
+    }
+
+    .bar:has(nav a + a) {
+      flex-wrap: wrap;
+      row-gap: 0.25rem;
+    }
+
+    .bar:has(nav a + a) nav {
+      order: 3;
+      flex-basis: 100%;
+      margin-left: 0;
     }
   }
 </style>
