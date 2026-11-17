@@ -2,9 +2,11 @@ from enum import StrEnum
 
 from freal.metrics.luck import Luck
 from freal.metrics.rating import Rating
+from freal.metrics.standings import Standing
 
 LUCK_THRESHOLD = 1.0
 LIKELY = 0.5
+REAL_SHOT = 0.35
 
 
 class Verdict(StrEnum):
@@ -17,6 +19,12 @@ class Strength(StrEnum):
     GOOD = "good"
     AVERAGE = "average"
     BAD = "bad"
+
+
+class Stamp(StrEnum):
+    FOR_REAL = "for_real"
+    IN_THE_HUNT = "in_the_hunt"
+    FRAUD = "fraud"
 
 
 def verdict_for(luck: Luck) -> Verdict:
@@ -32,10 +40,26 @@ def verdict_for(luck: Luck) -> Verdict:
 
 
 def strength_for(rating: Rating) -> Strength:
-    """Good when a team is more likely than not one of the league's real threats, Bad when it is
-    more likely than not one of its weakest."""
-    if rating.contender_probability >= LIKELY:
+    """Good when a team has at least a real shot at being one of the league's real threats, Bad
+    when it is more likely than not one of the weakest."""
+    if rating.contender_probability >= REAL_SHOT:
         return Strength.GOOD
     if rating.bottom_probability >= LIKELY:
         return Strength.BAD
     return Strength.AVERAGE
+
+
+def stamp_for(rating: Rating, verdict: Verdict, standing: Standing) -> Stamp | None:
+    """The verdict on a team: a likely threat, a team with a real shot, or a winning record that
+    luck explains on scoring below average."""
+    if rating.contender_probability >= LIKELY:
+        return Stamp.FOR_REAL
+    if rating.contender_probability >= REAL_SHOT:
+        return Stamp.IN_THE_HUNT
+    if (
+        standing.wins > standing.losses
+        and verdict is Verdict.LUCKY
+        and rating.points_above_average < 0
+    ):
+        return Stamp.FRAUD
+    return None

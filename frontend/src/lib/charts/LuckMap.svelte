@@ -6,6 +6,7 @@
   import Tooltip from '@/lib/charts/Tooltip.svelte';
   import { formatRecord, formatSigned } from '@/lib/format';
   import { type LuckDot, sharedDomain } from '@/lib/season/luckMap';
+  import { isForReal } from '@/lib/verdict';
 
   let { dots }: { dots: readonly LuckDot[] } = $props();
 
@@ -34,7 +35,7 @@
       [...points]
         .sort(
           (a, b) =>
-            Number(b.dot.team.for_real) - Number(a.dot.team.for_real) ||
+            Number(isForReal(b.dot.team)) - Number(isForReal(a.dot.team)) ||
             Math.abs(b.dot.team.luck.luck) - Math.abs(a.dot.team.luck.luck),
         )
         .map((point) => ({
@@ -66,7 +67,7 @@
         : dot.polarity === 'unlucky'
           ? `unlucky by ${Math.abs(team.luck.luck).toFixed(1)} wins`
           : 'record matches expected';
-    const stamp = team.for_real ? ', for real' : '';
+    const stamp = isForReal(team) ? ', for real' : '';
     return `${team.name}: expected ${dot.expected.toFixed(1)} wins, record ${formatRecord(team.standing.wins, team.standing.losses, team.standing.ties)}, ${mood}${stamp}`;
   }
 
@@ -124,7 +125,7 @@
 
     {#each points as point, index (point.dot.team.team_id)}
       <g class="dot" style:--i={index} role="img" aria-label={summary(point.dot)}>
-        {#if point.dot.team.for_real}
+        {#if isForReal(point.dot.team)}
           <circle class="ring" cx={point.cx} cy={point.cy} r={RING_RADIUS} />
         {/if}
         <circle class="mark {point.dot.polarity}" cx={point.cx} cy={point.cy} r={DOT_RADIUS} />

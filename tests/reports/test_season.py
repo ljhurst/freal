@@ -3,7 +3,8 @@ import json
 import pytest
 
 from freal.leagues.models import MatchupKind, Season
-from freal.metrics.verdict import Strength, Verdict
+from freal.metrics.rating import Rating
+from freal.metrics.verdict import Stamp, Strength, Verdict
 from freal.reports.season import SeasonReport, build_season_report
 from tests.factories import matchup, season, side
 
@@ -73,12 +74,49 @@ def test_a_team_without_playoff_games_has_no_record() -> None:
     assert [(t.team_id, t.playoffs and t.playoffs.wins) for t in report.teams] == [(1, 1), (2, 0)]
 
 
-def test_the_stamp_goes_exactly_to_the_teams_rated_good(season_2025: Season) -> None:
+def test_the_for_real_stamp_goes_to_the_teams_rated_likely_threats(season_2025: Season) -> None:
     report = build_season_report(season_2025)
 
-    assert any(team.for_real for team in report.teams)
-    assert all(team.for_real == (team.strength is Strength.GOOD) for team in report.teams)
+    assert {team.team_id for team in report.teams if team.stamp is Stamp.FOR_REAL} == {5, 6}
     assert sum(team.rating.contender_probability for team in report.teams) == pytest.approx(2.0)
+
+
+def _with_ratings(
+    season_: Season, monkeypatch: pytest.MonkeyPatch, contender: dict[int, float], points: float
+) -> None:
+    def rated(_: Season) -> tuple[Rating, ...]:
+        return tuple(
+            Rating(
+                team_id=team.team_id,
+                points_above_average=points,
+                contender_probability=contender.get(team.team_id, 0.1),
+                bottom_probability=0.1,
+            )
+            for team in season_.teams
+        )
+
+    monkeypatch.setattr("freal.reports.season.rate_teams", rated)
+
+
+def test_a_team_with_a_real_shot_is_in_the_hunt_and_scores_good(
+    season_2025: Season, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _with_ratings(season_2025, monkeypatch, {2: 0.4}, points=3.0)
+
+    team = next(t for t in build_season_report(season_2025).teams if t.team_id == 2)
+
+    assert team.stamp is Stamp.IN_THE_HUNT
+    assert team.strength is Strength.GOOD
+
+
+def test_a_lucky_winning_team_with_weak_scoring_is_a_fraud_and_keeps_its_lucky_verdict(
+    season_2025: Season, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _with_ratings(season_2025, monkeypatch, {}, points=-2.0)
+
+    team = next(t for t in build_season_report(season_2025).teams if t.team_id == 4)
+
+    assert (team.verdict, team.stamp) == (Verdict.LUCKY, Stamp.FRAUD)
 
 
 def test_a_season_with_no_completed_weeks_has_no_teams() -> None:
@@ -119,10 +157,9 @@ def test_the_verdict_is_published_as_a_plain_word(season_2025: Season) -> None:
     assert {team["verdict"] for team in payload["teams"]} == {"lucky", "unlucky", "as_expected"}
 
 
-def test_the_good_teams_get_the_for_real_stamp_lucky_or_not(season_2025: Season) -> None:
+def test_the_strength_word_follows_the_rating(season_2025: Season) -> None:
     report = build_season_report(season_2025)
 
-    assert {team.team_id for team in report.teams if team.for_real} == {5, 6}
     assert {team.team_id: team.strength for team in report.teams} == {
         5: Strength.GOOD,
         6: Strength.GOOD,

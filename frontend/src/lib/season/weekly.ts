@@ -1,5 +1,6 @@
 import type { SeasonReport, TeamReport } from '@/lib/api/client';
 import { byStanding } from '@/lib/season/order';
+import { isForReal } from '@/lib/verdict';
 
 export type Result = 'win' | 'loss' | 'tie';
 
@@ -80,7 +81,7 @@ export function weeklyView(season: SeasonReport): WeeklyView {
     })
     .sort((a, b) => a.swing - b.swing || byStanding(a.team, b.team));
 
-  const leader = standing.find((team) => team.for_real) ?? standing[0];
+  const leader = standing.find(isForReal) ?? standing[0];
   return { weeks, teams, medians, strip, defaultTeamId: leader?.team_id ?? null };
 }
 

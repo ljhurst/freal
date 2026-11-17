@@ -6,7 +6,7 @@ from freal.metrics.playoffs import PlayoffRecord, playoff_records
 from freal.metrics.rating import Rating, rate_teams
 from freal.metrics.results import TeamWeek, team_weeks
 from freal.metrics.standings import Standing, standings
-from freal.metrics.verdict import Strength, Verdict, strength_for, verdict_for
+from freal.metrics.verdict import Stamp, Strength, Verdict, stamp_for, strength_for, verdict_for
 from freal.models import FrozenModel
 
 
@@ -20,7 +20,7 @@ class TeamReport(FrozenModel):
     luck: Luck
     verdict: Verdict
     strength: Strength
-    for_real: bool
+    stamp: Stamp | None
     schedule: ScheduleStrength
     efficiency: LineupEfficiency
     consistency: Consistency
@@ -45,6 +45,10 @@ def build_season_report(season: Season) -> SeasonReport:
     rating_of = {row.team_id: row for row in rate_teams(season)}
     verdict_of = {team_id: verdict_for(row) for team_id, row in luck_of.items()}
     strength_of = {team_id: strength_for(rating_of[team_id]) for team_id in standing_of}
+    stamp_of = {
+        team_id: stamp_for(rating_of[team_id], verdict_of[team_id], standing_of[team_id])
+        for team_id in standing_of
+    }
     return SeasonReport(
         league_id=season.league_id,
         year=season.year,
@@ -60,7 +64,7 @@ def build_season_report(season: Season) -> SeasonReport:
                 luck=luck_of[team.team_id],
                 verdict=verdict_of[team.team_id],
                 strength=strength_of[team.team_id],
-                for_real=strength_of[team.team_id] is Strength.GOOD,
+                stamp=stamp_of[team.team_id],
                 schedule=schedule_of[team.team_id],
                 efficiency=efficiency_of[team.team_id],
                 consistency=consistency_of[team.team_id],

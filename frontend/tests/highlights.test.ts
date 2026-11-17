@@ -12,7 +12,22 @@ describe('highlights on the demo league', () => {
   const result = highlights(season);
 
   it('stamps the teams that are for real, in standing order', () => {
-    expect(result.stamped.map((team) => team.name)).toEqual(['Team 5', 'Team 6']);
+    expect(result.forReal.map((team) => team.name)).toEqual(['Team 5', 'Team 6']);
+  });
+
+  it('lists teams with a real shot, in standing order, once they are in the hunt', () => {
+    expect(result.inTheHunt).toEqual([]);
+
+    const hunting = {
+      ...season,
+      teams: season.teams.map((team) =>
+        ['Team 2', 'Team 4'].includes(team.name)
+          ? { ...team, stamp: 'in_the_hunt' as const }
+          : team,
+      ),
+    };
+
+    expect(highlights(hunting).inTheHunt.map((team) => team.name)).toEqual(['Team 4', 'Team 2']);
   });
 
   it('picks the luckiest and unluckiest teams with their luck', () => {
@@ -44,7 +59,8 @@ describe('highlights when the data is thin', () => {
     const season = { ...seasonReport(), teams: [], weeks: [] };
 
     expect(highlights(season)).toEqual({
-      stamped: [],
+      forReal: [],
+      inTheHunt: [],
       luckiest: null,
       unluckiest: null,
       mostEfficient: null,

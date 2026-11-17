@@ -94,6 +94,7 @@ export function seasonReport(): SeasonReport {
       ...team,
       verdict: team.verdict as TeamReport['verdict'],
       strength: team.strength as TeamReport['strength'],
+      stamp: team.stamp as TeamReport['stamp'],
     })),
   };
 }
