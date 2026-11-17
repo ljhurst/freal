@@ -10,15 +10,20 @@
   <span class="visually-hidden">Loading the {year} season…</span>
 
   {#if tab === 'overview'}
-    <div class="hero">
-      <Skeleton width="7rem" height="0.8rem" />
-      <Skeleton width="min(18rem, 70%)" height="1.5rem" />
-      <Skeleton width="min(15rem, 60%)" height="1.5rem" />
-    </div>
-    <div class="tiles">
-      {#each [1, 2, 3, 4, 5] as tile (tile)}
-        <Skeleton height="6.5rem" />
-      {/each}
+    <Card>
+      <Skeleton width="9rem" height="1.2rem" />
+      <div class="rows">
+        <Skeleton width="min(18rem, 70%)" height="1.5rem" />
+        <Skeleton width="min(15rem, 60%)" height="1.5rem" />
+      </div>
+    </Card>
+    <div>
+      <Skeleton width="9rem" height="1.2rem" />
+      <div class="tiles">
+        {#each [1, 2, 3, 4, 5] as tile (tile)}
+          <Skeleton height="6.5rem" />
+        {/each}
+      </div>
     </div>
     <Card>
       <Skeleton width="8rem" height="1.2rem" />
@@ -74,13 +79,8 @@
     gap: 1.25rem;
   }
 
-  .hero {
-    display: grid;
-    gap: 0.6rem;
-    padding-bottom: 0.5rem;
-  }
-
   .tiles {
+    margin-top: 0.75rem;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
     gap: 0.75rem;
