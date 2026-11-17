@@ -32,6 +32,32 @@ describe('estimateTextWidth', () => {
   });
 });
 
+describe('placeLabels with padding', () => {
+  const NARROW = { ...OPTIONS, bounds: { left: 20, top: 0, right: 200, bottom: 300 } };
+  const close = [candidate('a', 100, 100, 'abcdefgh'), candidate('b', 190, 100, 'b')];
+
+  it('places two names that clear each other by a few pixels when there is no padding', () => {
+    const placed = placeLabels(close, NARROW);
+
+    expect([...placed.keys()]).toEqual(['a', 'b']);
+  });
+
+  it('drops the later name that would crowd the first, and keeps the first where it was', () => {
+    const padded = placeLabels(close, { ...NARROW, padding: 8 });
+
+    expect(padded.get('a')).toEqual(placeLabels(close, NARROW).get('a'));
+    expect(padded.has('b')).toBe(false);
+  });
+
+  it('only keeps names apart from each other, so a name beside another dot is placed as before', () => {
+    const near = [candidate('a', 100, 100), candidate('b', 100, 112)];
+
+    expect(placeLabels(near, { ...OPTIONS, padding: 8 }).get('a')).toEqual(
+      placeLabels(near, OPTIONS).get('a'),
+    );
+  });
+});
+
 describe('placeLabels', () => {
   it('leaves room for an icon beside the text', () => {
     const roomy = placeLabels([candidate('Team 6', 340, 100, 'Team 6', 0)], OPTIONS);

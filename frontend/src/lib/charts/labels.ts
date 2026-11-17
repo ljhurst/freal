@@ -18,6 +18,8 @@ export interface LabelOptions {
   dotRadius: number;
   fontSize: number;
   gap: number;
+  /** Clear space kept between one name and the next. */
+  padding?: number;
   bounds: { left: number; top: number; right: number; bottom: number };
 }
 
@@ -46,7 +48,8 @@ export function placeLabels(
   const dots = candidates.map((candidate) => dotBox(candidate, options.dotRadius));
   const taken: Box[] = [];
 
-  for (const candidate of candidates) {
+  for (const [index, candidate] of candidates.entries()) {
+    const otherDots = dots.filter((_, position) => position !== index);
     const width = estimateTextWidth(candidate.text, options.fontSize) + (candidate.iconWidth ?? 0);
     const sides: PlacedLabel['anchor'][] = ['start', 'end'];
     for (const anchor of sides) {
@@ -60,7 +63,12 @@ export function placeLabels(
         top: candidate.y - options.fontSize / 2,
         bottom: candidate.y + options.fontSize / 2,
       };
-      if (fits(box, options.bounds) && ![...dots, ...taken].some((other) => overlaps(box, other))) {
+      const apart = grow(box, options.padding ?? 0);
+      if (
+        fits(box, options.bounds) &&
+        !otherDots.some((dot) => overlaps(box, dot)) &&
+        !taken.some((label) => overlaps(apart, label))
+      ) {
         taken.push(box);
         placed.set(candidate.id, { x, y: candidate.y, anchor });
         break;
@@ -86,6 +94,10 @@ function fits(box: Box, bounds: LabelOptions['bounds']): boolean {
     box.top >= bounds.top &&
     box.bottom <= bounds.bottom
   );
+}
+
+function grow(box: Box, by: number): Box {
+  return { left: box.left - by, right: box.right + by, top: box.top - by, bottom: box.bottom + by };
 }
 
 function overlaps(a: Box, b: Box): boolean {

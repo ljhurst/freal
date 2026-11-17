@@ -133,66 +133,26 @@
 
   @media (max-width: 52rem) {
     .rows {
-      display: block;
+      grid-template-columns: minmax(0, 1fr) max-content;
       min-width: 0;
     }
 
-    .head {
-      display: block;
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      grid-template-areas:
-        'name value'
-        'track track';
-      column-gap: 0.75rem;
-      align-items: baseline;
-      padding: 0.6rem 0 0.2rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .row:last-child {
-      border-bottom: 0;
-    }
-
-    .name,
-    .value,
-    .track {
-      height: auto;
-      padding: 0;
-      border-bottom: 0;
-    }
-
     .name {
-      grid-area: name;
+      grid-column: 1 / -1;
+      display: block;
+      height: auto;
+      padding: 0.6rem 0 0.15rem;
+      border-bottom: 0;
       white-space: normal;
     }
 
+    .track,
     .value {
-      grid-area: value;
+      height: 1.9rem;
     }
 
-    .track {
-      grid-area: track;
-      height: 1.75rem;
-    }
-
-    .has-marks .row {
-      padding-inline: 0.5rem;
-    }
-
-    .has-marks .head {
-      padding-inline: 0.5rem;
-    }
-
-    .row.marked {
-      background: color-mix(in srgb, var(--accent) 9%, transparent);
-    }
-
-    .marked > * {
-      background: none;
+    .head-name {
+      grid-column: 1 / -1;
     }
 
     .guide::before {
