@@ -43,6 +43,34 @@ describe('the team chips', () => {
     expect(pressed()).toBe('Team 5');
   });
 
+  it("puts a trophy on the champion's chip and no other", async () => {
+    renderWeekly();
+
+    const group = await screen.findByRole('group', { name: 'Team to highlight' });
+
+    const trophies = within(group).getAllByRole('img', { name: 'Champion' });
+    expect(trophies).toHaveLength(1);
+    expect(trophies[0]?.closest('button')).toHaveTextContent('Team 6');
+  });
+
+  it("draws a trophy at the end of the champion's line when they are selected", async () => {
+    const { container } = renderWeekly('/leagues/1/2025/weekly?team=6');
+
+    await screen.findByRole('group', { name: 'Team to highlight' });
+
+    const chart = container.querySelector('svg[role="group"]') as SVGSVGElement;
+    expect(chart.querySelectorAll('svg[role="img"][aria-label="Champion"]')).toHaveLength(1);
+  });
+
+  it('draws no trophy on the line of a team that did not win', async () => {
+    const { container } = renderWeekly('/leagues/1/2025/weekly?team=3');
+
+    await screen.findByRole('group', { name: 'Team to highlight' });
+
+    const chart = container.querySelector('svg[role="group"]') as SVGSVGElement;
+    expect(chart.querySelectorAll('svg[role="img"][aria-label="Champion"]')).toHaveLength(0);
+  });
+
   it('starts on the team named in the address', async () => {
     renderWeekly('/leagues/1/2025/weekly?team=3');
 

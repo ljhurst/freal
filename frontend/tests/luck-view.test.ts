@@ -27,7 +27,7 @@ describe('the luck map', () => {
     expect(dots).toHaveLength(8);
     expect(
       screen.getByRole('img', {
-        name: 'Team 6: expected 10.0 wins, record 8-6, unlucky by 2.0 wins, for real',
+        name: 'Team 6 (champion): expected 10.0 wins, record 8-6, unlucky by 2.0 wins, for real',
       }),
     ).toBeInTheDocument();
     expect(
@@ -77,6 +77,15 @@ describe('the luck map', () => {
     expect(labels).toContain('Team 6');
   });
 
+  it('draws a trophy at the champion and nowhere else', () => {
+    const { container } = renderLuck();
+
+    const map = container.querySelector('svg[role="group"]') as SVGSVGElement;
+    const marks = map.querySelectorAll('svg[role="img"][aria-label="Champion"]');
+
+    expect(marks).toHaveLength(1);
+  });
+
   it('shows the same numbers as a table', async () => {
     renderLuck();
     const [toggle] = screen.getAllByRole('button', { name: 'Table' });
@@ -85,7 +94,7 @@ describe('the luck map', () => {
 
     const rows = screen.getAllByRole('row');
     expect(within(rows[0] as HTMLElement).getAllByRole('columnheader')).toHaveLength(4);
-    const team6 = rows.find((row) => within(row).queryByText('Team 6')) as HTMLElement;
+    const team6 = rows.find((row) => within(row).queryByText('Team 6 (champion)')) as HTMLElement;
     expect(
       within(team6)
         .getAllByRole('cell')
@@ -103,7 +112,7 @@ describe('the luck map', () => {
 
 describe('the luck map tooltip', () => {
   function dotOf(container: HTMLElement, team: string) {
-    const group = container.querySelector(`[aria-label^="${team}:"]`) as SVGGElement;
+    const group = container.querySelector(`[role="img"][aria-label^="${team}"]`) as SVGGElement;
     const mark = group.querySelector('.mark') as SVGCircleElement;
     return { x: Number(mark.getAttribute('cx')), y: Number(mark.getAttribute('cy')) };
   }

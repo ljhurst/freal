@@ -3,6 +3,8 @@ export interface LabelCandidate {
   text: string;
   x: number;
   y: number;
+  /** Room to leave beside the text for an icon. */
+  iconWidth?: number;
 }
 
 export interface PlacedLabel {
@@ -41,7 +43,8 @@ export function placeLabels(
   const taken: Box[] = [];
 
   for (const candidate of candidates) {
-    const width = candidate.text.length * options.fontSize * CHARACTER_WIDTH;
+    const width =
+      candidate.text.length * options.fontSize * CHARACTER_WIDTH + (candidate.iconWidth ?? 0);
     const sides: PlacedLabel['anchor'][] = ['start', 'end'];
     for (const anchor of sides) {
       const x =

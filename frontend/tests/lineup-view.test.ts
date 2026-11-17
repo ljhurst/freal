@@ -16,9 +16,28 @@ describe('the lineups chart', () => {
 
     expect(rows).toHaveLength(8);
     expect(rows[0]).toHaveAccessibleName(
-      'Team 6 scored 1,930.1 of a possible 2,086.6 points, 92.5%, missing 156.5 points',
+      'Team 6 (champion) scored 1,930.1 of a possible 2,086.6 points, 92.5%, missing 156.5 points',
     );
     expect(rows.at(-1)).toHaveAccessibleName(/^Team 3 scored 1,409\.6 of a possible 1,772\.0/);
+  });
+
+  it("puts a trophy beside the champion's name and nobody else's", () => {
+    renderLineups();
+
+    const trophies = screen.getAllByRole('img', { name: 'Champion' });
+
+    expect(trophies).toHaveLength(1);
+    expect(trophies[0]?.closest('li')).toHaveTextContent('Team 6');
+  });
+
+  it('shows no trophy when no team has won the season yet', () => {
+    const season = seasonReport();
+    renderLineups({
+      ...season,
+      teams: season.teams.map((team) => ({ ...team, final_rank: null })),
+    });
+
+    expect(screen.queryByRole('img', { name: 'Champion' })).not.toBeInTheDocument();
   });
 
   it('prints the efficiency and the points missed on every row', () => {
@@ -71,7 +90,7 @@ describe('the lineups chart', () => {
 
     const rows = screen.getAllByRole('row');
     expect(within(rows[0] as HTMLElement).getAllByRole('columnheader')).toHaveLength(5);
-    const team6 = rows.find((row) => within(row).queryByText('Team 6')) as HTMLElement;
+    const team6 = rows.find((row) => within(row).queryByText('Team 6 (champion)')) as HTMLElement;
     expect(
       within(team6)
         .getAllByRole('cell')

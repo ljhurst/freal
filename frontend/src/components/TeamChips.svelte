@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { TeamReport } from '@/lib/api/client';
+  import TeamName from '@/lib/ui/TeamName.svelte';
 
   let {
     teams,
@@ -26,7 +27,7 @@
       aria-pressed={team.team_id === selected}
       onclick={() => onselect(team.team_id)}
     >
-      {team.name}
+      <TeamName {team} />
     </button>
   {/each}
 </div>

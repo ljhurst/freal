@@ -5,11 +5,10 @@
   import Sparkline from '@/lib/charts/Sparkline.svelte';
   import { formatPoints, formatRecord } from '@/lib/format';
   import { seasonPath, teamPath } from '@/lib/router.svelte';
-  import { isChampion } from '@/lib/season/champion';
   import { byStanding } from '@/lib/season/order';
   import Chip from '@/lib/ui/Chip.svelte';
   import PlainLink from '@/lib/ui/PlainLink.svelte';
-  import Trophy from '@/lib/ui/Trophy.svelte';
+  import TeamName from '@/lib/ui/TeamName.svelte';
   import { isForReal, verdictLabels } from '@/lib/verdict';
 
   let {
@@ -69,10 +68,7 @@
         {@const chips = verdictLabels(team)}
         <tr class:for-real={isForReal(team)}>
           <th scope="row">
-            <PlainLink href={teamPath(leagueId, year, team.team_id)}>{team.name}</PlainLink>
-            {#if isChampion(team)}
-              <Trophy />
-            {/if}
+            <PlainLink href={teamPath(leagueId, year, team.team_id)}><TeamName {team} /></PlainLink>
           </th>
           <td>{formatRecord(team.standing.wins, team.standing.losses, team.standing.ties)}</td>
           <td class="narrow-hide">{formatPoints(team.standing.points_for)}</td>

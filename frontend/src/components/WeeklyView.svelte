@@ -7,6 +7,7 @@
   import WeeklyLines from '@/lib/charts/WeeklyLines.svelte';
   import { formatPoints } from '@/lib/format';
   import { seasonPath } from '@/lib/router.svelte';
+  import { teamLabel } from '@/lib/season/champion';
   import { selectedTeamId, weeklyView } from '@/lib/season/weekly';
   import { useServices } from '@/lib/services';
 
@@ -96,7 +97,7 @@
             { label: 'Worst week', numeric: true },
           ]}
           rows={view.strip.map((row) => [
-            row.team.name,
+            teamLabel(row.team),
             formatPoints(row.mean),
             `±${row.swing.toFixed(1)}`,
             formatPoints(row.best),

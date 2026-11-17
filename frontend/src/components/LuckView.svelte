@@ -5,6 +5,7 @@
   import LuckMap from '@/lib/charts/LuckMap.svelte';
   import ScheduleDotPlot from '@/lib/charts/ScheduleDotPlot.svelte';
   import { formatPoints, formatRecord, formatSigned } from '@/lib/format';
+  import { teamLabel } from '@/lib/season/champion';
   import { luckDots, scheduleView } from '@/lib/season/luckMap';
 
   let { season }: { season: SeasonReport } = $props();
@@ -41,7 +42,7 @@
             { label: 'Luck', numeric: true },
           ]}
           rows={dots.map((dot) => [
-            dot.team.name,
+            teamLabel(dot.team),
             formatRecord(dot.team.standing.wins, dot.team.standing.losses, dot.team.standing.ties),
             dot.expected.toFixed(1),
             `${formatSigned(dot.team.luck.luck)} wins`,
@@ -70,7 +71,7 @@
             { label: 'Vs league average', numeric: true },
           ]}
           rows={schedule.rows.map((row) => [
-            row.team.name,
+            teamLabel(row.team),
             formatPoints(row.opponentPoints),
             formatSigned(row.difference),
           ])}

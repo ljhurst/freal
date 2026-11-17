@@ -4,7 +4,11 @@
   import { integerTicks, linearScale, niceTicks } from '@/lib/charts/scales';
   import Tooltip from '@/lib/charts/Tooltip.svelte';
   import { formatPoints } from '@/lib/format';
+  import { isChampion, teamLabel } from '@/lib/season/champion';
   import type { TeamGames, WeeklyView } from '@/lib/season/weekly';
+  import TeamName from '@/lib/ui/TeamName.svelte';
+  import TrophyMark from '@/lib/ui/TrophyMark.svelte';
+  import { TROPHY_MARK_SIZE } from '@/lib/ui/trophy';
 
   let { view, selectedId }: { view: WeeklyView; selectedId: number } = $props();
 
@@ -76,7 +80,7 @@
     {height}
     viewBox="0 0 {width} {height}"
     role="group"
-    aria-label="Points scored each week by {view.teams.length} teams over {view.weeks.length} weeks, with {selected?.team.name ?? 'one team'} highlighted"
+    aria-label="Points scored each week by {view.teams.length} teams over {view.weeks.length} weeks, with {selected ? teamLabel(selected.team) : 'one team'} highlighted"
     onpointermove={pointer.move}
     onpointerdown={pointer.move}
     onpointerleave={pointer.leave}
@@ -121,9 +125,19 @@
       {/each}
       {@const last = selected.games.at(-1)}
       {#if last}
-        <text class="label" x={xScale(last.week)} y={Math.max(MARGIN.top + 10, yScale(last.points) - 12)} text-anchor="end">
+        {@const labelY = Math.max(MARGIN.top + 10, yScale(last.points) - 12)}
+        {@const trophy = isChampion(selected.team)}
+        <text
+          class="label"
+          x={xScale(last.week) - (trophy ? TROPHY_MARK_SIZE : 0)}
+          y={labelY}
+          text-anchor="end"
+        >
           {selected.team.name}
         </text>
+        {#if trophy}
+          <TrophyMark x={xScale(last.week) - TROPHY_MARK_SIZE} y={labelY - TROPHY_MARK_SIZE + 3} />
+        {/if}
       {/if}
     {/if}
   </svg>
@@ -131,7 +145,7 @@
   {#if selected && shownGame && shownWeek !== null}
     <Tooltip x={xScale(shownWeek)} y={yScale(shownGame.points)} {width}>
       <strong>Week {shownWeek}</strong>
-      <span>{selected.team.name} {formatPoints(shownGame.points)}</span>
+      <span><TeamName team={selected.team} /> {formatPoints(shownGame.points)}</span>
       <span>
         {RESULT_WORDS[shownGame.result]} against {shownGame.opponent?.name ?? 'an opponent'}
         {formatPoints(shownGame.opponentPoints)}

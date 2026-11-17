@@ -1,11 +1,13 @@
 <script lang="ts" generics="T">
   import type { Snippet } from 'svelte';
+  import Trophy from '@/lib/ui/Trophy.svelte';
 
   let {
     label,
     rows,
     key,
     name,
+    champion,
     describe,
     track,
     value,
@@ -19,6 +21,8 @@
     rows: readonly T[];
     key: (row: T) => string | number;
     name: (row: T) => string;
+    /** Marks the champion's row with a trophy beside the name. */
+    champion?: (row: T) => boolean;
     /** The spoken description of a row's track. */
     describe: (row: T) => string;
     track: Snippet<[T]>;
@@ -44,7 +48,7 @@
     {/if}
     {#each rows as row, index (key(row))}
       <li class="row" class:marked={marked?.(row)} style:--i={index}>
-        <span class="name">{name(row)}</span>
+        <span class="name">{name(row)}{#if champion?.(row)}<Trophy />{/if}</span>
         <span class="track" class:guide role="img" aria-label={describe(row)}>
           {@render track(row)}
         </span>

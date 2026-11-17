@@ -5,7 +5,11 @@
   import { integerTicks, linearScale, nearestPoint } from '@/lib/charts/scales';
   import Tooltip from '@/lib/charts/Tooltip.svelte';
   import { formatRecord, formatSigned } from '@/lib/format';
+  import { isChampion, teamLabel } from '@/lib/season/champion';
   import { type LuckDot, sharedDomain } from '@/lib/season/luckMap';
+  import TeamName from '@/lib/ui/TeamName.svelte';
+  import TrophyMark from '@/lib/ui/TrophyMark.svelte';
+  import { TROPHY_MARK_SIZE } from '@/lib/ui/trophy';
   import { isForReal } from '@/lib/verdict';
 
   let { dots }: { dots: readonly LuckDot[] } = $props();
@@ -43,6 +47,7 @@
           text: point.dot.team.name,
           x: point.cx,
           y: point.cy,
+          iconWidth: isChampion(point.dot.team) ? TROPHY_MARK_SIZE : 0,
         })),
       {
         dotRadius: RING_RADIUS,
@@ -68,7 +73,7 @@
           ? `unlucky by ${Math.abs(team.luck.luck).toFixed(1)} wins`
           : 'record matches expected';
     const stamp = isForReal(team) ? ', for real' : '';
-    return `${team.name}: expected ${dot.expected.toFixed(1)} wins, record ${formatRecord(team.standing.wins, team.standing.losses, team.standing.ties)}, ${mood}${stamp}`;
+    return `${teamLabel(team)}: expected ${dot.expected.toFixed(1)} wins, record ${formatRecord(team.standing.wins, team.standing.losses, team.standing.ties)}, ${mood}${stamp}`;
   }
 
   const pointer = pointerReach({
@@ -134,17 +139,33 @@
 
     {#each points as point (point.dot.team.team_id)}
       {@const label = labels.get(String(point.dot.team.team_id))}
+      {@const trophy = isChampion(point.dot.team)}
       {#if label}
-        <text class="label" x={label.x} y={label.y} text-anchor={label.anchor} dominant-baseline="middle">
+        {@const shift = trophy ? TROPHY_MARK_SIZE : 0}
+        <text
+          class="label"
+          x={label.anchor === 'start' ? label.x + shift : label.x - shift}
+          y={label.y}
+          text-anchor={label.anchor}
+          dominant-baseline="middle"
+        >
           {point.dot.team.name}
         </text>
+        {#if trophy}
+          <TrophyMark
+            x={label.anchor === 'start' ? label.x : label.x - TROPHY_MARK_SIZE}
+            y={label.y - TROPHY_MARK_SIZE / 2}
+          />
+        {/if}
+      {:else if trophy}
+        <TrophyMark x={point.cx + RING_RADIUS + 2} y={point.cy - TROPHY_MARK_SIZE / 2} />
       {/if}
     {/each}
   </svg>
 
   {#if shown}
     <Tooltip x={shown.cx} y={shown.cy} {width}>
-      <strong>{shown.dot.team.name}</strong>
+      <strong><TeamName team={shown.dot.team} /></strong>
       <span>Record {formatRecord(shown.dot.team.standing.wins, shown.dot.team.standing.losses, shown.dot.team.standing.ties)}</span>
       <span>Expected {shown.dot.expected.toFixed(1)} wins</span>
       <span>Luck {formatSigned(shown.dot.team.luck.luck)} wins</span>

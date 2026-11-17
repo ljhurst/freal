@@ -4,6 +4,7 @@
   import HelpButton from '@/lib/ui/HelpButton.svelte';
   import HelpPanel from '@/lib/ui/HelpPanel.svelte';
   import PlainLink from '@/lib/ui/PlainLink.svelte';
+  import TeamName from '@/lib/ui/TeamName.svelte';
 
   let { highlights, leagueId, year }: { highlights: Highlights; leagueId: number; year: number } =
     $props();
@@ -30,7 +31,7 @@
       {#each highlights.forReal as team (team.team_id)}
         <li>
           <span class="badge" aria-hidden="true">✓</span>
-          <PlainLink href={teamPath(leagueId, year, team.team_id)}>{team.name}</PlainLink>
+          <PlainLink href={teamPath(leagueId, year, team.team_id)}><TeamName {team} /></PlainLink>
         </li>
       {/each}
     </ul>
@@ -42,7 +43,7 @@
       <span class="glyph" aria-hidden="true">◐</span>
       In the hunt:
       {#each highlights.inTheHunt as team, index (team.team_id)}
-        <PlainLink href={teamPath(leagueId, year, team.team_id)}>{team.name}</PlainLink>{index <
+        <PlainLink href={teamPath(leagueId, year, team.team_id)}><TeamName {team} /></PlainLink>{index <
         highlights.inTheHunt.length - 1
           ? ', '
           : ''}
