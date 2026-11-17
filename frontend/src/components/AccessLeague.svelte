@@ -43,7 +43,7 @@
     <ul>
       {#each members as member (member.sub)}
         <li>
-          <span class="label">{member.label || 'Unnamed'}</span>
+          <span class="label" title={member.label || undefined}>{member.label || 'Unnamed'}</span>
           <code>{member.sub}</code>
           <button
             type="button"
@@ -92,6 +92,7 @@
     margin: 0.75rem 0;
     padding: 0;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.5rem;
   }
 
@@ -99,17 +100,29 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    flex-wrap: wrap;
   }
 
   .label {
+    flex: none;
+    max-width: min(9rem, 35%);
+    overflow: hidden;
     font-weight: 650;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
+  /* A long ID scrolls inside its own cell, so every row stays one line tall. */
   code {
-    color: var(--muted);
-    overflow-wrap: anywhere;
     flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    color: var(--muted);
+    scrollbar-width: none;
+    white-space: nowrap;
+  }
+
+  li button {
+    flex: none;
   }
 
   form {
