@@ -49,8 +49,8 @@
       <tr>
         <th scope="col">Team</th>
         <th scope="col">Record</th>
-        <th scope="col" class="points">PF</th>
-        <th scope="col" class="points">PA</th>
+        <th scope="col" class="narrow-hide">PF</th>
+        <th scope="col" class="narrow-hide">PA</th>
         <th scope="col" class="mark">
           <PlainLink href={seasonPath(leagueId, year, 'luck')}>Luck</PlainLink>
         </th>
@@ -61,7 +61,7 @@
           <PlainLink href={seasonPath(leagueId, year, 'weekly')}>Trend</PlainLink>
         </th>
         <th scope="col" class="verdict">Verdict</th>
-        <th scope="col" class="points">Playoffs</th>
+        <th scope="col" class="narrow-hide">Playoffs</th>
       </tr>
     </thead>
     <tbody>
@@ -75,8 +75,8 @@
             {/if}
           </th>
           <td>{formatRecord(team.standing.wins, team.standing.losses, team.standing.ties)}</td>
-          <td class="points">{formatPoints(team.standing.points_for)}</td>
-          <td class="points">{formatPoints(team.standing.points_against)}</td>
+          <td class="narrow-hide">{formatPoints(team.standing.points_for)}</td>
+          <td class="narrow-hide">{formatPoints(team.standing.points_against)}</td>
           <td class="mark"><LuckBar luck={team.luck.luck} limit={luckScale} /></td>
           <td class="mark extra"><Meter value={team.efficiency.efficiency} label="Lineup efficiency" /></td>
           <td class="mark extra"><Sparkline points={pointsOf(team)} {...scoreRange} /></td>
@@ -87,7 +87,7 @@
               {/each}
             </span>
           </td>
-          <td class="points">
+          <td class="narrow-hide">
             {team.playoffs ? formatRecord(team.playoffs.wins, team.playoffs.losses, 0) : '–'}
           </td>
         </tr>
@@ -164,7 +164,7 @@
   }
 
   @media (max-width: 56rem) {
-    .points {
+    .narrow-hide {
       display: none;
     }
   }
