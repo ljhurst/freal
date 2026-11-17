@@ -2,6 +2,7 @@ import { fireEvent, render, screen, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import LuckView from '@/components/LuckView.svelte';
+import { estimateTextWidth } from '@/lib/charts/labels';
 import { seasonReport } from './helpers';
 
 const originalWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientWidth');
@@ -84,6 +85,37 @@ describe('the luck map', () => {
     const marks = map.querySelectorAll('svg[role="img"][aria-label="Champion"]');
 
     expect(marks).toHaveLength(1);
+  });
+
+  it("puts the trophy after the champion's name when the label sits right of its dot", () => {
+    const { container } = renderLuck();
+
+    const label = container.querySelector('text.label[data-champion]') as SVGTextElement;
+    const mark = container.querySelector(
+      'svg[role="group"] svg[role="img"][aria-label="Champion"]',
+    ) as SVGSVGElement;
+
+    expect(label.getAttribute('text-anchor')).toBe('start');
+    expect(Number(mark.getAttribute('x'))).toBeGreaterThan(
+      Number(label.getAttribute('x')) + estimateTextWidth('Team 6', 12),
+    );
+  });
+
+  it("follows the measured end of the champion's name once the browser can measure it", () => {
+    const prototype = SVGElement.prototype as unknown as { getComputedTextLength?: () => number };
+    prototype.getComputedTextLength = () => 100;
+    try {
+      const { container } = renderLuck();
+
+      const label = container.querySelector('text.label[data-champion]') as SVGTextElement;
+      const mark = container.querySelector(
+        'svg[role="group"] svg[role="img"][aria-label="Champion"]',
+      ) as SVGSVGElement;
+
+      expect(Number(mark.getAttribute('x'))).toBeCloseTo(Number(label.getAttribute('x')) + 100 + 3);
+    } finally {
+      prototype.getComputedTextLength = undefined;
+    }
   });
 
   it('shows the same numbers as a table', async () => {

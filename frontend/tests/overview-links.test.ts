@@ -59,6 +59,27 @@ describe('the standout tiles', () => {
   });
 });
 
+describe('the champion on the overview', () => {
+  it('keeps the trophy off the standout tiles, even when they all name the champion', async () => {
+    renderOverview();
+
+    for (const label of ['Unluckiest', 'Best manager', 'Top week']) {
+      expect(await tile(label)).toHaveTextContent('Team 6');
+      expect(within(await tile(label)).queryByRole('img', { name: 'Champion' })).toBeNull();
+    }
+  });
+
+  it('still puts it beside the champion in the for-real list', async () => {
+    renderOverview();
+
+    const hero = (await screen.findByRole('heading', { name: "Who's for real?" })).closest(
+      'section',
+    ) as HTMLElement;
+
+    expect(within(hero).getAllByRole('img', { name: 'Champion' })).toHaveLength(1);
+  });
+});
+
 describe('teams on the overview', () => {
   it('link from the for-real list to their season', async () => {
     renderOverview();
