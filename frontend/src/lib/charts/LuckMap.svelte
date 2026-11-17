@@ -19,6 +19,7 @@
   const RING_RADIUS = 11;
   const FONT_SIZE = 12;
   const TROPHY_GAP = 3;
+  const LABEL_PADDING_NARROW = 12;
   const HOVER_REACH = 40;
 
   let width = $state(640);
@@ -54,6 +55,7 @@
         dotRadius: RING_RADIUS,
         fontSize: FONT_SIZE,
         gap: 4,
+        padding: width < 480 ? LABEL_PADDING_NARROW : 0,
         bounds: {
           left: MARGIN.left,
           top: MARGIN.top,
