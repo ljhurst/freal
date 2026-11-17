@@ -1,11 +1,10 @@
 from enum import StrEnum
 
 from freal.metrics.luck import Luck
-from freal.metrics.standings import Standing
+from freal.metrics.rating import Rating
 
 LUCK_THRESHOLD = 1.0
-GOOD_SHARE = 0.6
-BAD_SHARE = 0.4
+LIKELY = 0.5
 
 
 class Verdict(StrEnum):
@@ -32,21 +31,11 @@ def verdict_for(luck: Luck) -> Verdict:
     return Verdict.AS_EXPECTED
 
 
-def strength_for(luck: Luck, standing: Standing) -> Strength:
-    """How good a team is by what its scoring earned, whatever its record says."""
-    games = standing.wins + standing.losses + standing.ties
-    if games == 0:
-        return Strength.AVERAGE
-    share = luck.expected_wins / games
-    if share >= GOOD_SHARE:
+def strength_for(rating: Rating) -> Strength:
+    """Good when a team is more likely than not one of the league's real threats, Bad when it is
+    more likely than not one of its weakest."""
+    if rating.contender_probability >= LIKELY:
         return Strength.GOOD
-    if share <= BAD_SHARE:
+    if rating.bottom_probability >= LIKELY:
         return Strength.BAD
     return Strength.AVERAGE
-
-
-def is_for_real(strength: Strength, verdict: Verdict) -> bool:
-    """The stamp: scoring that is good whatever the record, or decent and held back by luck."""
-    return strength is Strength.GOOD or (
-        strength is Strength.AVERAGE and verdict is Verdict.UNLUCKY
-    )

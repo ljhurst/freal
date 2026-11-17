@@ -19,12 +19,14 @@
   </div>
   <HelpPanel id={helpId} open={helpOpen}>
     <p>
-      Each week, every team's score is compared with every other team's. That shows how many games
-      a team's scoring should have won: its expected wins.
+      A team is for real when it is more likely than not to be one of the league's strongest:
+      the top quarter of teams, so two of eight or three of twelve. Strength is how far a team's
+      scoring sits above the league average each week, pulled toward average when there is little
+      evidence yet. Its record does not count.
     </p>
     <p>
-      A team is for real when its scoring is good, whatever its record says, or when it is
-      average but has been unlucky. A team whose scoring is bad is never for real.
+      Early in a season, weekly scores swing too much to tell teams apart, so it can take a few
+      weeks before anyone is for real.
     </p>
   </HelpPanel>
   {#if highlights.stamped.length > 0}

@@ -53,8 +53,9 @@
             Trend is its points each week.
           </p>
           <p>
-            Lucky or Unlucky shows when the gap is a full win or more. Otherwise you see how good
-            the scoring is: Good, Average or Bad. "For real" is explained at the top of the page.
+            Lucky or Unlucky shows when the gap is a full win or more. Otherwise you see where the
+            scoring ranks: Good means likely one of the league's strongest teams, the same as "For
+            real", Bad means likely one of its weakest, and Average is in between.
           </p>
         {/snippet}
         <Standings teams={season.teams} weeks={season.weeks} {leagueId} {year} />

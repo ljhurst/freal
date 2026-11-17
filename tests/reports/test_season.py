@@ -73,6 +73,14 @@ def test_a_team_without_playoff_games_has_no_record() -> None:
     assert [(t.team_id, t.playoffs and t.playoffs.wins) for t in report.teams] == [(1, 1), (2, 0)]
 
 
+def test_the_stamp_goes_exactly_to_the_teams_rated_good(season_2025: Season) -> None:
+    report = build_season_report(season_2025)
+
+    assert any(team.for_real for team in report.teams)
+    assert all(team.for_real == (team.strength is Strength.GOOD) for team in report.teams)
+    assert sum(team.rating.contender_probability for team in report.teams) == pytest.approx(2.0)
+
+
 def test_a_season_with_no_completed_weeks_has_no_teams() -> None:
     report = build_season_report(season([]))
 

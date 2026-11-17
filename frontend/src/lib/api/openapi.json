@@ -248,6 +248,34 @@
         "title": "PlayoffRecord",
         "type": "object"
       },
+      "Rating": {
+        "properties": {
+          "bottom_probability": {
+            "title": "Bottom Probability",
+            "type": "number"
+          },
+          "contender_probability": {
+            "title": "Contender Probability",
+            "type": "number"
+          },
+          "points_above_average": {
+            "title": "Points Above Average",
+            "type": "number"
+          },
+          "team_id": {
+            "title": "Team Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "team_id",
+          "points_above_average",
+          "contender_probability",
+          "bottom_probability"
+        ],
+        "title": "Rating",
+        "type": "object"
+      },
       "ScheduleStrength": {
         "properties": {
           "average_opponent_points": {
@@ -392,6 +420,9 @@
               }
             ]
           },
+          "rating": {
+            "$ref": "#/components/schemas/Rating"
+          },
           "schedule": {
             "$ref": "#/components/schemas/ScheduleStrength"
           },
@@ -415,6 +446,7 @@
           "final_rank",
           "standing",
           "playoffs",
+          "rating",
           "luck",
           "verdict",
           "strength",
