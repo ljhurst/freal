@@ -64,7 +64,9 @@
       {:else}
         <h1>{current?.name ?? 'League'}</h1>
       {/if}
-      <Menu size="year" name="Season" label={String(year)} items={seasons} disabled={loading} />
+      <div class="season">
+        <Menu size="year" name="Season" label={String(year)} items={seasons} disabled={loading} />
+      </div>
     {/if}
   </div>
 
@@ -97,7 +99,25 @@
     column-gap: 1rem;
   }
 
+  /* The year's list hangs from the edge the year sits at: right beside the title, left once stacked. */
+  .season {
+    --menu-left: auto;
+    --menu-right: 0;
+  }
+
   .tabs {
     border-bottom: 1px solid var(--border);
+  }
+
+  @media (max-width: 36rem) {
+    .title {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 0.25rem;
+    }
+
+    .season {
+      --menu-left: 0;
+      --menu-right: auto;
+    }
   }
 </style>

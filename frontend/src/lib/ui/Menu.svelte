@@ -158,7 +158,9 @@
   ul {
     position: absolute;
     top: 100%;
-    left: 0;
+    /* A caller picks the edge the list hangs from by setting --menu-left and --menu-right. */
+    left: var(--menu-left, 0);
+    right: var(--menu-right, auto);
     z-index: 5;
     min-width: 100%;
     width: max-content;
@@ -170,11 +172,6 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-  }
-
-.year ul {
-    left: auto;
-    right: 0;
   }
 
   a {
