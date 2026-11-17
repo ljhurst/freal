@@ -19,14 +19,9 @@
   </div>
   <HelpPanel id={helpId} open={helpOpen}>
     <p>
-      A team is for real when it is more likely than not to be one of the league's strongest:
-      the top quarter of teams, so two of eight or three of twelve. Strength is how far a team's
-      scoring sits above the league average each week, pulled toward average when there is little
-      evidence yet. Its record does not count.
-    </p>
-    <p>
-      Early in a season, weekly scores swing too much to tell teams apart, so it can take a few
-      weeks before anyone is for real.
+      Teams that are For Real are threats to win the league. Their strength is measured by how many
+      points they score above the league average, accounting for early season uncertainty. They are
+      likely to finish in the top quarter of the league.
     </p>
   </HelpPanel>
   {#if highlights.stamped.length > 0}
