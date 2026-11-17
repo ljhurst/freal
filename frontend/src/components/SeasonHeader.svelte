@@ -3,6 +3,7 @@
   import type { LeagueSummary } from '@/lib/api/client';
   import { type SeasonTab, seasonPath } from '@/lib/router.svelte';
   import { useServices } from '@/lib/services';
+  import Menu from '@/lib/ui/Menu.svelte';
   import Skeleton from '@/lib/ui/Skeleton.svelte';
   import Tabs from '@/lib/ui/Tabs.svelte';
 
@@ -27,7 +28,6 @@
 
   const current = $derived(options?.find((league) => league.league_id === leagueId));
   const switchesLeagues = $derived((options?.length ?? 0) > 1 && current !== undefined);
-  const hasSeasonPicker = $derived((current?.years.length ?? 0) > 1);
 
   const TABS: readonly { id: SeasonTab; label: string }[] = [
     { id: 'overview', label: 'Overview' },
@@ -44,10 +44,13 @@
     })),
   );
 
-  function pickYear(event: Event): void {
-    const picked = Number((event.currentTarget as HTMLSelectElement).value);
-    router.navigate(seasonPath(leagueId, picked, tab));
-  }
+  const seasons = $derived(
+    [...(current?.years ?? [])].reverse().map((option) => ({
+      href: seasonPath(leagueId, option, tab),
+      label: String(option),
+      current: option === year,
+    })),
+  );
 </script>
 
 <header>
@@ -55,30 +58,15 @@
     {#if options === null}
       <Skeleton width="min(20rem, 70%)" height="2.6rem" />
     {:else}
-      {#if !hasSeasonPicker}<p class="eyebrow">{year} season</p>{/if}
       {#if switchesLeagues && options}
         <h1 class="visually-hidden">{current?.name}</h1>
         <LeagueMenu leagues={options} {leagueId} />
       {:else}
         <h1>{current?.name ?? 'League'}</h1>
       {/if}
+      <Menu size="year" name="Season" label={String(year)} items={seasons} disabled={loading} />
     {/if}
   </div>
-
-  {#if options !== null}
-    <div class="switchers rise" style:--i="1">
-      {#if current && hasSeasonPicker}
-        <label>
-          <span class="eyebrow">Season</span>
-          <select value={year} onchange={pickYear} disabled={loading}>
-            {#each current.years as option (option)}
-              <option value={option}>{option}</option>
-            {/each}
-          </select>
-        </label>
-      {/if}
-    </div>
-  {/if}
 
   <div class="tabs rise" style:--i="2">
     <Tabs {items} active={tab} {router} label="Season views" />
@@ -88,9 +76,7 @@
 <style>
   header {
     display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: end;
-    gap: 0.75rem 1.5rem;
+    gap: 0.75rem;
     margin-bottom: 1.25rem;
   }
 
@@ -100,56 +86,18 @@
     margin: 0;
   }
 
-  .eyebrow {
-    margin: 0 0 0.35rem;
-  }
-
-  .switchers {
-    display: flex;
-    gap: 0.75rem;
-  }
-
-  label {
-    display: grid;
-  }
-
-  label .eyebrow {
-    margin-bottom: 0.2rem;
-  }
-
-  select:disabled {
-    cursor: progress;
-    opacity: 0.6;
-  }
-
-  select {
-    appearance: none;
-    padding: 0.45rem 2rem 0.45rem 0.8rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background-color: var(--surface);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%238d97b0' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.7rem center;
-    color: var(--text);
-    cursor: pointer;
-  }
-
-  /* The league menu hangs below the title, so the title must paint above the tabs row. */
+  /* The menus hang below the title, so it must paint above the tabs row. */
   .title {
     position: relative;
     z-index: 2;
     min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    column-gap: 1rem;
   }
 
   .tabs {
-    grid-column: 1 / -1;
     border-bottom: 1px solid var(--border);
-  }
-
-  @media (max-width: 36rem) {
-    header {
-      grid-template-columns: 1fr;
-    }
   }
 </style>

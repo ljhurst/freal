@@ -5,6 +5,11 @@ import App from '@/App.svelte';
 import { isForReal } from '@/lib/verdict';
 import { contextFor, fakeApi, league, seasonReport, services } from './helpers';
 
+async function pickSeason(year: string): Promise<void> {
+  await userEvent.click(await screen.findByRole('button', { name: /^Season \d{4}$/ }));
+  await userEvent.click(screen.getByRole('link', { name: year }));
+}
+
 function renderSeason(path: string, leagues = [league({ league_id: 1, years: [2024, 2025] })]) {
   const appServices = services({
     path,
@@ -175,21 +180,42 @@ describe('the season page', () => {
   it('leaves the season to the dropdown when there are several', async () => {
     renderSeason('/leagues/1/2025');
 
-    await screen.findByRole('combobox', { name: 'Season' });
+    await screen.findByRole('button', { name: 'Season 2025' });
 
-    expect(screen.queryByText('2025 season')).not.toBeInTheDocument();
+    expect(screen.getAllByText('2025')).toHaveLength(1);
   });
 
-  it('names the season above the league when there is nothing to switch', async () => {
+  it('starts collapsed, and lists every season as a link with the current one marked', async () => {
+    renderSeason('/leagues/1/2025');
+
+    const button = await screen.findByRole('button', { name: 'Season 2025' });
+
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('link', { name: '2024' })).not.toBeInTheDocument();
+
+    await userEvent.click(button);
+
+    expect(button).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('link', { name: '2025' })).toHaveAttribute('aria-current', 'true');
+    expect(screen.getByRole('link', { name: '2024' })).not.toHaveAttribute('aria-current');
+    expect(
+      screen
+        .getAllByRole('link', { name: /^\d{4}$/ })
+        .map((item) => item.textContent?.replace('✓', '').trim()),
+    ).toEqual(['2025', '2024']);
+  });
+
+  it('shows the year beside the league as plain text when there is nothing to switch', async () => {
     renderSeason('/leagues/1/2025', [league({ league_id: 1, years: [2025] })]);
 
-    expect(await screen.findByText('2025 season')).toBeInTheDocument();
+    expect(await screen.findByText('2025')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Season/ })).not.toBeInTheDocument();
   });
 
   it('lets people switch seasons', async () => {
     renderSeason('/leagues/1/2025');
 
-    await userEvent.selectOptions(await screen.findByRole('combobox', { name: 'Season' }), '2024');
+    await pickSeason('2024');
 
     expect(window.location.pathname).toBe('/leagues/1/2024');
   });
@@ -197,7 +223,7 @@ describe('the season page', () => {
   it('keeps the current view when switching seasons', async () => {
     renderSeason('/leagues/1/2025/lineups');
 
-    await userEvent.selectOptions(await screen.findByRole('combobox', { name: 'Season' }), '2024');
+    await pickSeason('2024');
 
     expect(window.location.pathname).toBe('/leagues/1/2024/lineups');
   });
@@ -273,7 +299,7 @@ describe('the season page', () => {
 
     await screen.findByRole('heading', { name: 'Family League' });
 
-    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Season \d{4}$/ })).not.toBeInTheDocument();
   });
 });
 
@@ -322,7 +348,7 @@ describe('switching seasons', () => {
     renderSlow();
     await screen.findByText('Standings');
 
-    await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Season' }), '2024');
+    await pickSeason('2024');
 
     expect(await screen.findByRole('status')).toHaveTextContent('Loading the 2024 season');
     expect(screen.getByRole('heading', { name: 'Family League' })).toBeInTheDocument();
@@ -334,11 +360,15 @@ describe('switching seasons', () => {
     const release = renderSlow();
     await screen.findByText('Standings');
 
-    await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Season' }), '2024');
+    await pickSeason('2024');
 
-    await waitFor(() => expect(screen.getByRole('combobox', { name: 'Season' })).toBeDisabled());
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /^Season \d{4}$/ })).toBeDisabled(),
+    );
     release.resolve();
-    await waitFor(() => expect(screen.getByRole('combobox', { name: 'Season' })).toBeEnabled());
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /^Season \d{4}$/ })).toBeEnabled(),
+    );
     expect(await screen.findByText('Standings')).toBeInTheDocument();
   });
 
@@ -346,7 +376,7 @@ describe('switching seasons', () => {
     renderSlow();
     await screen.findByText('Standings');
 
-    await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Season' }), '2024');
+    await pickSeason('2024');
     await userEvent.click(screen.getByRole('link', { name: 'Luck' }));
 
     expect(window.location.pathname).toBe('/leagues/1/2024/luck');
