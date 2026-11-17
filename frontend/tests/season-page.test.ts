@@ -34,7 +34,10 @@ describe('the season page', () => {
   it('puts a trophy on the champion and no one else', async () => {
     renderSeason('/leagues/1/2025');
 
-    const trophies = await screen.findAllByRole('img', { name: 'Champion' });
+    const header = await screen.findByRole('columnheader', { name: 'Playoffs' });
+    const trophies = within(header.closest('table') as HTMLElement).getAllByRole('img', {
+      name: 'Champion',
+    });
 
     expect(trophies).toHaveLength(1);
     expect(trophies[0]?.closest('tr')).toHaveTextContent('Team 6');
@@ -46,7 +49,9 @@ describe('the season page', () => {
     const header = await screen.findByRole('columnheader', { name: 'Playoffs' });
     const standings = within(header.closest('table') as HTMLElement);
     const playoffs = (name: string) => {
-      const row = standings.getByRole('link', { name }).closest('tr') as HTMLElement;
+      const row = standings
+        .getByRole('link', { name: new RegExp(`^${name}`) })
+        .closest('tr') as HTMLElement;
       return within(row).getAllByRole('cell').at(-1)?.textContent?.trim();
     };
 

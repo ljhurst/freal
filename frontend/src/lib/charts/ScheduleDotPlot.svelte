@@ -4,6 +4,7 @@
   import Legend from '@/lib/charts/Legend.svelte';
   import { linearScale } from '@/lib/charts/scales';
   import { formatPoints, formatSigned } from '@/lib/format';
+  import { isChampion, teamLabel } from '@/lib/season/champion';
   import type { ScheduleView } from '@/lib/season/luckMap';
 
   let { view }: { view: ScheduleView } = $props();
@@ -25,7 +26,7 @@
         : row.difference > 0
           ? `${gap} points tougher than average`
           : 'an average schedule';
-    return `${row.team.name} faced ${row.opponentPoints.toFixed(1)} points per game, ${how}`;
+    return `${teamLabel(row.team)} faced ${row.opponentPoints.toFixed(1)} points per game, ${how}`;
   }
 </script>
 
@@ -34,6 +35,7 @@
   rows={view.rows}
   key={(row) => row.team.team_id}
   name={(row) => row.team.name}
+  champion={(row) => isChampion(row.team)}
   describe={sentence}
   rowHeight="2rem"
   guide

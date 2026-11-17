@@ -4,6 +4,7 @@
   import ChartTable from '@/lib/charts/ChartTable.svelte';
   import LineupBars from '@/lib/charts/LineupBars.svelte';
   import { formatPercent, formatPoints } from '@/lib/format';
+  import { teamLabel } from '@/lib/season/champion';
   import { lineupView } from '@/lib/season/lineups';
 
   let { season }: { season: SeasonReport } = $props();
@@ -37,7 +38,7 @@
           { label: 'Efficiency', numeric: true },
         ]}
         rows={view.rows.map((row) => [
-          row.team.name,
+          teamLabel(row.team),
           formatPoints(row.scored),
           formatPoints(row.best),
           formatPoints(row.missed),

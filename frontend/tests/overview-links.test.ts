@@ -71,7 +71,7 @@ describe('teams on the overview', () => {
       'href',
       '/leagues/1/2025/weekly?team=5',
     );
-    expect(within(hero).getByRole('link', { name: 'Team 6' })).toHaveAttribute(
+    expect(within(hero).getByRole('link', { name: /^Team 6/ })).toHaveAttribute(
       'href',
       '/leagues/1/2025/weekly?team=6',
     );

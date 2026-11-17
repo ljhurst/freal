@@ -1,4 +1,6 @@
-<script lang="ts"></script>
+<script lang="ts">
+  import { TROPHY_PATHS } from '@/lib/ui/trophy';
+</script>
 
 <svg
   class="trophy"
@@ -13,9 +15,9 @@
   stroke-linecap="round"
   stroke-linejoin="round"
 >
-  <path d="M8 4h8v6a4 4 0 0 1-8 0Z" fill="currentColor" fill-opacity="0.25" />
-  <path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4" />
-  <path d="M12 14v4M8.5 20h7" />
+  {#each TROPHY_PATHS as path (path.d)}
+    <path d={path.d} fill={path.filled ? 'currentColor' : 'none'} fill-opacity={path.filled ? 0.25 : 1} />
+  {/each}
 </svg>
 
 <style>

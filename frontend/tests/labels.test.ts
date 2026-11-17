@@ -8,11 +8,19 @@ const OPTIONS = {
   bounds: { left: 20, top: 0, right: 400, bottom: 300 },
 };
 
-function candidate(id: string, x: number, y: number, text = id): LabelCandidate {
-  return { id, text, x, y };
+function candidate(id: string, x: number, y: number, text = id, iconWidth = 0): LabelCandidate {
+  return { id, text, x, y, iconWidth };
 }
 
 describe('placeLabels', () => {
+  it('leaves room for an icon beside the text', () => {
+    const roomy = placeLabels([candidate('Team 6', 340, 100, 'Team 6', 0)], OPTIONS);
+    const withIcon = placeLabels([candidate('Team 6', 340, 100, 'Team 6', 14)], OPTIONS);
+
+    expect(roomy.get('Team 6')).toMatchObject({ anchor: 'start' });
+    expect(withIcon.get('Team 6')).toMatchObject({ anchor: 'end' });
+  });
+
   it('puts a label to the right of its dot when there is room', () => {
     const placed = placeLabels([candidate('a', 100, 100)], OPTIONS);
 

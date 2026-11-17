@@ -3,6 +3,7 @@
   import Legend from '@/lib/charts/Legend.svelte';
   import { linearScale } from '@/lib/charts/scales';
   import { formatPercent, formatPoints } from '@/lib/format';
+  import { isChampion, teamLabel } from '@/lib/season/champion';
   import type { LineupRow, LineupView } from '@/lib/season/lineups';
 
   let { view }: { view: LineupView } = $props();
@@ -10,7 +11,7 @@
   const percent = $derived(linearScale([0, view.max], [0, 100]));
 
   function sentence(row: LineupRow): string {
-    return `${row.team.name} scored ${formatPoints(row.scored)} of a possible ${formatPoints(row.best)} points, ${formatPercent(row.efficiency)}, missing ${formatPoints(row.missed)} points`;
+    return `${teamLabel(row.team)} scored ${formatPoints(row.scored)} of a possible ${formatPoints(row.best)} points, ${formatPercent(row.efficiency)}, missing ${formatPoints(row.missed)} points`;
   }
 </script>
 
@@ -19,6 +20,7 @@
   rows={view.rows}
   key={(row) => row.team.team_id}
   name={(row) => row.team.name}
+  champion={(row) => isChampion(row.team)}
   describe={sentence}
   rowHeight="2.4rem"
 >

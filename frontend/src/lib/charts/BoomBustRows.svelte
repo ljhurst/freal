@@ -4,6 +4,7 @@
   import Legend from '@/lib/charts/Legend.svelte';
   import { linearScale } from '@/lib/charts/scales';
   import { formatPoints } from '@/lib/format';
+  import { isChampion, teamLabel } from '@/lib/season/champion';
   import type { StripRow, WeeklyView } from '@/lib/season/weekly';
 
   let { view, selectedId }: { view: WeeklyView; selectedId: number } = $props();
@@ -14,7 +15,7 @@
   const percent = $derived(linearScale([low, high], [0, 100]));
 
   function sentence(row: StripRow): string {
-    return `${row.team.name} scored ${formatPoints(row.worst)} at worst and ${formatPoints(row.best)} at best, averaging ${formatPoints(row.mean)} with a typical swing of ${row.swing.toFixed(1)} points`;
+    return `${teamLabel(row.team)} scored ${formatPoints(row.worst)} at worst and ${formatPoints(row.best)} at best, averaging ${formatPoints(row.mean)} with a typical swing of ${row.swing.toFixed(1)} points`;
   }
 </script>
 
@@ -23,6 +24,7 @@
   rows={view.strip}
   key={(row) => row.team.team_id}
   name={(row) => row.team.name}
+  champion={(row) => isChampion(row.team)}
   describe={sentence}
   rowHeight="2.4rem"
   guide
