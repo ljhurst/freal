@@ -30,6 +30,10 @@ interface Box {
 
 const CHARACTER_WIDTH = 0.58;
 
+export function estimateTextWidth(text: string, fontSize: number): number {
+  return text.length * fontSize * CHARACTER_WIDTH;
+}
+
 /**
  * Places a label beside each dot, most important first, and leaves out any label that would
  * overlap a dot, an earlier label or the edge of the chart. Candidates must be in priority order.
@@ -43,8 +47,7 @@ export function placeLabels(
   const taken: Box[] = [];
 
   for (const candidate of candidates) {
-    const width =
-      candidate.text.length * options.fontSize * CHARACTER_WIDTH + (candidate.iconWidth ?? 0);
+    const width = estimateTextWidth(candidate.text, options.fontSize) + (candidate.iconWidth ?? 0);
     const sides: PlacedLabel['anchor'][] = ['start', 'end'];
     for (const anchor of sides) {
       const x =

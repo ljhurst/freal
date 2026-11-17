@@ -1,12 +1,10 @@
 <script lang="ts">
   import { link } from '@/lib/link';
   import type { Router } from '@/lib/router.svelte';
-  import Trophy from '@/lib/ui/Trophy.svelte';
 
   let {
     label,
     name,
-    champion = false,
     figure,
     tone = 'plain',
     index = 0,
@@ -15,7 +13,6 @@
   }: {
     label: string;
     name: string;
-    champion?: boolean;
     figure: string;
     tone?: 'plain' | 'lucky' | 'unlucky';
     index?: number;
@@ -27,7 +24,7 @@
 
 {#snippet body()}
   <p class="eyebrow">{label}</p>
-  <p class="name">{name}{#if champion}<Trophy />{/if}</p>
+  <p class="name">{name}</p>
   <p class="figure">
     <span>
       {#if tone !== 'plain'}<span class="mark {tone}" aria-hidden="true">{tone === 'lucky' ? '▲' : '▼'}</span>{/if}

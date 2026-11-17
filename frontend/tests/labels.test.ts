@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { type LabelCandidate, placeLabels } from '@/lib/charts/labels';
+import { estimateTextWidth, type LabelCandidate, placeLabels } from '@/lib/charts/labels';
 
 const OPTIONS = {
   dotRadius: 7,
@@ -11,6 +11,26 @@ const OPTIONS = {
 function candidate(id: string, x: number, y: number, text = id, iconWidth = 0): LabelCandidate {
   return { id, text, x, y, iconWidth };
 }
+
+describe('estimateTextWidth', () => {
+  it('grows with the text and the font size', () => {
+    expect(estimateTextWidth('Team 6', 12)).toBeCloseTo(6 * 12 * 0.58);
+    expect(estimateTextWidth('Team 66', 12)).toBeGreaterThan(estimateTextWidth('Team 6', 12));
+    expect(estimateTextWidth('Team 6', 16)).toBeGreaterThan(estimateTextWidth('Team 6', 12));
+  });
+
+  it('is the width a label reserves, so the first label to fill the space fits exactly', () => {
+    const exact = 400 - 340 - 11;
+    const text = 'x'.repeat(Math.floor(exact / (12 * 0.58)));
+
+    expect(placeLabels([candidate('a', 340, 100, text)], OPTIONS).get('a')).toMatchObject({
+      anchor: 'start',
+    });
+    expect(placeLabels([candidate('a', 340, 100, `${text}xx`)], OPTIONS).get('a')).toMatchObject({
+      anchor: 'end',
+    });
+  });
+});
 
 describe('placeLabels', () => {
   it('leaves room for an icon beside the text', () => {

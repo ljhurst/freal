@@ -1,6 +1,6 @@
 <script lang="ts">
   import Legend from '@/lib/charts/Legend.svelte';
-  import { placeLabels } from '@/lib/charts/labels';
+  import { estimateTextWidth, placeLabels } from '@/lib/charts/labels';
   import { pointerReach } from '@/lib/charts/pointer';
   import { integerTicks, linearScale, nearestPoint } from '@/lib/charts/scales';
   import Tooltip from '@/lib/charts/Tooltip.svelte';
@@ -18,6 +18,7 @@
   const DOT_RADIUS = 7;
   const RING_RADIUS = 11;
   const FONT_SIZE = 12;
+  const TROPHY_GAP = 3;
   const HOVER_REACH = 40;
 
   let width = $state(640);
@@ -47,7 +48,7 @@
           text: point.dot.team.name,
           x: point.cx,
           y: point.cy,
-          iconWidth: isChampion(point.dot.team) ? TROPHY_MARK_SIZE : 0,
+          iconWidth: isChampion(point.dot.team) ? TROPHY_MARK_SIZE + TROPHY_GAP : 0,
         })),
       {
         dotRadius: RING_RADIUS,
@@ -62,6 +63,15 @@
       },
     ),
   );
+  let championWidth = $state<number | null>(null);
+
+  $effect(() => {
+    void labels;
+    void width;
+    const text = svg?.querySelector<SVGTextElement>('text.label[data-champion]');
+    championWidth = text?.getComputedTextLength?.() ?? null;
+  });
+
   const shown = $derived(active === null ? null : (points[active] ?? null));
 
   function summary(dot: LuckDot): string {
@@ -141,10 +151,13 @@
       {@const label = labels.get(String(point.dot.team.team_id))}
       {@const trophy = isChampion(point.dot.team)}
       {#if label}
-        {@const shift = trophy ? TROPHY_MARK_SIZE : 0}
+        {@const textWidth = trophy
+          ? (championWidth ?? estimateTextWidth(point.dot.team.name, FONT_SIZE))
+          : 0}
         <text
           class="label"
-          x={label.anchor === 'start' ? label.x + shift : label.x - shift}
+          data-champion={trophy || undefined}
+          x={trophy && label.anchor === 'end' ? label.x - TROPHY_MARK_SIZE - TROPHY_GAP : label.x}
           y={label.y}
           text-anchor={label.anchor}
           dominant-baseline="middle"
@@ -153,7 +166,9 @@
         </text>
         {#if trophy}
           <TrophyMark
-            x={label.anchor === 'start' ? label.x : label.x - TROPHY_MARK_SIZE}
+            x={label.anchor === 'start'
+              ? label.x + textWidth + TROPHY_GAP
+              : label.x - TROPHY_MARK_SIZE}
             y={label.y - TROPHY_MARK_SIZE / 2}
           />
         {/if}
