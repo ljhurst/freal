@@ -240,6 +240,11 @@ export interface components {
             /** Year */
             year: number;
         };
+        /**
+         * Stamp
+         * @enum {string}
+         */
+        Stamp: "for_real" | "in_the_hunt" | "fraud";
         /** Standing */
         Standing: {
             /** Losses */
@@ -266,14 +271,13 @@ export interface components {
             efficiency: components["schemas"]["LineupEfficiency"];
             /** Final Rank */
             final_rank: number | null;
-            /** For Real */
-            for_real: boolean;
             luck: components["schemas"]["Luck"];
             /** Name */
             name: string;
             playoffs: components["schemas"]["PlayoffRecord"] | null;
             rating: components["schemas"]["Rating"];
             schedule: components["schemas"]["ScheduleStrength"];
+            stamp: components["schemas"]["Stamp"] | null;
             standing: components["schemas"]["Standing"];
             strength: components["schemas"]["Strength"];
             /** Team Id */

@@ -5,6 +5,8 @@
 
   const GLYPHS = {
     forReal: '✓',
+    hunt: '◐',
+    fraud: '✕',
     lucky: '▲',
     unlucky: '▼',
     neutral: '●',
@@ -39,8 +41,20 @@
     color: var(--accent);
   }
 
+  .hunt {
+    color: var(--accent);
+  }
+
+  .fraud {
+    color: var(--lucky);
+  }
+
   .chip:has(.forReal) {
     border-color: var(--accent);
+  }
+
+  .chip:has(.fraud) {
+    border-color: var(--lucky);
   }
 
   .lucky {

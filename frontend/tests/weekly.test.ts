@@ -69,7 +69,7 @@ describe('weeklyView', () => {
   it('starts on the leader when nobody is for real', () => {
     const none = {
       ...season,
-      teams: season.teams.map((team) => ({ ...team, for_real: false })),
+      teams: season.teams.map((team) => ({ ...team, stamp: null })),
     };
 
     expect(weeklyView(none).defaultTeamId).toBe(5);

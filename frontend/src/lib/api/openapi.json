@@ -333,6 +333,15 @@
         "title": "SeasonReport",
         "type": "object"
       },
+      "Stamp": {
+        "enum": [
+          "for_real",
+          "in_the_hunt",
+          "fraud"
+        ],
+        "title": "Stamp",
+        "type": "string"
+      },
       "Standing": {
         "properties": {
           "losses": {
@@ -399,10 +408,6 @@
             ],
             "title": "Final Rank"
           },
-          "for_real": {
-            "title": "For Real",
-            "type": "boolean"
-          },
           "luck": {
             "$ref": "#/components/schemas/Luck"
           },
@@ -425,6 +430,16 @@
           },
           "schedule": {
             "$ref": "#/components/schemas/ScheduleStrength"
+          },
+          "stamp": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Stamp"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "standing": {
             "$ref": "#/components/schemas/Standing"
@@ -450,7 +465,7 @@
           "luck",
           "verdict",
           "strength",
-          "for_real",
+          "stamp",
           "schedule",
           "efficiency",
           "consistency"

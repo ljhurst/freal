@@ -10,7 +10,7 @@
   import Chip from '@/lib/ui/Chip.svelte';
   import PlainLink from '@/lib/ui/PlainLink.svelte';
   import Trophy from '@/lib/ui/Trophy.svelte';
-  import { verdictLabels } from '@/lib/verdict';
+  import { isForReal, verdictLabels } from '@/lib/verdict';
 
   let {
     teams,
@@ -67,7 +67,7 @@
     <tbody>
       {#each ranked as team (team.team_id)}
         {@const chips = verdictLabels(team)}
-        <tr class:for-real={team.for_real}>
+        <tr class:for-real={isForReal(team)}>
           <th scope="row">
             <PlainLink href={teamPath(leagueId, year, team.team_id)}>{team.name}</PlainLink>
             {#if isChampion(team)}

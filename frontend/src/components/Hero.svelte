@@ -23,10 +23,11 @@
       points they score above the league average, accounting for early season uncertainty. They are
       likely to finish in the top quarter of the league.
     </p>
+    <p>In the hunt means a real shot, but the scoring can't confirm it yet.</p>
   </HelpPanel>
-  {#if highlights.stamped.length > 0}
+  {#if highlights.forReal.length > 0}
     <ul>
-      {#each highlights.stamped as team (team.team_id)}
+      {#each highlights.forReal as team (team.team_id)}
         <li>
           <span class="badge" aria-hidden="true">✓</span>
           <PlainLink href={teamPath(leagueId, year, team.team_id)}>{team.name}</PlainLink>
@@ -35,6 +36,18 @@
     </ul>
   {:else}
     <p class="nobody">Nobody yet</p>
+  {/if}
+  {#if highlights.inTheHunt.length > 0}
+    <p class="hunt">
+      <span class="glyph" aria-hidden="true">◐</span>
+      In the hunt:
+      {#each highlights.inTheHunt as team, index (team.team_id)}
+        <PlainLink href={teamPath(leagueId, year, team.team_id)}>{team.name}</PlainLink>{index <
+        highlights.inTheHunt.length - 1
+          ? ', '
+          : ''}
+      {/each}
+    </p>
   {/if}
 </section>
 
@@ -79,6 +92,17 @@
 
   .badge {
     flex: none;
+    color: var(--accent);
+  }
+
+  .hunt {
+    margin: 0.75rem 0 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  .glyph {
+    margin-right: 0.35rem;
     color: var(--accent);
   }
 

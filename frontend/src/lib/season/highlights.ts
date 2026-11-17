@@ -1,5 +1,6 @@
 import type { SeasonReport, TeamReport } from '@/lib/api/client';
 import { byStanding } from '@/lib/season/order';
+import { isForReal } from '@/lib/verdict';
 
 export interface Pick {
   team: TeamReport;
@@ -11,7 +12,8 @@ export interface TopWeek extends Pick {
 }
 
 export interface Highlights {
-  stamped: TeamReport[];
+  forReal: TeamReport[];
+  inTheHunt: TeamReport[];
   luckiest: Pick | null;
   unluckiest: Pick | null;
   mostEfficient: Pick | null;
@@ -19,13 +21,14 @@ export interface Highlights {
   topWeek: TopWeek | null;
 }
 
-/** What the overview calls out: the stamped teams and the season's standouts. */
+/** What the overview calls out: the teams that are for real or in the hunt, and the season's standouts. */
 export function highlights(season: SeasonReport): Highlights {
   const teams = [...season.teams].sort(byStanding);
   const luckiest = best(teams, (team) => team.luck.luck);
   const unluckiest = best(teams, (team) => -team.luck.luck);
   return {
-    stamped: teams.filter((team) => team.for_real),
+    forReal: teams.filter(isForReal),
+    inTheHunt: teams.filter((team) => team.stamp === 'in_the_hunt'),
     luckiest: luckiest && luckiest.value > 0 ? luckiest : null,
     unluckiest:
       unluckiest && unluckiest.value > 0 ? { ...unluckiest, value: -unluckiest.value } : null,

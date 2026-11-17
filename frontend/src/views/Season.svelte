@@ -54,7 +54,8 @@
           </p>
           <p>
             Lucky or Unlucky shows when luck moved the record by a full win or more. Otherwise you
-            see the scoring: Good (that's For real), Average or Bad.
+            see the scoring: Good, Average or Bad. The second pill is the verdict: For real, In the
+            hunt, or Fraud, a winning record that luck explains on below-average scoring.
           </p>
         {/snippet}
         <Standings teams={season.teams} weeks={season.weeks} {leagueId} {year} />

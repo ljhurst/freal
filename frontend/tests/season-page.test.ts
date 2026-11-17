@@ -2,6 +2,7 @@ import { render, screen, waitFor, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import App from '@/App.svelte';
+import { isForReal } from '@/lib/verdict';
 import { contextFor, fakeApi, league, seasonReport, services } from './helpers';
 
 function renderSeason(path: string, leagues = [league({ league_id: 1, years: [2024, 2025] })]) {
@@ -149,7 +150,7 @@ describe('the season page', () => {
     const report = seasonReport();
     const renamed = {
       ...report,
-      teams: report.teams.map((team) => (team.for_real ? { ...team, name: long } : team)),
+      teams: report.teams.map((team) => (isForReal(team) ? { ...team, name: long } : team)),
     };
     render(App, {
       context: contextFor(
@@ -406,5 +407,38 @@ describe('switching seasons', () => {
 
     expect(await screen.findByText('Standings')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'League' })).toBeInTheDocument();
+  });
+});
+
+describe('the standings stamps', () => {
+  it('shows a fraud beside its lucky pill and an in-the-hunt team beside its read', async () => {
+    const base = seasonReport();
+    const report = {
+      ...base,
+      teams: base.teams.map((team) => {
+        if (team.name === 'Team 4') return { ...team, stamp: 'fraud' as const };
+        if (team.name === 'Team 2') return { ...team, stamp: 'in_the_hunt' as const };
+        return team;
+      }),
+    };
+    const appServices = services({
+      path: '/leagues/1/2025',
+      api: fakeApi({
+        leagues: async () => [league({ league_id: 1 })],
+        season: async () => report,
+      }),
+    });
+    render(App, { context: contextFor(appServices) });
+
+    const header = await screen.findByRole('columnheader', { name: 'Verdict' });
+    const table = within(header.closest('table') as HTMLElement);
+    const pills = (name: string) =>
+      (table.getByRole('link', { name }).closest('tr') as HTMLElement).textContent?.replace(
+        /\s+/g,
+        ' ',
+      );
+
+    expect(pills('Team 4')).toMatch(/Lucky\W+Fraud/);
+    expect(pills('Team 2')).toMatch(/Average\W+In the hunt/);
   });
 });
