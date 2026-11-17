@@ -5,9 +5,11 @@
   import Sparkline from '@/lib/charts/Sparkline.svelte';
   import { formatPoints, formatRecord } from '@/lib/format';
   import { seasonPath, teamPath } from '@/lib/router.svelte';
+  import { isChampion } from '@/lib/season/champion';
   import { byStanding } from '@/lib/season/order';
   import Chip from '@/lib/ui/Chip.svelte';
   import PlainLink from '@/lib/ui/PlainLink.svelte';
+  import Trophy from '@/lib/ui/Trophy.svelte';
   import { verdictLabels } from '@/lib/verdict';
 
   let {
@@ -59,6 +61,7 @@
           <PlainLink href={seasonPath(leagueId, year, 'weekly')}>Trend</PlainLink>
         </th>
         <th scope="col" class="verdict">Verdict</th>
+        <th scope="col" class="points">Playoffs</th>
       </tr>
     </thead>
     <tbody>
@@ -67,6 +70,9 @@
         <tr class:for-real={team.for_real}>
           <th scope="row">
             <PlainLink href={teamPath(leagueId, year, team.team_id)}>{team.name}</PlainLink>
+            {#if isChampion(team)}
+              <Trophy />
+            {/if}
           </th>
           <td>{formatRecord(team.standing.wins, team.standing.losses, team.standing.ties)}</td>
           <td class="points">{formatPoints(team.standing.points_for)}</td>
@@ -80,6 +86,9 @@
                 <Chip tone={chip.tone} label={chip.label} />
               {/each}
             </span>
+          </td>
+          <td class="points">
+            {team.playoffs ? formatRecord(team.playoffs.wins, team.playoffs.losses, 0) : '–'}
           </td>
         </tr>
       {/each}
@@ -101,7 +110,7 @@
 
   th,
   td {
-    padding: 0.75rem 0.9rem;
+    padding: 0.75rem 0.6rem;
     text-align: right;
     border-bottom: 1px solid var(--border);
     white-space: nowrap;

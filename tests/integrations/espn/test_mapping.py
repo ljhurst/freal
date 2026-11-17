@@ -28,6 +28,14 @@ def test_regular_and_playoff_matchups_are_converted() -> None:
     assert [t.owner_id for t in season.teams] == ["{GUID-1}", "{GUID-2}"]
 
 
+def test_final_rank_is_kept_and_an_undecided_rank_becomes_none() -> None:
+    espn = _league(outcomes={1: ["W"], 2: ["L"]}, final_standings={1: 1, 2: 0})
+
+    season = build_season(espn, 7, 2025, lambda period: [])
+
+    assert [t.final_rank for t in season.teams] == [1, None]
+
+
 def test_consolation_brackets_are_not_playoffs() -> None:
     espn = _league(outcomes={1: ["W"], 2: ["L"]}, regular_season_weeks=1)
     boxes = {1: [_box("LOSERS_CONSOLATION_LADDER", 80.0, 70.0)]}
@@ -79,7 +87,10 @@ def test_bye_weeks_are_skipped(missing_opponent: int | None) -> None:
 
 
 def _league(
-    outcomes: dict[int, list[str]], regular_season_weeks: int = 14, playoff_length: int = 2
+    outcomes: dict[int, list[str]],
+    regular_season_weeks: int = 14,
+    playoff_length: int = 2,
+    final_standings: dict[int, int] | None = None,
 ) -> Any:
     return SimpleNamespace(
         settings=SimpleNamespace(
@@ -94,6 +105,7 @@ def _league(
                 team_name=f"team-{team_id}",
                 owners=[{"displayName": f"owner-{team_id}", "id": f"{{GUID-{team_id}}}"}],
                 outcomes=team_outcomes,
+                final_standing=(final_standings or {}).get(team_id, 0),
             )
             for team_id, team_outcomes in outcomes.items()
         ],

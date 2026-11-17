@@ -225,6 +225,29 @@
         "title": "MembersRequest",
         "type": "object"
       },
+      "PlayoffRecord": {
+        "properties": {
+          "losses": {
+            "title": "Losses",
+            "type": "integer"
+          },
+          "team_id": {
+            "title": "Team Id",
+            "type": "integer"
+          },
+          "wins": {
+            "title": "Wins",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "team_id",
+          "wins",
+          "losses"
+        ],
+        "title": "PlayoffRecord",
+        "type": "object"
+      },
       "ScheduleStrength": {
         "properties": {
           "average_opponent_points": {
@@ -337,6 +360,17 @@
           "efficiency": {
             "$ref": "#/components/schemas/LineupEfficiency"
           },
+          "final_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Rank"
+          },
           "for_real": {
             "title": "For Real",
             "type": "boolean"
@@ -347,6 +381,16 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "playoffs": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlayoffRecord"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/ScheduleStrength"
@@ -368,7 +412,9 @@
         "required": [
           "team_id",
           "name",
+          "final_rank",
           "standing",
+          "playoffs",
           "luck",
           "verdict",
           "strength",

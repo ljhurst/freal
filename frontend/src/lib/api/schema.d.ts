@@ -200,6 +200,15 @@ export interface components {
             /** Members */
             members: components["schemas"]["Member"][];
         };
+        /** PlayoffRecord */
+        PlayoffRecord: {
+            /** Losses */
+            losses: number;
+            /** Team Id */
+            team_id: number;
+            /** Wins */
+            wins: number;
+        };
         /** ScheduleStrength */
         ScheduleStrength: {
             /** Average Opponent Points */
@@ -244,11 +253,14 @@ export interface components {
         TeamReport: {
             consistency: components["schemas"]["Consistency"];
             efficiency: components["schemas"]["LineupEfficiency"];
+            /** Final Rank */
+            final_rank: number | null;
             /** For Real */
             for_real: boolean;
             luck: components["schemas"]["Luck"];
             /** Name */
             name: string;
+            playoffs: components["schemas"]["PlayoffRecord"] | null;
             schedule: components["schemas"]["ScheduleStrength"];
             standing: components["schemas"]["Standing"];
             strength: components["schemas"]["Strength"];

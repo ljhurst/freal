@@ -50,6 +50,7 @@ class Team(FrozenModel):
     name: str
     owner: str
     owner_id: str
+    final_rank: int | None = None
 
 
 class Season(FrozenModel):

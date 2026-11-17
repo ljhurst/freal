@@ -10,7 +10,7 @@ from pydantic import SecretStr
 
 from freal.integrations.espn.client import load_season
 from freal.integrations.espn.credentials import EspnCredentials
-from freal.leagues.models import Season, Team
+from freal.leagues.models import Season
 
 
 def main(league_id: int, year: int, cookies_file: Path, out: Path) -> None:
@@ -25,11 +25,12 @@ def anonymize(season: Season) -> Season:
             "league_id": 1,
             "name": "Demo League",
             "teams": tuple(
-                Team(
-                    team_id=t.team_id,
-                    name=f"Team {t.team_id}",
-                    owner=f"Owner {t.team_id}",
-                    owner_id=f"owner-{t.team_id}",
+                t.model_copy(
+                    update={
+                        "name": f"Team {t.team_id}",
+                        "owner": f"Owner {t.team_id}",
+                        "owner_id": f"owner-{t.team_id}",
+                    }
                 )
                 for t in season.teams
             ),
