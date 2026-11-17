@@ -54,21 +54,22 @@
 </script>
 
 <header>
-  <div class="title rise">
+  <div class="league rise">
     {#if options === null}
       <Skeleton width="min(20rem, 70%)" height="2.6rem" />
+    {:else if switchesLeagues && options}
+      <h1 class="visually-hidden">{current?.name}</h1>
+      <LeagueMenu leagues={options} {leagueId} />
     {:else}
-      {#if switchesLeagues && options}
-        <h1 class="visually-hidden">{current?.name}</h1>
-        <LeagueMenu leagues={options} {leagueId} />
-      {:else}
-        <h1>{current?.name ?? 'League'}</h1>
-      {/if}
-      <div class="season">
-        <Menu size="year" name="Season" label={String(year)} items={seasons} disabled={loading} />
-      </div>
+      <h1>{current?.name ?? 'League'}</h1>
     {/if}
   </div>
+
+  {#if options !== null}
+    <div class="season rise" style:--i="1">
+      <Menu size="year" name="Season" label={String(year)} items={seasons} disabled={loading} />
+    </div>
+  {/if}
 
   <div class="tabs rise" style:--i="2">
     <Tabs {items} active={tab} {router} label="Season views" />
@@ -78,7 +79,12 @@
 <style>
   header {
     display: grid;
-    gap: 0.75rem;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'league season'
+      'tabs tabs';
+    align-items: baseline;
+    gap: 0.75rem 1rem;
     margin-bottom: 1.25rem;
   }
 
@@ -88,31 +94,40 @@
     margin: 0;
   }
 
-  /* The menus hang below the title, so it must paint above the tabs row. */
-  .title {
+  /* The menus hang below their buttons, so both regions must paint above the tabs row. */
+  .league,
+  .season {
     position: relative;
     z-index: 2;
     min-width: 0;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: baseline;
-    column-gap: 1rem;
+  }
+
+  /* The league list can reach down over the year, so the league region sits above it. */
+  .league {
+    grid-area: league;
+    z-index: 3;
   }
 
   /* The year's list hangs from the edge the year sits at: right beside the title, left once stacked. */
   .season {
+    grid-area: season;
     --menu-left: auto;
     --menu-right: 0;
   }
 
   .tabs {
+    grid-area: tabs;
     border-bottom: 1px solid var(--border);
   }
 
   @media (max-width: 36rem) {
-    .title {
+    header {
       grid-template-columns: minmax(0, 1fr);
-      row-gap: 0.25rem;
+      grid-template-areas:
+        'league'
+        'season'
+        'tabs';
+      row-gap: 1rem;
     }
 
     .season {
