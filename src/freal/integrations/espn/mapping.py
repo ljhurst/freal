@@ -68,6 +68,7 @@ def _to_team(team: Any) -> Team:
         name=team.team_name,
         owner=owner.get("displayName", ""),
         owner_id=owner.get("id", ""),
+        final_rank=team.final_standing or None,
     )
 
 

@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from freal.leagues.models import Season
+from freal.leagues.models import MatchupKind, Season
 from freal.metrics.verdict import Strength, Verdict
 from freal.reports.season import SeasonReport, build_season_report
 from tests.factories import matchup, season, side
@@ -34,6 +34,43 @@ def test_the_report_json_has_derived_values_and_no_owner_information(season_2025
     assert "efficiency" in first["efficiency"]
     assert "owner" not in report.model_dump_json().lower()
     assert SeasonReport.model_validate_json(report.model_dump_json()) == report
+
+
+def test_the_final_rank_is_passed_through_to_the_report(season_2025: Season) -> None:
+    teams = tuple(
+        team.model_copy(update={"final_rank": 1 if team.team_id == 3 else None})
+        for team in season_2025.teams
+    )
+
+    report = build_season_report(season_2025.model_copy(update={"teams": teams}))
+
+    assert {team.team_id: team.final_rank for team in report.teams} == {
+        team_id: 1 if team_id == 3 else None for team_id in range(1, 9)
+    }
+
+
+def test_playoff_records_reach_only_the_teams_that_played(season_2025: Season) -> None:
+    report = build_season_report(season_2025)
+
+    records = {team.team_id: team.playoffs for team in report.teams}
+
+    assert records[6] is not None
+    assert (records[6].wins, records[6].losses) == (2, 0)
+    assert [team_id for team_id, record in records.items() if record is None] == [1, 3, 7, 8]
+
+
+def test_a_team_without_playoff_games_has_no_record() -> None:
+    report = build_season_report(
+        season(
+            [
+                matchup(1, side(1, 100), side(2, 90)),
+                matchup(15, side(1, 120), side(2, 110), kind=MatchupKind.PLAYOFF),
+            ],
+            team_ids=(1, 2),
+        )
+    )
+
+    assert [(t.team_id, t.playoffs and t.playoffs.wins) for t in report.teams] == [(1, 1), (2, 0)]
 
 
 def test_a_season_with_no_completed_weeks_has_no_teams() -> None:

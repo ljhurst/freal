@@ -154,7 +154,9 @@ describe('the season page', () => {
     render(App, { context: contextFor(services({ api, path: '/leagues/1/2025' })) });
 
     const rows = await screen.findAllByRole('row');
-    const names = rows.slice(1).map((row) => within(row).getByRole('rowheader').textContent);
+    const names = rows
+      .slice(1)
+      .map((row) => within(row).getByRole('link', { name: /^Team/ }).textContent);
     expect(names).toEqual([
       'Team 5',
       'Team 4',

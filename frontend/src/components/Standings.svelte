@@ -5,9 +5,11 @@
   import Sparkline from '@/lib/charts/Sparkline.svelte';
   import { formatPoints, formatRecord } from '@/lib/format';
   import { seasonPath, teamPath } from '@/lib/router.svelte';
+  import { isChampion } from '@/lib/season/champion';
   import { byStanding } from '@/lib/season/order';
   import Chip from '@/lib/ui/Chip.svelte';
   import PlainLink from '@/lib/ui/PlainLink.svelte';
+  import Trophy from '@/lib/ui/Trophy.svelte';
   import { verdictLabels } from '@/lib/verdict';
 
   let {
@@ -47,8 +49,8 @@
       <tr>
         <th scope="col">Team</th>
         <th scope="col">Record</th>
-        <th scope="col" class="points">PF</th>
-        <th scope="col" class="points">PA</th>
+        <th scope="col" class="narrow-hide">PF</th>
+        <th scope="col" class="narrow-hide">PA</th>
         <th scope="col" class="mark">
           <PlainLink href={seasonPath(leagueId, year, 'luck')}>Luck</PlainLink>
         </th>
@@ -59,6 +61,7 @@
           <PlainLink href={seasonPath(leagueId, year, 'weekly')}>Trend</PlainLink>
         </th>
         <th scope="col" class="verdict">Verdict</th>
+        <th scope="col" class="narrow-hide">Playoffs</th>
       </tr>
     </thead>
     <tbody>
@@ -67,10 +70,13 @@
         <tr class:for-real={team.for_real}>
           <th scope="row">
             <PlainLink href={teamPath(leagueId, year, team.team_id)}>{team.name}</PlainLink>
+            {#if isChampion(team)}
+              <Trophy />
+            {/if}
           </th>
           <td>{formatRecord(team.standing.wins, team.standing.losses, team.standing.ties)}</td>
-          <td class="points">{formatPoints(team.standing.points_for)}</td>
-          <td class="points">{formatPoints(team.standing.points_against)}</td>
+          <td class="narrow-hide">{formatPoints(team.standing.points_for)}</td>
+          <td class="narrow-hide">{formatPoints(team.standing.points_against)}</td>
           <td class="mark"><LuckBar luck={team.luck.luck} limit={luckScale} /></td>
           <td class="mark extra"><Meter value={team.efficiency.efficiency} label="Lineup efficiency" /></td>
           <td class="mark extra"><Sparkline points={pointsOf(team)} {...scoreRange} /></td>
@@ -80,6 +86,9 @@
                 <Chip tone={chip.tone} label={chip.label} />
               {/each}
             </span>
+          </td>
+          <td class="narrow-hide">
+            {team.playoffs ? formatRecord(team.playoffs.wins, team.playoffs.losses, 0) : '–'}
           </td>
         </tr>
       {/each}
@@ -101,7 +110,7 @@
 
   th,
   td {
-    padding: 0.75rem 0.9rem;
+    padding: 0.75rem 0.6rem;
     text-align: right;
     border-bottom: 1px solid var(--border);
     white-space: nowrap;
@@ -155,7 +164,7 @@
   }
 
   @media (max-width: 56rem) {
-    .points {
+    .narrow-hide {
       display: none;
     }
   }
