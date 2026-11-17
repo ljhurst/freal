@@ -29,7 +29,7 @@ const CARDS: readonly { path: string; title: string; phrase: RegExp }[] = [
   {
     path: '/leagues/1/2025',
     title: "Who's for real?",
-    phrase: /for real when its scoring is good/,
+    phrase: /threats to win the league/,
   },
   {
     path: '/leagues/1/2025',

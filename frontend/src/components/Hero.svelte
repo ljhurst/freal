@@ -19,12 +19,9 @@
   </div>
   <HelpPanel id={helpId} open={helpOpen}>
     <p>
-      Each week, every team's score is compared with every other team's. That shows how many games
-      a team's scoring should have won: its expected wins.
-    </p>
-    <p>
-      A team is for real when its scoring is good, whatever its record says, or when it is
-      average but has been unlucky. A team whose scoring is bad is never for real.
+      Teams that are For Real are threats to win the league. Their strength is measured by how many
+      points they score above the league average, accounting for early season uncertainty. They are
+      likely to finish in the top quarter of the league.
     </p>
   </HelpPanel>
   {#if highlights.stamped.length > 0}

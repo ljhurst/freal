@@ -209,6 +209,17 @@ export interface components {
             /** Wins */
             wins: number;
         };
+        /** Rating */
+        Rating: {
+            /** Bottom Probability */
+            bottom_probability: number;
+            /** Contender Probability */
+            contender_probability: number;
+            /** Points Above Average */
+            points_above_average: number;
+            /** Team Id */
+            team_id: number;
+        };
         /** ScheduleStrength */
         ScheduleStrength: {
             /** Average Opponent Points */
@@ -261,6 +272,7 @@ export interface components {
             /** Name */
             name: string;
             playoffs: components["schemas"]["PlayoffRecord"] | null;
+            rating: components["schemas"]["Rating"];
             schedule: components["schemas"]["ScheduleStrength"];
             standing: components["schemas"]["Standing"];
             strength: components["schemas"]["Strength"];
