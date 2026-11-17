@@ -9,6 +9,7 @@
     $props();
 
   const { router } = useServices();
+  const headingId = $props.id();
 
   const tiles = $derived(
     [
@@ -49,18 +50,29 @@
 </script>
 
 {#if tiles.length > 0}
-  <div class="tiles">
-    {#each tiles as tile, index (tile.label)}
-      <StatTile {...tile} {router} index={index + 1} />
-    {/each}
-  </div>
+  <section class="standouts" aria-labelledby={headingId}>
+    <h2 id={headingId}>Season standouts</h2>
+    <div class="tiles">
+      {#each tiles as tile, index (tile.label)}
+        <StatTile {...tile} {router} index={index + 1} />
+      {/each}
+    </div>
+  </section>
 {/if}
 
 <style>
+  .standouts {
+    margin-bottom: 1.25rem;
+  }
+
+  h2 {
+    font-size: 1.15rem;
+    margin: 0 0 0.75rem;
+  }
+
   .tiles {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
     gap: 0.75rem;
-    margin-bottom: 1.25rem;
   }
 </style>
