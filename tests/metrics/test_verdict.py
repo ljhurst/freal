@@ -86,24 +86,20 @@ def test_strength_is_whether_a_team_has_a_real_shot_or_is_likely_a_weakling(
 def test_a_team_is_for_real_or_in_the_hunt_by_its_chance_of_being_a_top_quarter_team(
     contender: float, expected: Stamp | None
 ) -> None:
-    stamp = stamp_for(_rating(contender), Verdict.AS_EXPECTED, _standing(7, 7))
+    stamp = stamp_for(_rating(contender), _standing(7, 7))
 
     assert stamp is expected
 
 
 def _fraud_check(
-    wins: int = 9,
-    losses: int = 5,
-    verdict: Verdict = Verdict.LUCKY,
-    points: float = -1.0,
-    contender: float = 0.1,
+    wins: int = 9, losses: int = 5, bottom: float = 0.5, contender: float = 0.1
 ) -> Stamp | None:
-    return stamp_for(_rating(contender, points=points), verdict, _standing(wins, losses))
+    return stamp_for(_rating(contender, bottom=bottom), _standing(wins, losses))
 
 
-def test_a_winning_record_that_luck_explains_on_weak_scoring_is_a_fraud() -> None:
+def test_a_winning_record_on_a_team_likely_to_be_among_the_weakest_is_a_fraud() -> None:
     assert _fraud_check() is Stamp.FRAUD
-    assert _fraud_check(points=-0.1) is Stamp.FRAUD
+    assert _fraud_check(bottom=0.9) is Stamp.FRAUD
 
 
 @pytest.mark.parametrize(
@@ -111,13 +107,13 @@ def test_a_winning_record_that_luck_explains_on_weak_scoring_is_a_fraud() -> Non
     [
         {"wins": 7, "losses": 7},
         {"wins": 5, "losses": 9},
-        {"verdict": Verdict.AS_EXPECTED},
-        {"verdict": Verdict.UNLUCKY},
-        {"points": 0.1},
-        {"points": 0.0},
+        {"bottom": 0.49},
+        {"bottom": 0.0},
     ],
 )
-def test_it_takes_all_three_to_be_a_fraud(overrides: dict[str, object]) -> None:
+def test_it_takes_a_winning_record_and_likely_bottom_group_to_be_a_fraud(
+    overrides: dict[str, object],
+) -> None:
     assert _fraud_check(**overrides) is None  # type: ignore[arg-type]
 
 

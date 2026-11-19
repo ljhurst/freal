@@ -82,7 +82,11 @@ def test_the_for_real_stamp_goes_to_the_teams_rated_likely_threats(season_2025: 
 
 
 def _with_ratings(
-    season_: Season, monkeypatch: pytest.MonkeyPatch, contender: dict[int, float], points: float
+    season_: Season,
+    monkeypatch: pytest.MonkeyPatch,
+    contender: dict[int, float],
+    points: float,
+    bottom: float = 0.1,
 ) -> None:
     def rated(_: Season) -> tuple[Rating, ...]:
         return tuple(
@@ -90,7 +94,7 @@ def _with_ratings(
                 team_id=team.team_id,
                 points_above_average=points,
                 contender_probability=contender.get(team.team_id, 0.1),
-                bottom_probability=0.1,
+                bottom_probability=bottom,
             )
             for team in season_.teams
         )
@@ -109,10 +113,10 @@ def test_a_team_with_a_real_shot_is_in_the_hunt_and_scores_good(
     assert team.strength is Strength.GOOD
 
 
-def test_a_lucky_winning_team_with_weak_scoring_is_a_fraud_and_keeps_its_lucky_verdict(
+def test_a_winning_team_likely_to_be_among_the_weakest_is_a_fraud_and_keeps_its_lucky_verdict(
     season_2025: Season, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _with_ratings(season_2025, monkeypatch, {}, points=-2.0)
+    _with_ratings(season_2025, monkeypatch, {}, points=-2.0, bottom=0.6)
 
     team = next(t for t in build_season_report(season_2025).teams if t.team_id == 4)
 

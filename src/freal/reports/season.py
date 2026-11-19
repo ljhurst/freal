@@ -46,8 +46,7 @@ def build_season_report(season: Season) -> SeasonReport:
     verdict_of = {team_id: verdict_for(row) for team_id, row in luck_of.items()}
     strength_of = {team_id: strength_for(rating_of[team_id]) for team_id in standing_of}
     stamp_of = {
-        team_id: stamp_for(rating_of[team_id], verdict_of[team_id], standing_of[team_id])
-        for team_id in standing_of
+        team_id: stamp_for(rating_of[team_id], standing_of[team_id]) for team_id in standing_of
     }
     return SeasonReport(
         league_id=season.league_id,
