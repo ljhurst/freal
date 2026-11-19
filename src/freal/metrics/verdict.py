@@ -49,17 +49,13 @@ def strength_for(rating: Rating) -> Strength:
     return Strength.AVERAGE
 
 
-def stamp_for(rating: Rating, verdict: Verdict, standing: Standing) -> Stamp | None:
-    """The verdict on a team: a likely threat, a team with a real shot, or a winning record that
-    luck explains on scoring below average."""
+def stamp_for(rating: Rating, standing: Standing) -> Stamp | None:
+    """The verdict on a team: a likely threat, a team with a real shot, or a winning record on a
+    team that is more likely than not one of the league's weakest."""
     if rating.contender_probability >= LIKELY:
         return Stamp.FOR_REAL
     if rating.contender_probability >= REAL_SHOT:
         return Stamp.IN_THE_HUNT
-    if (
-        standing.wins > standing.losses
-        and verdict is Verdict.LUCKY
-        and rating.points_above_average < 0
-    ):
+    if standing.wins > standing.losses and rating.bottom_probability >= LIKELY:
         return Stamp.FRAUD
     return None
