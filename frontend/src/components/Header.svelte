@@ -13,7 +13,10 @@
     <a class="brand" href="/" use:link={router}>
       <svg viewBox="0 0 32 32" width="26" height="26" aria-hidden="true">
         <rect width="32" height="32" rx="8" fill="var(--accent)" />
-        <path d="M10 23V9.5h11M10 16h8" stroke="var(--accent-ink)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+        <g transform="rotate(-35 16 16)">
+          <ellipse cx="16" cy="16" rx="13" ry="8" fill="var(--accent-ink)" />
+          <path d="M7.94 16H24.06M11.84 12.96v6.08M16 12.96v6.08M20.16 12.96v6.08" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round" />
+        </g>
       </svg>
       <span class="wordmark">F<span class="tick">'</span>Real</span>
     </a>
